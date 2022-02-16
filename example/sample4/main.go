@@ -3,7 +3,7 @@ package main
 import (
 	"bytes"
 	_ "embed"
-	"github.com/arran4/frame"
+	"github.com/arran4/golang-frame"
 	"github.com/golang/freetype/truetype"
 	"golang.org/x/image/colornames"
 	"golang.org/x/image/font"

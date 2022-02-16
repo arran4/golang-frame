@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/arran4/frame"
+	"github.com/arran4/golang-frame"
 	"golang.org/x/image/colornames"
 	"image"
 	"image/color"

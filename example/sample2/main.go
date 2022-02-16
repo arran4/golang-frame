@@ -3,7 +3,7 @@ package main
 import (
 	"bytes"
 	_ "embed"
-	"github.com/arran4/frame"
+	"github.com/arran4/golang-frame"
 	"image"
 	"image/draw"
 	"image/png"
