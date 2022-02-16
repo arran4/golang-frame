@@ -1,7 +1,6 @@
 # Frame
 
-A simple utility that creates an image.Image compatible object that
-can be used for drawing a frame around something else. Think like a window, button, or anything else.
+A simple golang library that creates an image.Image compatible object (ideally used with draw.Draw) that can be used for drawing a frame around something else. Think like a window, button, or anything else. 
 
 It works by splitting an image into 9 parts:
 
