@@ -19,7 +19,7 @@ This is a simple library I am reusing else where. PRs reviewed and probably acce
 # Doc
 
 There is basic go doc which you can check out here:
-https://pkg.go.dev/github.com/arran4/frame
+https://pkg.go.dev/github.com/arran4/golang-frame
 
 The intended way of using this is:
 ```go
