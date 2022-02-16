@@ -108,7 +108,7 @@ position. This might change so ensure your code will handle this.
 
 ```go
 
-func NewBasicFrame2(r image.Rectangle) *Frame {
+func NewBasicFrame(r image.Rectangle) *Frame {
 	middle := image.Rect(0, 0, 1, 1)
 	base := image.NewRGBA(image.Rect(-2, -2, 2, 2))
 	b := base.Bounds()
