@@ -4,6 +4,7 @@ A simple utility that creates an image.Image compatible object that
 can be used for drawing a frame around something else. Think like a window, button, or anything else.
 
 It works by splitting an image into 9 parts:
+
 ![](doc/9%20parts.png)
 
 Parts, 1, 3, 7 and 9 are drawn exactly as is. Then the remaining parts
