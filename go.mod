@@ -1,4 +1,4 @@
-module github.com/arran4/frame
+module github.com/arran4/golang-frame
 
 go 1.17
 
