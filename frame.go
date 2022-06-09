@@ -33,66 +33,83 @@ func (f *Frame) Bounds() image.Rectangle {
 
 // At overrides the at functionality with our own multiplexer version
 func (f *Frame) At(x, y int) color.Color {
-	xp := x - f.Dest.Min.X
-	yp := y - f.Dest.Min.Y
-	xDistanceFromEnd := f.Dest.Dx() - xp
+	op := image.Pt(x, y)
+	p := op.Sub(f.Dest.Min)
+	xDistanceFromEnd := f.Dest.Dx() - p.X
 	midStartX := f.Middle.Min.X - f.Base.Bounds().Min.X
 	midEndX := f.Dest.Dx() - (f.Base.Bounds().Max.X - f.Middle.Max.X)
 	s5 := 0
 	if xDistanceFromEnd <= f.Base.Bounds().Max.Sub(f.Middle.Max).X {
-		xp = f.Base.Bounds().Dx() - xDistanceFromEnd
-	} else if xp > midStartX {
+		p.X = f.Base.Bounds().Dx() - xDistanceFromEnd
+	} else if p.X > midStartX {
 		switch f.BorderMode {
 		case Stretched:
-			xp = midStartX + int(float64(xp-midStartX)/float64(midEndX-midStartX)*float64(f.Middle.Dx()))
+			p.X = midStartX + int(float64(p.X-midStartX)/float64(midEndX-midStartX)*float64(f.Middle.Dx()))
 		default:
-			xp = midStartX + (xp-midStartX)%(f.Middle.Dx())
+			p.X = midStartX + (p.X-midStartX)%(f.Middle.Dx())
 		}
 		s5++
 	}
-	yDistanceFromEnd := f.Dest.Dy() - yp
+	yDistanceFromEnd := f.Dest.Dy() - p.Y
 	midStartY := f.Middle.Min.Y - f.Base.Bounds().Min.Y
 	midEndY := f.Dest.Dy() - (f.Base.Bounds().Max.Y - f.Middle.Max.Y)
 	if yDistanceFromEnd <= f.Base.Bounds().Max.Sub(f.Middle.Max).Y {
-		yp = f.Base.Bounds().Dy() - yDistanceFromEnd
-	} else if yp > midStartY {
+		p.Y = f.Base.Bounds().Dy() - yDistanceFromEnd
+	} else if p.Y > midStartY {
 		switch f.BorderMode {
 		case Stretched:
-			yp = midStartY + int(float64(yp-midStartY)/float64(midEndY-midStartY)*float64(f.Middle.Dy()))
+			p.Y = midStartY + int(float64(p.Y-midStartY)/float64(midEndY-midStartY)*float64(f.Middle.Dy()))
 		default:
-			yp = midStartY + (yp-midStartY)%(f.Middle.Dy())
+			p.Y = midStartY + (p.Y-midStartY)%(f.Middle.Dy())
 		}
 		s5++
 	}
 	if f.Section5Override != nil && s5 == 2 {
-		s5b := f.Section5Override.Bounds()
-		xp = x - f.Dest.Min.X
-		yp = y - f.Dest.Min.Y
-		var c color.Color
-		switch f.Section5Pos {
-		case PassThrough:
-			c = f.Section5Override.At(x, y)
-		case Zerod:
-			c = f.Section5Override.At(xp, yp)
-		default:
-			c = f.Section5Override.At(xp-midStartX-s5b.Min.X, yp-midStartY-s5b.Min.Y)
-		}
-		r1, g1, b1, a1 := c.RGBA()
-		if a1 == math.MaxUint16 || f.Section5Override.Replace {
-			return c
-		} else if a1 != 0 {
-			destc := f.Base.At(xp+f.Base.Bounds().Min.X, yp+f.Base.Bounds().Min.Y)
-			destr, destg, destb, desta := destc.RGBA()
-			a := (math.MaxUint16 - a1) * 0x101
-			return color.RGBA{
-				uint8((uint32(destr)*a/math.MaxUint16 + r1) >> 8),
-				uint8((uint32(destg)*a/math.MaxUint16 + g1) >> 8),
-				uint8((uint32(destb)*a/math.MaxUint16 + b1) >> 8),
-				uint8((uint32(desta)*a/math.MaxUint16 + a1) >> 8),
-			}
+		if c2 := f.Section5Override.Apply(p, op, f, midStartX, midStartY); c2 != nil {
+			return c2
 		}
 	}
-	return f.Base.At(xp+f.Base.Bounds().Min.X, yp+f.Base.Bounds().Min.Y)
+	return f.Base.At(p.X+f.Base.Bounds().Min.X, p.Y+f.Base.Bounds().Min.Y)
+}
+
+// Apply applies the section 5 override specific code.
+func (s5 *Section5) Apply(p image.Point, op image.Point, f *Frame, midStartX int, midStartY int) color.Color {
+	s5b := s5.Bounds()
+	var c color.Color
+	switch f.Section5Pos {
+	case PassThrough:
+		c = s5.At(op.X, op.Y)
+	case Zerod:
+		c = s5.At(p.X, p.Y)
+	default:
+		c = s5.At(p.X-midStartX-s5b.Min.X, p.Y-midStartY-s5b.Min.Y)
+	}
+	r1, g1, b1, a1 := c.RGBA()
+	if a1 == math.MaxUint16 || s5.Replace {
+		return nil
+	} else if a1 == 0 {
+		return nil
+	}
+	destc := f.Base.At(p.X+f.Base.Bounds().Min.X, p.Y+f.Base.Bounds().Min.Y)
+	if s5.AlphaMode == nil {
+		return Over(destc, a1, r1, g1, b1)
+	} else {
+		return s5.AlphaMode(destc, a1, r1, g1, b1)
+	}
+}
+
+// Over is the alpha mode applied by draw.Draw() Probably inaccurate. I am not sure what 0x101 does. It looks like an
+// almost bitwise shift.
+func Over(destc color.Color, a1 uint32, r1 uint32, g1 uint32, b1 uint32) color.Color {
+	destr, destg, destb, desta := destc.RGBA()
+	a := (math.MaxUint16 - a1) * 0x101
+	c := color.RGBA{
+		R: uint8((uint32(destr)*a/math.MaxUint16 + r1) >> 8),
+		G: uint8((uint32(destg)*a/math.MaxUint16 + g1) >> 8),
+		B: uint8((uint32(destb)*a/math.MaxUint16 + b1) >> 8),
+		A: uint8((uint32(desta)*a/math.MaxUint16 + a1) >> 8),
+	}
+	return &c
 }
 
 // MiddleRect calculates the total space in the resulting image that section 5 consumes
@@ -113,6 +130,8 @@ type Section5 struct {
 	image.Image
 	// Replace If the new section 5 image should fully replace the base section 5 image
 	Replace bool
+	// AlphaMode the mode to apply alpha with, defaults to "over"
+	AlphaMode func(destc color.Color, a1 uint32, r1 uint32, g1 uint32, b1 uint32) color.Color
 }
 
 // Option enables the use as a config option
