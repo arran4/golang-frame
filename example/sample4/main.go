@@ -64,7 +64,7 @@ func WindowZeroZero(i SubImagable, base image.Image, s5i image.Image) {
 	s2 := base.Bounds().Add(image.Pt(0, 42))
 	s2.Max.Y += -42
 	ti := frame.NewFrame(tidst.Bounds(), base.(SubImagable).SubImage(s1), image.Rect(16, 16, 47, 42))
-	fr := frame.NewFrame(frdst.Bounds(), base.(SubImagable).SubImage(s2), image.Rect(14, 48, 88, 66), &frame.Section5{Image: s5i})
+	fr := frame.NewFrame(frdst.Bounds(), base.(SubImagable).SubImage(s2), image.Rect(14, 48, 88, 66), &frame.Section5{Image: s5i, Replace: true})
 
 	draw.Draw(tidst, tidst.Bounds(), ti, tidst.Bounds().Min, draw.Src)
 
@@ -99,7 +99,7 @@ func WindowZerod(i SubImagable, base image.Image, s5i image.Image) {
 	s2 := base.Bounds().Add(image.Pt(0, 42))
 	s2.Max.Y += -42
 	ti := frame.NewFrame(tidst.Bounds(), base.(SubImagable).SubImage(s1), image.Rect(16, 16, 47, 42))
-	fr := frame.NewFrame(frdst.Bounds(), base.(SubImagable).SubImage(s2), image.Rect(14, 48, 88, 66), &frame.Section5{Image: s5i}, frame.Zerod)
+	fr := frame.NewFrame(frdst.Bounds(), base.(SubImagable).SubImage(s2), image.Rect(14, 48, 88, 66), &frame.Section5{Image: s5i, Replace: true}, frame.Zerod)
 
 	draw.Draw(tidst, tidst.Bounds(), ti, tidst.Bounds().Min, draw.Src)
 
@@ -134,7 +134,7 @@ func WindowPassthrough(i SubImagable, base image.Image, s5i image.Image) {
 	s2 := base.Bounds().Add(image.Pt(0, 42))
 	s2.Max.Y += -42
 	ti := frame.NewFrame(tidst.Bounds(), base.(SubImagable).SubImage(s1), image.Rect(16, 16, 47, 42))
-	fr := frame.NewFrame(frdst.Bounds(), base.(SubImagable).SubImage(s2), image.Rect(14, 48, 88, 66), &frame.Section5{Image: s5i}, frame.PassThrough)
+	fr := frame.NewFrame(frdst.Bounds(), base.(SubImagable).SubImage(s2), image.Rect(14, 48, 88, 66), &frame.Section5{Image: s5i, Replace: true}, frame.PassThrough)
 
 	draw.Draw(tidst, tidst.Bounds(), ti, tidst.Bounds().Min, draw.Src)
 

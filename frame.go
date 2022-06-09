@@ -3,6 +3,7 @@ package frame
 import (
 	"image"
 	"image/color"
+	"math"
 )
 
 type Frame struct {
@@ -15,7 +16,7 @@ type Frame struct {
 	// The Border mode to use
 	BorderMode BorderMode
 	// Section5Override an image to replace section 5 with
-	Section5Override image.Image
+	Section5Override *Section5
 	// Section5Pos is how to handle Section5Override positioning
 	Section5Pos Section5Positioning
 }
@@ -67,13 +68,28 @@ func (f *Frame) At(x, y int) color.Color {
 		s5b := f.Section5Override.Bounds()
 		xp = x - f.Dest.Min.X
 		yp = y - f.Dest.Min.Y
+		var c color.Color
 		switch f.Section5Pos {
 		case PassThrough:
-			return f.Section5Override.At(x, y)
+			c = f.Section5Override.At(x, y)
 		case Zerod:
-			return f.Section5Override.At(xp, yp)
+			c = f.Section5Override.At(xp, yp)
 		default:
-			return f.Section5Override.At(xp-midStartX-s5b.Min.X, yp-midStartY-s5b.Min.Y)
+			c = f.Section5Override.At(xp-midStartX-s5b.Min.X, yp-midStartY-s5b.Min.Y)
+		}
+		r1, g1, b1, a1 := c.RGBA()
+		if a1 == math.MaxUint16 || f.Section5Override.Replace {
+			return c
+		} else if a1 != 0 {
+			destc := f.Base.At(xp+f.Base.Bounds().Min.X, yp+f.Base.Bounds().Min.Y)
+			destr, destg, destb, desta := destc.RGBA()
+			a := (math.MaxUint16 - a1) * 0x101
+			return color.RGBA{
+				uint8((uint32(destr)*a/math.MaxUint16 + r1) >> 8),
+				uint8((uint32(destg)*a/math.MaxUint16 + g1) >> 8),
+				uint8((uint32(destb)*a/math.MaxUint16 + b1) >> 8),
+				uint8((uint32(desta)*a/math.MaxUint16 + a1) >> 8),
+			}
 		}
 	}
 	return f.Base.At(xp+f.Base.Bounds().Min.X, yp+f.Base.Bounds().Min.Y)
@@ -95,6 +111,8 @@ type Options interface {
 // Section5 is an optional image to replace section 5 with
 type Section5 struct {
 	image.Image
+	// Replace If the new section 5 image should fully replace the base section 5 image
+	Replace bool
 }
 
 // Option enables the use as a config option
