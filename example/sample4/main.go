@@ -42,6 +42,7 @@ func main() {
 	WindowPassthrough(i, base, s5i)
 	WindowZeroZero(i, base, s5i)
 	WindowZerod(i, base, s5i)
+	// TODO WindowStretched(i, base, s5i)
 	SaveFile(i)
 }
 
@@ -100,6 +101,41 @@ func WindowZerod(i SubImagable, base image.Image, s5i image.Image) {
 	s2.Max.Y += -42
 	ti := frame.NewFrame(tidst.Bounds(), base.(SubImagable).SubImage(s1), image.Rect(16, 16, 47, 42))
 	fr := frame.NewFrame(frdst.Bounds(), base.(SubImagable).SubImage(s2), image.Rect(14, 48, 88, 66), &frame.Section5{Image: s5i, Replace: true}, frame.Zerod)
+
+	draw.Draw(tidst, tidst.Bounds(), ti, tidst.Bounds().Min, draw.Src)
+
+	grfd := &font.Drawer{
+		Dst:  tidst.SubImage(ti.MiddleRect()).(draw.Image),
+		Src:  image.NewUniform(colornames.Blue),
+		Face: grf,
+	}
+	ttb, _ := grfd.BoundString(titletext)
+	grfd.Dot = grfd.Dot.Sub(ttb.Min).Add(fixed.P(ti.MiddleRect().Min.X, ti.MiddleRect().Min.Y))
+	grfd.DrawString(titletext)
+
+	draw.Draw(frdst, frdst.Bounds(), fr, frdst.Bounds().Min, draw.Src)
+}
+
+func WindowStretched(i SubImagable, base image.Image, s5i image.Image) {
+	titletext := "Stretched (Optional)"
+	gr, err := truetype.Parse(goregular.TTF)
+	if err != nil {
+		log.Panicf("font load error: %s", err)
+	}
+	grf := truetype.NewFace(gr, &truetype.Options{
+		Size: 8,
+		DPI:  180,
+	})
+	xp := 320
+	yp := 320
+	tidst := i.SubImage(image.Rect(xp, yp, xp+300, yp+40)).(SubImagable)
+	frdst := i.SubImage(image.Rect(xp, yp+40, xp+300, yp+260+40)).(SubImagable)
+	s1 := base.Bounds()
+	s1.Max.Y = 42
+	s2 := base.Bounds().Add(image.Pt(0, 42))
+	s2.Max.Y += -42
+	ti := frame.NewFrame(tidst.Bounds(), base.(SubImagable).SubImage(s1), image.Rect(16, 16, 47, 42))
+	fr := frame.NewFrame(frdst.Bounds(), base.(SubImagable).SubImage(s2), image.Rect(14, 48, 88, 66), &frame.Section5{Image: s5i, Replace: true}, frame.Stretched)
 
 	draw.Draw(tidst, tidst.Bounds(), ti, tidst.Bounds().Min, draw.Src)
 

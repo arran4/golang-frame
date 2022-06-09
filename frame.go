@@ -76,14 +76,15 @@ func (f *Frame) At(x, y int) color.Color {
 // Apply applies the section 5 override specific code.
 func (s5 *Section5) Apply(p image.Point, op image.Point, f *Frame, midStartX int, midStartY int) color.Color {
 	s5b := s5.Bounds()
+	np := op.Sub(f.Dest.Min)
 	var c color.Color
 	switch f.Section5Pos {
 	case PassThrough:
 		c = s5.At(op.X, op.Y)
 	case Zerod:
-		c = s5.At(p.X, p.Y)
+		c = s5.At(np.X, np.Y)
 	default:
-		c = s5.At(p.X-midStartX-s5b.Min.X, p.Y-midStartY-s5b.Min.Y)
+		c = s5.At(np.X-midStartX-s5b.Min.X, np.Y-midStartY-s5b.Min.Y)
 	}
 	if s5.Replace {
 		return c

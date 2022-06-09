@@ -39,17 +39,35 @@ func main() {
 	if err != nil {
 		log.Panicf("Error with loading base file: %s", err)
 	}
-	s5i := image.NewRGBA(image.Rect(0, 0, 50, 50))
-	for x := 0; x < 50; x++ {
-		for y := 0; y < 50; y++ {
-			if x/10%2 == 0 && x/10 == y/10 {
-				s5i.SetRGBA(x, y, color.RGBA{0, 0, 127, 127})
-			}
+	s5i := image.NewRGBA(image.Rect(0, 0, 100, 100))
+	const sz = 50
+	draw.Draw(s5i, s5i.Rect, SrcImageFunc(func(x, y int) color.Color {
+		if (x/2)/sz%2 == 0 && (x/2)/sz == y/sz {
+			return color.RGBA{0, 0, 127, 127}
 		}
-	}
-	i := image.NewRGBA(image.Rect(0, 0, 120*3, 120*3))
-	Draw(i, ti, base, s5i)
-	SaveFile(i)
+		return color.RGBA{}
+	}), image.Pt(0, 0), draw.Src)
+	c := image.NewRGBA(image.Rect(0, 0, 120*3, 120*3))
+	Draw(c, ti, base, s5i)
+	SaveFile(c)
+}
+
+type SrcImageFunc func(x int, y int) color.Color
+
+func (s SrcImageFunc) Convert(c color.Color) color.Color {
+	return c
+}
+
+func (s SrcImageFunc) ColorModel() color.Model {
+	return s
+}
+
+func (s SrcImageFunc) Bounds() image.Rectangle {
+	return image.Rectangle{image.Point{-1e9, -1e9}, image.Point{1e9, 1e9}}
+}
+
+func (s SrcImageFunc) At(x, y int) color.Color {
+	return s(x, y)
 }
 
 func Draw(i SubImagable, tibase, fibase, s5i image.Image) {
