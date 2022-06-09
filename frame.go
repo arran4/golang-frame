@@ -102,12 +102,12 @@ func (s5 *Section5) Apply(p image.Point, op image.Point, f *Frame, midStartX int
 // almost bitwise shift.
 func Over(destc color.Color, a1 uint32, r1 uint32, g1 uint32, b1 uint32) color.Color {
 	destr, destg, destb, desta := destc.RGBA()
-	a := (math.MaxUint16 - a1) * 0x101
+	reva := (math.MaxUint16 - a1) * 0x101
 	c := color.RGBA{
-		R: uint8((uint32(destr)*a/math.MaxUint16 + r1) >> 8),
-		G: uint8((uint32(destg)*a/math.MaxUint16 + g1) >> 8),
-		B: uint8((uint32(destb)*a/math.MaxUint16 + b1) >> 8),
-		A: uint8((uint32(desta)*a/math.MaxUint16 + a1) >> 8),
+		R: uint8((uint32(destr)*reva/math.MaxUint16 + r1*a1) >> 8),
+		G: uint8((uint32(destg)*reva/math.MaxUint16 + g1*a1) >> 8),
+		B: uint8((uint32(destb)*reva/math.MaxUint16 + b1*a1) >> 8),
+		A: uint8((uint32(desta)*reva/math.MaxUint16 + a1) >> 8),
 	}
 	return &c
 }
