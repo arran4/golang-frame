@@ -91,7 +91,7 @@ func (s5 *Section5) Apply(p image.Point, op image.Point, f *Frame, midStartX int
 	}
 	r1, g1, b1, a1 := c.RGBA()
 	if a1 == math.MaxUint16 {
-		return nil
+		return c
 	} else if a1 == 0 {
 		return nil
 	}
