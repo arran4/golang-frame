@@ -85,17 +85,20 @@ func (s5 *Section5) Apply(p image.Point, op image.Point, f *Frame, midStartX int
 	default:
 		c = s5.At(p.X-midStartX-s5b.Min.X, p.Y-midStartY-s5b.Min.Y)
 	}
+	if s5.Replace {
+		return c
+	}
 	r1, g1, b1, a1 := c.RGBA()
-	if a1 == math.MaxUint16 || s5.Replace {
+	if a1 == math.MaxUint16 {
 		return nil
 	} else if a1 == 0 {
 		return nil
 	}
-	destc := f.Base.At(p.X+f.Base.Bounds().Min.X, p.Y+f.Base.Bounds().Min.Y)
+	baseC := f.Base.At(p.X+f.Base.Bounds().Min.X, p.Y+f.Base.Bounds().Min.Y)
 	if s5.AlphaMode == nil {
-		return draw.Over(destc, a1, r1, g1, b1)
+		return draw.Over(baseC, a1, r1, g1, b1)
 	} else {
-		return s5.AlphaMode(destc, a1, r1, g1, b1)
+		return s5.AlphaMode(baseC, a1, r1, g1, b1)
 	}
 }
 
@@ -118,7 +121,7 @@ type Section5 struct {
 	// Replace If the new section 5 image should fully replace the base section 5 image
 	Replace bool
 	// AlphaMode the mode to apply alpha with, defaults to "over"
-	AlphaMode func(destc color.Color, a1 uint32, r1 uint32, g1 uint32, b1 uint32) color.Color
+	AlphaMode func(destC color.Color, a1 uint32, r1 uint32, g1 uint32, b1 uint32) color.Color
 }
 
 // Option enables the use as a config option
