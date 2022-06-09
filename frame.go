@@ -98,8 +98,7 @@ func (s5 *Section5) Apply(p image.Point, op image.Point, f *Frame, midStartX int
 	}
 }
 
-// Over is the alpha mode applied by draw.Draw() Probably inaccurate. I am not sure what 0x101 does. It looks like an
-// almost bitwise shift.
+// Over is the alpha mode applied by draw.Draw() Probably inaccurate.
 func Over(destc color.Color, a1 uint32, r1 uint32, g1 uint32, b1 uint32) color.Color {
 	destr, destg, destb, desta := destc.RGBA()
 	reva := (math.MaxUint16 - a1) * 0x101
