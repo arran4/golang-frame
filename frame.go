@@ -24,13 +24,13 @@ type Frame struct {
 }
 
 type frameGeometry struct {
-	destDx, destDy                                     int
-	baseBoundsMinX, baseBoundsMinY                     int
+	destDx, destDy                                         int
+	baseBoundsMinX, baseBoundsMinY                         int
 	baseBoundsMaxSubMiddleMaxX, baseBoundsMaxSubMiddleMaxY int
-	middleDx, middleDy                                 int
-	midStartX, midStartY                               int
-	midEndX, midEndY                                   int
-	baseBoundsDx, baseBoundsDy                         int
+	middleDx, middleDy                                     int
+	midStartX, midStartY                                   int
+	midEndX, midEndY                                       int
+	baseBoundsDx, baseBoundsDy                             int
 }
 
 // ColorModel Pass through to base image.
