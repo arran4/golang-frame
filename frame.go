@@ -20,6 +20,17 @@ type Frame struct {
 	Section5Override *Section5
 	// Section5Pos is how to handle Section5Override positioning
 	Section5Pos Section5Positioning
+	geom        *frameGeometry
+}
+
+type frameGeometry struct {
+	destDx, destDy                                     int
+	baseBoundsMinX, baseBoundsMinY                     int
+	baseBoundsMaxSubMiddleMaxX, baseBoundsMaxSubMiddleMaxY int
+	middleDx, middleDy                                 int
+	midStartX, midStartY                               int
+	midEndX, midEndY                                   int
+	baseBoundsDx, baseBoundsDy                         int
 }
 
 // ColorModel Pass through to base image.
@@ -32,45 +43,64 @@ func (f *Frame) Bounds() image.Rectangle {
 	return f.Dest
 }
 
+func (f *Frame) ensureGeom() {
+	if f.geom != nil {
+		return
+	}
+	f.geom = &frameGeometry{
+		destDx:                     f.Dest.Dx(),
+		destDy:                     f.Dest.Dy(),
+		baseBoundsMinX:             f.Base.Bounds().Min.X,
+		baseBoundsMinY:             f.Base.Bounds().Min.Y,
+		baseBoundsMaxSubMiddleMaxX: f.Base.Bounds().Max.Sub(f.Middle.Max).X,
+		baseBoundsMaxSubMiddleMaxY: f.Base.Bounds().Max.Sub(f.Middle.Max).Y,
+		middleDx:                   f.Middle.Dx(),
+		middleDy:                   f.Middle.Dy(),
+		midStartX:                  f.Middle.Min.X - f.Base.Bounds().Min.X,
+		midStartY:                  f.Middle.Min.Y - f.Base.Bounds().Min.Y,
+		midEndX:                    f.Dest.Dx() - (f.Base.Bounds().Max.X - f.Middle.Max.X),
+		midEndY:                    f.Dest.Dy() - (f.Base.Bounds().Max.Y - f.Middle.Max.Y),
+		baseBoundsDx:               f.Base.Bounds().Dx(),
+		baseBoundsDy:               f.Base.Bounds().Dy(),
+	}
+}
+
 // At overrides the at functionality with our own multiplexer version
 func (f *Frame) At(x, y int) color.Color {
+	f.ensureGeom()
 	op := image.Pt(x, y)
 	p := op.Sub(f.Dest.Min)
-	xDistanceFromEnd := f.Dest.Dx() - p.X
-	midStartX := f.Middle.Min.X - f.Base.Bounds().Min.X
-	midEndX := f.Dest.Dx() - (f.Base.Bounds().Max.X - f.Middle.Max.X)
+	xDistanceFromEnd := f.geom.destDx - p.X
 	s5 := 0
-	if xDistanceFromEnd <= f.Base.Bounds().Max.Sub(f.Middle.Max).X {
-		p.X = f.Base.Bounds().Dx() - xDistanceFromEnd
-	} else if p.X > midStartX {
+	if xDistanceFromEnd <= f.geom.baseBoundsMaxSubMiddleMaxX {
+		p.X = f.geom.baseBoundsDx - xDistanceFromEnd
+	} else if p.X > f.geom.midStartX {
 		switch f.BorderMode {
 		case Stretched:
-			p.X = midStartX + int(float64(p.X-midStartX)/float64(midEndX-midStartX)*float64(f.Middle.Dx()))
+			p.X = f.geom.midStartX + int(float64(p.X-f.geom.midStartX)/float64(f.geom.midEndX-f.geom.midStartX)*float64(f.geom.middleDx))
 		default:
-			p.X = midStartX + (p.X-midStartX)%(f.Middle.Dx())
+			p.X = f.geom.midStartX + (p.X-f.geom.midStartX)%(f.geom.middleDx)
 		}
 		s5++
 	}
-	yDistanceFromEnd := f.Dest.Dy() - p.Y
-	midStartY := f.Middle.Min.Y - f.Base.Bounds().Min.Y
-	midEndY := f.Dest.Dy() - (f.Base.Bounds().Max.Y - f.Middle.Max.Y)
-	if yDistanceFromEnd <= f.Base.Bounds().Max.Sub(f.Middle.Max).Y {
-		p.Y = f.Base.Bounds().Dy() - yDistanceFromEnd
-	} else if p.Y > midStartY {
+	yDistanceFromEnd := f.geom.destDy - p.Y
+	if yDistanceFromEnd <= f.geom.baseBoundsMaxSubMiddleMaxY {
+		p.Y = f.geom.baseBoundsDy - yDistanceFromEnd
+	} else if p.Y > f.geom.midStartY {
 		switch f.BorderMode {
 		case Stretched:
-			p.Y = midStartY + int(float64(p.Y-midStartY)/float64(midEndY-midStartY)*float64(f.Middle.Dy()))
+			p.Y = f.geom.midStartY + int(float64(p.Y-f.geom.midStartY)/float64(f.geom.midEndY-f.geom.midStartY)*float64(f.geom.middleDy))
 		default:
-			p.Y = midStartY + (p.Y-midStartY)%(f.Middle.Dy())
+			p.Y = f.geom.midStartY + (p.Y-f.geom.midStartY)%(f.geom.middleDy)
 		}
 		s5++
 	}
 	if f.Section5Override != nil && s5 == 2 {
-		if c2 := f.Section5Override.Apply(p, op, f, midStartX, midStartY); c2 != nil {
+		if c2 := f.Section5Override.Apply(p, op, f, f.geom.midStartX, f.geom.midStartY); c2 != nil {
 			return c2
 		}
 	}
-	return f.Base.At(p.X+f.Base.Bounds().Min.X, p.Y+f.Base.Bounds().Min.Y)
+	return f.Base.At(p.X+f.geom.baseBoundsMinX, p.Y+f.geom.baseBoundsMinY)
 }
 
 // Apply applies the section 5 override specific code.
@@ -105,6 +135,7 @@ func (s5 *Section5) Apply(p image.Point, op image.Point, f *Frame, midStartX int
 
 // MiddleRect calculates the total space in the resulting image that section 5 consumes
 func (f *Frame) MiddleRect() image.Rectangle {
+	f.ensureGeom()
 	return image.Rectangle{
 		Min: f.Dest.Min.Add(f.Middle.Min.Sub(f.Base.Bounds().Min)),
 		Max: f.Dest.Max.Sub(f.Base.Bounds().Max.Sub(f.Middle.Max)),
