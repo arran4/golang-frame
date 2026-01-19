@@ -42,7 +42,7 @@ func main() {
 	WindowPassthrough(i, base, s5i)
 	WindowZeroZero(i, base, s5i)
 	WindowZerod(i, base, s5i)
-	// TODO WindowStretched(i, base, s5i)
+	WindowStretched(i, base, s5i)
 	SaveFile(i)
 }
 
