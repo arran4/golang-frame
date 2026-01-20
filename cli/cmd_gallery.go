@@ -1,4 +1,4 @@
-package main
+package cli
 
 import (
 	"fmt"
@@ -19,7 +19,8 @@ type FrameData struct {
 	ExportedName string
 }
 
-func main() {
+// Gallery is a subcommand `frames gallery`
+func Gallery() {
 	dstDir := "images"
 	os.MkdirAll(dstDir, 0755)
 
@@ -84,23 +85,4 @@ func main() {
 	}
 
 	fmt.Println("Successfully generated images/ and readme.md")
-}
-
-func toExportedName(s string) string {
-	res := ""
-	nextUpper := true
-	for _, c := range s {
-		if c == '_' {
-			nextUpper = true
-		} else {
-			if nextUpper {
-				if c >= 'a' && c <= 'z' {
-					c = c - 32
-				}
-				nextUpper = false
-			}
-			res += string(c)
-		}
-	}
-	return res
 }

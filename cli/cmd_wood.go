@@ -1,4 +1,4 @@
-package main
+package cli
 
 import (
 	"image"
@@ -8,13 +8,14 @@ import (
 	"os"
 )
 
-func main() {
-	generate("frames/wood.png", 96, 16)
-	generate("frames/wood_large.png", 192, 32)
-	generate("frames/wood_xlarge.png", 288, 48)
+// GenWood is a subcommand `frames wood`
+func GenWood() {
+	generateWoodFile("frames/wood.png", 96, 16)
+	generateWoodFile("frames/wood_large.png", 192, 32)
+	generateWoodFile("frames/wood_xlarge.png", 288, 48)
 }
 
-func generate(filename string, size int, border int) {
+func generateWoodFile(filename string, size int, border int) {
 	img := image.NewRGBA(image.Rect(0, 0, size, size))
 
 	// 1. Generate Background (Inner part)

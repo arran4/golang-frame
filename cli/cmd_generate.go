@@ -1,4 +1,4 @@
-package main
+package cli
 
 import (
 	"fmt"
@@ -57,7 +57,8 @@ var generators = []Generator{
 	genSignConstruction,
 }
 
-func main() {
+// Generate is a subcommand `frames generate`
+func Generate() {
 	dstDir := "frames"
 	os.MkdirAll(dstDir, 0755)
 
