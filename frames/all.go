@@ -1,12 +1,6 @@
 package frames
 
 var All = []*Definition{
-	AmigaLike,
-	AmigaLikeLarge,
-	AmigaLikeXlarge,
-	BeosLike,
-	BeosLikeLarge,
-	BeosLikeXlarge,
 	Chains,
 	ChainsLarge,
 	ChainsXlarge,
@@ -22,9 +16,6 @@ var All = []*Definition{
 	FantasyStone,
 	FantasyStoneLarge,
 	FantasyStoneXlarge,
-	Floral,
-	FloralLarge,
-	FloralXlarge,
 	Gold,
 	GoldLarge,
 	GoldXlarge,
