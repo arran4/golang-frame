@@ -628,5 +628,12 @@ func genSciFiTech(s int) (image.Image, image.Rectangle, string) {
 func genSignStreet(s int) (image.Image, image.Rectangle, string) {
 	w, h := 64*s, 64*s
 	img := solid(w, h, color.RGBA{0, 100, 0, 255})
+	white := color.RGBA{255, 255, 255, 255}
+	margin := s
+	thickness := s
+	rect(img, image.Rect(margin, margin, w-margin, margin+thickness), white)
+	rect(img, image.Rect(margin, h-margin-thickness, w-margin, h-margin), white)
+	rect(img, image.Rect(margin, margin, margin+thickness, h-margin), white)
+	rect(img, image.Rect(w-margin-thickness, margin, w-margin, h-margin), white)
 	return img, image.Rect(8*s, 8*s, w-8*s, h-8*s), "sign_street"
 }
