@@ -742,10 +742,53 @@ func genMWM(s int) (image.Image, image.Rectangle, string) {
 }
 
 func genNeXT(s int) (image.Image, image.Rectangle, string) {
-	w, h := 32*s, 32*s
-	img := solid(w, h, color.Black)
-	rect(img, image.Rect(s, s, w-s, h-s), color.RGBA{150, 150, 150, 255})
-	return img, image.Rect(6*s, 6*s, w-6*s, h-6*s), "next_like"
+	w, h := 48*s, 48*s
+	// Colors
+	black := color.RGBA{0, 0, 0, 255}
+	darkGray := color.RGBA{85, 85, 85, 255}
+	lightGray := color.RGBA{179, 179, 179, 255}
+	white := color.RGBA{255, 255, 255, 255}
+
+	img := solid(w, h, lightGray)
+
+	// Outer border
+	rect(img, image.Rect(0, 0, w, s), black)   // Top
+	rect(img, image.Rect(0, 0, s, h), black)   // Left
+	rect(img, image.Rect(w-s, 0, w, h), black) // Right
+	rect(img, image.Rect(0, h-s, w, h), black) // Bottom
+
+	// Title bar
+	titleHeight := 14 * s
+	rect(img, image.Rect(s, s, w-s, s+titleHeight), black)
+
+	// Content Well (Sunken)
+	// Margins
+	marginLeft := 4 * s
+	marginRight := 4 * s
+	marginBottom := 4 * s
+	// Top margin includes title bar and a small gap
+	marginTop := s + titleHeight + 2*s
+
+	// Draw the "Sunken" bezel for the content
+	// Outer bounds of the well
+	wellX1 := marginLeft
+	wellY1 := marginTop
+	wellX2 := w - marginRight
+	wellY2 := h - marginBottom
+
+	// Top Shadow
+	rect(img, image.Rect(wellX1, wellY1, wellX2, wellY1+s), darkGray)
+	// Left Shadow
+	rect(img, image.Rect(wellX1, wellY1, wellX1+s, wellY2), darkGray)
+	// Right Highlight
+	rect(img, image.Rect(wellX2-s, wellY1, wellX2, wellY2), white)
+	// Bottom Highlight
+	rect(img, image.Rect(wellX1, wellY2-s, wellX2, wellY2), white)
+
+	// Middle is the area inside the well bezel
+	middle := image.Rect(wellX1+s, wellY1+s, wellX2-s, wellY2-s)
+
+	return img, middle, "next_like"
 }
 
 func genBeOS(s int) (image.Image, image.Rectangle, string) {
