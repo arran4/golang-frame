@@ -24,14 +24,14 @@ func main() {
 	}
 	i := image.NewRGBA(image.Rect(0, 0, 600, 600))
 	dst := i.SubImage(image.Rect(100, 100, 400, 400)).(draw.Image)
-	fr := frame.NewFrame(dst.Bounds(), base, image.Rect(48, 48, 55, 66))
+	fr := frame.NewFrame(dst.Bounds(), base, image.Rect(25, 24, 75, 96))
 	draw.Draw(dst, dst.Bounds(), fr, dst.Bounds().Min, draw.Src)
 	SaveFile(i)
 }
 
 func SaveFile(i *image.RGBA) {
 	_ = os.MkdirAll("images", 0755)
-	fi, err := os.Create("images/sample2.png")
+	fi, err := os.Create("images/sample6.png")
 	if err != nil {
 		log.Panicf("File create error: %v", err)
 	}
