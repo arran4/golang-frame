@@ -357,23 +357,139 @@ func genStars(s int) (image.Image, image.Rectangle, string) {
 }
 
 func genGold(s int) (image.Image, image.Rectangle, string) {
-	w, h := 64*s, 64*s
+	w, h := 96*s, 96*s
 	img := image.NewRGBA(image.Rect(0, 0, w, h))
-	gold := color.RGBA{255, 215, 0, 255}
-	shadow := color.RGBA{150, 100, 0, 255}
+	bw := 16 * s
+
+	baseColor := color.RGBA{218, 165, 32, 255} // Metallic Gold
+
+	// Profile function: returns height (0-1) at normalized distance t (0-1)
+	getProfile := func(t float64) float64 {
+		if t < 0.0 {
+			return 0.0
+		}
+		if t > 1.0 {
+			return 0.0
+		}
+		// Classic Ogee / Scoop profile
+		// 0.0 - 0.15: Outer Bead
+		if t < 0.15 {
+			tt := t / 0.15
+			return math.Sqrt(1-(tt-1)*(tt-1)) * 0.8 // Quarter circle
+		}
+		// 0.15 - 0.20: Step down
+		if t < 0.20 {
+			tt := (t - 0.15) / 0.05
+			return 0.8 - tt*0.2
+		}
+		// 0.20 - 0.70: The Scoop (Concave)
+		if t < 0.70 {
+			tt := (t - 0.20) / 0.50
+			// concave curve
+			return 0.6 - math.Sin(tt*math.Pi)*0.3
+		}
+		// 0.70 - 0.85: Inner Bead (Convex)
+		if t < 0.85 {
+			tt := (t - 0.70) / 0.15
+			return 0.6 + math.Sin(tt*math.Pi)*0.4
+		}
+		// 0.85 - 1.00: Step to picture
+		tt := (t - 0.85) / 0.15
+		return 0.6 * (1 - tt)
+	}
+
+	lx, ly, lz := -1.0, -1.0, 0.5
+	ln := math.Sqrt(lx*lx + ly*ly + lz*lz)
+	lx, ly, lz = lx/ln, ly/ln, lz/ln
+
 	for y := 0; y < h; y++ {
 		for x := 0; x < w; x++ {
-			f := (math.Sin(float64(x+y)/float64(8*s)) + 1) / 2.0
-			r := uint8(float64(gold.R)*f + float64(shadow.R)*(1-f))
-			g := uint8(float64(gold.G)*f + float64(shadow.G)*(1-f))
-			b := uint8(float64(gold.B)*f + float64(shadow.B)*(1-f))
-			img.Set(x, y, color.RGBA{r, g, b, 255})
+			// Calculate distance to edge and gradient of distance
+			d := x
+			gx, gy := 1.0, 0.0
+			if w-1-x < d {
+				d = w - 1 - x
+				gx, gy = -1.0, 0.0
+			}
+			if y < d {
+				d = y
+				gx, gy = 0.0, 1.0
+			}
+			if h-1-y < d {
+				d = h - 1 - y
+				gx, gy = 0.0, -1.0
+			}
+
+			if d >= bw {
+				continue
+			}
+
+			t := float64(d) / float64(bw)
+
+			// Numerical derivative
+			z1 := getProfile(t)
+			z2 := getProfile(t + 0.01)
+			slope := (z2 - z1) / 0.01
+
+			// Normal calc
+			heightScale := float64(bw) * 0.5
+			realSlope := slope * heightScale / float64(bw) // dz/dt * Zscale / (Dscale)
+
+			nx := -realSlope * gx
+			ny := -realSlope * gy
+			nz := 1.0
+
+			// Texture / Bump map
+			noiseScale := 0.2
+			n1 := math.Sin(float64(x)*0.4) * math.Cos(float64(y)*0.4)
+			n2 := math.Cos(float64(x)*0.7 + float64(y)*0.7)
+			nx += n1 * noiseScale
+			ny += n2 * noiseScale
+
+			nn := math.Sqrt(nx*nx + ny*ny + nz*nz)
+			nx, ny, nz = nx/nn, ny/nn, nz/nn
+
+			// Diffuse
+			dot := nx*lx + ny*ly + nz*lz
+			if dot < 0 {
+				dot = 0
+			}
+
+			// Specular
+			spec := 0.0
+			refZ := 2*dot*nz - lz
+			if refZ > 0 {
+				spec = math.Pow(refZ, 20) // shininess
+			}
+
+			// Composite color
+			// Ambient
+			r := float64(baseColor.R) * 0.4
+			g := float64(baseColor.G) * 0.4
+			b := float64(baseColor.B) * 0.4
+
+			// Diffuse
+			r += float64(baseColor.R) * 0.6 * dot
+			g += float64(baseColor.G) * 0.6 * dot
+			b += float64(baseColor.B) * 0.6 * dot
+
+			// Specular (white)
+			r += 255 * spec * 0.4
+			g += 255 * spec * 0.4
+			b += 255 * spec * 0.4
+
+			if r > 255 {
+				r = 255
+			}
+			if g > 255 {
+				g = 255
+			}
+			if b > 255 {
+				b = 255
+			}
+
+			img.Set(x, y, color.RGBA{uint8(r), uint8(g), uint8(b), 255})
 		}
-	}
-	bw := 12 * s
-	for i := 0; i < bw; i++ {
-		fade := uint8(100 - i*100/bw)
-		rectHighlight(img, image.Rect(i, i, w-i, i+1), color.RGBA{255, 255, 255, fade})
 	}
 	return img, image.Rect(bw, bw, w-bw, h-bw), "gold"
 }

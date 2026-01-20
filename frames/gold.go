@@ -12,7 +12,7 @@ var GoldPng []byte
 
 var Gold = &Definition{
 	Name: "gold",
-	Middle: image.Rect(12, 12, 52, 52),
+	Middle: image.Rect(16, 16, 80, 80),
 }
 
 func init() {
