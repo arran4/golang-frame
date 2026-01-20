@@ -12,7 +12,7 @@ var MacosxLikeLargePng []byte
 
 var MacosxLikeLarge = &Definition{
 	Name: "macosx_like_large",
-	Middle: image.Rect(16, 32, 80, 80),
+	Middle: image.Rect(108, 48, 120, 120),
 }
 
 func init() {
