@@ -617,9 +617,24 @@ func genWin31(s int) (image.Image, image.Rectangle, string) {
 
 func genWin95(s int) (image.Image, image.Rectangle, string) {
 	w, h := 32*s, 32*s
-	img := solid(w, h, color.RGBA{192, 192, 192, 255})
-	rect(img, image.Rect(0, 0, w, s), color.White)
-	rect(img, image.Rect(w-s, 0, w, h), color.Black)
+	face := color.RGBA{192, 192, 192, 255}
+	white := color.White
+	darkGrey := color.RGBA{128, 128, 128, 255}
+	black := color.Black
+
+	img := solid(w, h, face)
+	// Top & Left (White)
+	rect(img, image.Rect(0, 0, w, s), white)
+	rect(img, image.Rect(0, 0, s, h), white)
+
+	// Bottom & Right (Black) - Outermost
+	rect(img, image.Rect(w-s, 0, w, h), black)
+	rect(img, image.Rect(0, h-s, w, h), black)
+
+	// Bottom & Right (Dark Grey) - Inner
+	rect(img, image.Rect(w-2*s, s, w-s, h-s), darkGrey)
+	rect(img, image.Rect(s, h-2*s, w-s, h-s), darkGrey)
+
 	return img, image.Rect(4*s, 4*s, w-4*s, h-4*s), "win95_like"
 }
 
