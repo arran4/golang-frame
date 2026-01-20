@@ -178,11 +178,11 @@ func (bm Section5Positioning) Option(f *Frame) {
 }
 
 const (
-	// Section5Zeroed tells the draw algorithm to 0 position the section 5 image
+	// Section5Zeroed aligns the (0,0) of the replacement image to the top-left of Section 5 (the middle content area).
 	Section5Zeroed Section5Positioning = iota
-	// Zerod uses the internal 0ed position
+	// Zerod aligns the (0,0) of the replacement image to the top-left of the destination frame.
 	Zerod
-	// PassThrough tells the draw algorithm to pass through the position to section 5 without modification
+	// PassThrough uses the global coordinates of the destination image, passing them through to the replacement image.
 	PassThrough
 	// Repeating tells the draw algorithm to repeat sections 2,4,6, and 8 as required
 	Repeating BorderMode = iota

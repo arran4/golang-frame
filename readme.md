@@ -77,10 +77,10 @@ From:
 
 In sample 4 we replace the contents of the window with our own rather than use section 5 of the image.
 
-There are currently 3 variants of this:
-* Section5Zeroed - Match section 5 starting position with co-ordinates 0, 0
-* Zerod - Match the whole frame's starting position with the co-ordinates 0, 0
-* PassThrough - Pass in the parent windows position
+There are currently 3 variants of this which control how the replacement image for Section 5 is positioned/aligned:
+* **Section5Zeroed** (Default): The (0,0) coordinate of the replacement image is aligned with the top-left corner of Section 5 (the middle content area) of the frame. This is ideal when the image is meant to be the content of the frame.
+* **Zerod**: The (0,0) coordinate of the replacement image is aligned with the top-left corner of the *entire frame* (Dest.Min). This is useful if you want the image to start from the frame's corner, covering borders if the image is large enough, or aligning relative to the frame itself.
+* **PassThrough**: The coordinates are passed through from the destination image directly. This means the replacement image is aligned with the origin (0,0) of the *destination image* (the canvas you are drawing onto), regardless of where the frame is located. This is useful for backgrounds that need to appear continuous across multiple frames or the entire window.
 
 ```go
 fr := frame.NewFrame(frdst.Bounds(), base.(SubImagable).SubImage(s2), image.Rect(14, 48, 88, 66), &frame.Section5{Image: s5i}, frame.Section5Zeroed)
