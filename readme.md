@@ -187,6 +187,72 @@ frame.Section5{Image: s5i, Replace: false, AlphaMode: draw.Over}
 There is a collection of included frames in the `frames` package. Each frame comes in standard, `_large` (2x), and `_xlarge` (3x) variants for high-DPI screens.
 
 
+### AmigaLike
+
+![](images/gallery_amiga_like.png)
+
+```go
+import "github.com/arran4/golang-frame/frames"
+
+// Use it directly
+fr := frame.NewFrame(destRect, frames.AmigaLike.Image, frames.AmigaLike.Middle)
+```
+
+### AmigaLikeLarge
+
+![](images/gallery_amiga_like_large.png)
+
+```go
+import "github.com/arran4/golang-frame/frames"
+
+// Use it directly
+fr := frame.NewFrame(destRect, frames.AmigaLikeLarge.Image, frames.AmigaLikeLarge.Middle)
+```
+
+### AmigaLikeXlarge
+
+![](images/gallery_amiga_like_xlarge.png)
+
+```go
+import "github.com/arran4/golang-frame/frames"
+
+// Use it directly
+fr := frame.NewFrame(destRect, frames.AmigaLikeXlarge.Image, frames.AmigaLikeXlarge.Middle)
+```
+
+### BeosLike
+
+![](images/gallery_beos_like.png)
+
+```go
+import "github.com/arran4/golang-frame/frames"
+
+// Use it directly
+fr := frame.NewFrame(destRect, frames.BeosLike.Image, frames.BeosLike.Middle)
+```
+
+### BeosLikeLarge
+
+![](images/gallery_beos_like_large.png)
+
+```go
+import "github.com/arran4/golang-frame/frames"
+
+// Use it directly
+fr := frame.NewFrame(destRect, frames.BeosLikeLarge.Image, frames.BeosLikeLarge.Middle)
+```
+
+### BeosLikeXlarge
+
+![](images/gallery_beos_like_xlarge.png)
+
+```go
+import "github.com/arran4/golang-frame/frames"
+
+// Use it directly
+fr := frame.NewFrame(destRect, frames.BeosLikeXlarge.Image, frames.BeosLikeXlarge.Middle)
+```
+
 ### Chains
 
 ![](images/gallery_chains.png)
@@ -350,6 +416,39 @@ import "github.com/arran4/golang-frame/frames"
 
 // Use it directly
 fr := frame.NewFrame(destRect, frames.FantasyStoneXlarge.Image, frames.FantasyStoneXlarge.Middle)
+```
+
+### Floral
+
+![](images/gallery_floral.png)
+
+```go
+import "github.com/arran4/golang-frame/frames"
+
+// Use it directly
+fr := frame.NewFrame(destRect, frames.Floral.Image, frames.Floral.Middle)
+```
+
+### FloralLarge
+
+![](images/gallery_floral_large.png)
+
+```go
+import "github.com/arran4/golang-frame/frames"
+
+// Use it directly
+fr := frame.NewFrame(destRect, frames.FloralLarge.Image, frames.FloralLarge.Middle)
+```
+
+### FloralXlarge
+
+![](images/gallery_floral_xlarge.png)
+
+```go
+import "github.com/arran4/golang-frame/frames"
+
+// Use it directly
+fr := frame.NewFrame(destRect, frames.FloralXlarge.Image, frames.FloralXlarge.Middle)
 ```
 
 ### Gold
