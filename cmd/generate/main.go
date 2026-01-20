@@ -826,6 +826,52 @@ func genAmiga(s int) (image.Image, image.Rectangle, string) {
 func genRetroWindow(s int) (image.Image, image.Rectangle, string) {
 	w, h := 64*s, 64*s
 	img := solid(w, h, color.RGBA{192, 192, 192, 255})
+
+	white := color.RGBA{255, 255, 255, 255}
+	grayDark := color.RGBA{128, 128, 128, 255}
+	black := color.RGBA{0, 0, 0, 255}
+	blue := color.RGBA{0, 0, 128, 255}
+
+	// Outer Border
+	rect(img, image.Rect(0, 0, w, s), white)
+	rect(img, image.Rect(0, 0, s, h), white)
+	rect(img, image.Rect(w-s, 0, w, h), black)
+	rect(img, image.Rect(w-2*s, s, w-s, h-s), grayDark)
+	rect(img, image.Rect(0, h-s, w, h), black)
+	rect(img, image.Rect(s, h-2*s, w-s, h-s), grayDark)
+
+	// Title Bar
+	titleBarRect := image.Rect(4*s, 4*s, w-4*s, 16*s)
+	rect(img, titleBarRect, blue)
+
+	// Title Bar Text Placeholder
+	rect(img, image.Rect(6*s, 6*s, 14*s, 14*s), white)
+
+	// Close button
+	btnRect := image.Rect(w-14*s, 6*s, w-6*s, 14*s)
+	rect(img, btnRect, color.RGBA{192, 192, 192, 255})
+	rect(img, image.Rect(btnRect.Min.X, btnRect.Min.Y, btnRect.Max.X, btnRect.Min.Y+s), white)
+	rect(img, image.Rect(btnRect.Min.X, btnRect.Min.Y, btnRect.Min.X+s, btnRect.Max.Y), white)
+	rect(img, image.Rect(btnRect.Max.X-s, btnRect.Min.Y, btnRect.Max.X, btnRect.Max.Y), black)
+	rect(img, image.Rect(btnRect.Min.X, btnRect.Max.Y-s, btnRect.Max.X, btnRect.Max.Y), black)
+
+	// Inner Border (around the content)
+	// Left Inner Border
+	rect(img, image.Rect(6*s, 18*s, 7*s, h-6*s), grayDark)
+	rect(img, image.Rect(7*s, 19*s, 8*s, h-7*s), black)
+
+	// Top Inner Border
+	rect(img, image.Rect(6*s, 18*s, w-6*s, 19*s), grayDark)
+	rect(img, image.Rect(7*s, 19*s, w-7*s, 20*s), black)
+
+	// Right Inner Border
+	rect(img, image.Rect(w-8*s, 19*s, w-7*s, h-7*s), white)
+	rect(img, image.Rect(w-7*s, 18*s, w-6*s, h-6*s), white)
+
+	// Bottom Inner Border
+	rect(img, image.Rect(7*s, h-8*s, w-7*s, h-7*s), white)
+	rect(img, image.Rect(6*s, h-7*s, w-6*s, h-6*s), white)
+
 	return img, image.Rect(8*s, 20*s, w-8*s, h-8*s), "window_retro"
 }
 
