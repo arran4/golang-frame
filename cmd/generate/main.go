@@ -510,13 +510,82 @@ func genMacClassic(s int) (image.Image, image.Rectangle, string) {
 }
 
 func genMacOSX(s int) (image.Image, image.Rectangle, string) {
-	w, h := 48*s, 48*s
-	img := solid(w, h, color.RGBA{220, 220, 220, 255})
-	for y := 0; y < 12*s; y++ {
-		g := uint8(240 - y/s)
-		rect(img, image.Rect(0, y, w, y+1), color.RGBA{g, g, g, 255})
+	width := 64 * s
+	height := 64 * s
+	img := image.NewRGBA(image.Rect(0, 0, width, height))
+	draw.Draw(img, img.Bounds(), &image.Uniform{color.Transparent}, image.Point{}, draw.Src)
+
+	titleBarStart := color.RGBA{235, 235, 235, 255}
+	titleBarEnd := color.RGBA{210, 210, 210, 255}
+	borderColor := color.RGBA{180, 180, 180, 255}
+
+	middle := image.Rect(54*s, 24*s, width-4*s, height-4*s)
+	cornerRadius := 8 * s
+	smallRad := 4 * s
+
+	// Draw Title Bar Background
+	for y := 0; y < 24*s; y++ {
+		f := float64(y) / float64(24*s)
+		c := interpolate(titleBarStart, titleBarEnd, f)
+		rect(img, image.Rect(0, y, width, y+1), c)
 	}
-	return img, image.Rect(8*s, 16*s, w-8*s, h-8*s), "macosx_like"
+
+	// Draw Window Body Background (White)
+	rect(img, image.Rect(0, 24*s, width, height), color.White)
+
+	// Masking out the corners
+	for y := 0; y < cornerRadius; y++ {
+		for x := 0; x < cornerRadius; x++ {
+			dx := cornerRadius - 1 - x
+			dy := cornerRadius - 1 - y
+			if dx*dx+dy*dy >= cornerRadius*cornerRadius {
+				img.Set(x, y, color.Transparent)
+			}
+		}
+	}
+	for y := 0; y < cornerRadius; y++ {
+		for x := 0; x < cornerRadius; x++ {
+			dx := x
+			dy := cornerRadius - 1 - y
+			if dx*dx+dy*dy >= cornerRadius*cornerRadius {
+				img.Set(width-cornerRadius+x, y, color.Transparent)
+			}
+		}
+	}
+	for y := 0; y < smallRad; y++ {
+		for x := 0; x < smallRad; x++ {
+			dx := smallRad - 1 - x
+			dy := y
+			if dx*dx+dy*dy >= smallRad*smallRad {
+				img.Set(x, height-smallRad+y, color.Transparent)
+			}
+		}
+	}
+	for y := 0; y < smallRad; y++ {
+		for x := 0; x < smallRad; x++ {
+			dx := x
+			dy := y
+			if dx*dx+dy*dy >= smallRad*smallRad {
+				img.Set(width-smallRad+x, height-smallRad+y, color.Transparent)
+			}
+		}
+	}
+
+	addBorder(img, borderColor)
+
+	btnY := 12 * s
+	btnRad := 5 * s
+	gap := 8 * s
+	startX := 10 * s
+	red := color.RGBA{255, 95, 87, 255}
+	yellow := color.RGBA{255, 189, 46, 255}
+	green := color.RGBA{40, 201, 64, 255}
+
+	drawCircle(img, startX, btnY, btnRad, red)
+	drawCircle(img, startX+gap+2*btnRad, btnY, btnRad, yellow)
+	drawCircle(img, startX+2*gap+4*btnRad, btnY, btnRad, green)
+
+	return img, middle, "macosx_like"
 }
 
 func genMWM(s int) (image.Image, image.Rectangle, string) {
@@ -629,4 +698,66 @@ func genSignStreet(s int) (image.Image, image.Rectangle, string) {
 	w, h := 64*s, 64*s
 	img := solid(w, h, color.RGBA{0, 100, 0, 255})
 	return img, image.Rect(8*s, 8*s, w-8*s, h-8*s), "sign_street"
+}
+
+// Helpers
+
+func interpolate(c1, c2 color.RGBA, f float64) color.RGBA {
+	return color.RGBA{
+		uint8(float64(c1.R)*(1-f) + float64(c2.R)*f),
+		uint8(float64(c1.G)*(1-f) + float64(c2.G)*f),
+		uint8(float64(c1.B)*(1-f) + float64(c2.B)*f),
+		uint8(float64(c1.A)*(1-f) + float64(c2.A)*f),
+	}
+}
+
+func drawCircle(img *image.RGBA, cx, cy, r int, c color.RGBA) {
+	for y := -r; y <= r; y++ {
+		for x := -r; x <= r; x++ {
+			if x*x+y*y <= r*r {
+				if cx+x >= 0 && cx+x < img.Bounds().Dx() && cy+y >= 0 && cy+y < img.Bounds().Dy() {
+					img.Set(cx+x, cy+y, c)
+				}
+			}
+		}
+	}
+}
+
+func addBorder(img *image.RGBA, c color.RGBA) {
+	bounds := img.Bounds()
+	w, h := bounds.Dx(), bounds.Dy()
+	var boundary []image.Point
+
+	for y := 0; y < h; y++ {
+		for x := 0; x < w; x++ {
+			_, _, _, a := img.At(x, y).RGBA()
+			if a == 0 {
+				continue
+			} // Transparent
+
+			isBoundary := false
+			if x == 0 || x == w-1 || y == 0 || y == h-1 {
+				isBoundary = true
+			} else {
+				// Check 4 neighbors
+				if _, _, _, na := img.At(x-1, y).RGBA(); na == 0 {
+					isBoundary = true
+				} else if _, _, _, na := img.At(x+1, y).RGBA(); na == 0 {
+					isBoundary = true
+				} else if _, _, _, na := img.At(x, y-1).RGBA(); na == 0 {
+					isBoundary = true
+				} else if _, _, _, na := img.At(x, y+1).RGBA(); na == 0 {
+					isBoundary = true
+				}
+			}
+
+			if isBoundary {
+				boundary = append(boundary, image.Point{x, y})
+			}
+		}
+	}
+
+	for _, p := range boundary {
+		img.Set(p.X, p.Y, c)
+	}
 }
