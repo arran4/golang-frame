@@ -58,6 +58,115 @@ var generators = []Generator{
 	genSignConstruction,
 }
 
+type N9 struct {
+	TopLeft, Top, TopRight          image.Image
+	Left, Center, Right             image.Image
+	BottomLeft, Bottom, BottomRight image.Image
+}
+
+func (n *N9) Generate() image.Image {
+	// helper to get bounds
+	dx := func(i image.Image) int {
+		if i == nil {
+			return 0
+		}
+		return i.Bounds().Dx()
+	}
+	dy := func(i image.Image) int {
+		if i == nil {
+			return 0
+		}
+		return i.Bounds().Dy()
+	}
+
+	c0 := 0
+	if v := dx(n.TopLeft); v > c0 {
+		c0 = v
+	}
+	if v := dx(n.Left); v > c0 {
+		c0 = v
+	}
+	if v := dx(n.BottomLeft); v > c0 {
+		c0 = v
+	}
+	c1 := 0
+	if v := dx(n.Top); v > c1 {
+		c1 = v
+	}
+	if v := dx(n.Center); v > c1 {
+		c1 = v
+	}
+	if v := dx(n.Bottom); v > c1 {
+		c1 = v
+	}
+	c2 := 0
+	if v := dx(n.TopRight); v > c2 {
+		c2 = v
+	}
+	if v := dx(n.Right); v > c2 {
+		c2 = v
+	}
+	if v := dx(n.BottomRight); v > c2 {
+		c2 = v
+	}
+
+	r0 := 0
+	if v := dy(n.TopLeft); v > r0 {
+		r0 = v
+	}
+	if v := dy(n.Top); v > r0 {
+		r0 = v
+	}
+	if v := dy(n.TopRight); v > r0 {
+		r0 = v
+	}
+	r1 := 0
+	if v := dy(n.Left); v > r1 {
+		r1 = v
+	}
+	if v := dy(n.Center); v > r1 {
+		r1 = v
+	}
+	if v := dy(n.Right); v > r1 {
+		r1 = v
+	}
+	r2 := 0
+	if v := dy(n.BottomLeft); v > r2 {
+		r2 = v
+	}
+	if v := dy(n.Bottom); v > r2 {
+		r2 = v
+	}
+	if v := dy(n.BottomRight); v > r2 {
+		r2 = v
+	}
+
+	w, h := c0+c1+c2, r0+r1+r2
+	img := image.NewRGBA(image.Rect(0, 0, w, h))
+
+	drawImage := func(src image.Image, x, y int) {
+		if src == nil {
+			return
+		}
+		r := image.Rect(x, y, x+src.Bounds().Dx(), y+src.Bounds().Dy())
+		draw.Draw(img, r, src, image.Point{}, draw.Src)
+	}
+
+	drawImage(n.TopLeft, 0, 0)
+	drawImage(n.Top, c0, 0)
+	drawImage(n.TopRight, c0+c1, 0)
+
+	drawImage(n.Left, 0, r0)
+	drawImage(n.Center, c0, r0)
+	drawImage(n.Right, c0+c1, r0)
+
+	drawImage(n.BottomLeft, 0, r0+r1)
+	drawImage(n.Bottom, c0, r0+r1)
+	drawImage(n.BottomRight, c0+c1, r0+r1)
+
+	return img
+}
+
 func main() {
 	dstDir := "frames"
 	os.MkdirAll(dstDir, 0755)
@@ -358,7 +467,6 @@ func genStars(s int) (image.Image, image.Rectangle, string) {
 
 func genGold(s int) (image.Image, image.Rectangle, string) {
 	w, h := 96*s, 96*s
-	img := image.NewRGBA(image.Rect(0, 0, w, h))
 	bw := 16 * s
 
 	baseColor := color.RGBA{218, 165, 32, 255} // Metallic Gold
@@ -402,96 +510,121 @@ func genGold(s int) (image.Image, image.Rectangle, string) {
 	ln := math.Sqrt(lx*lx + ly*ly + lz*lz)
 	lx, ly, lz = lx/ln, ly/ln, lz/ln
 
-	for y := 0; y < h; y++ {
-		for x := 0; x < w; x++ {
-			// Calculate distance to edge and gradient of distance
-			d := x
-			gx, gy := 1.0, 0.0
-			if w-1-x < d {
-				d = w - 1 - x
-				gx, gy = -1.0, 0.0
-			}
-			if y < d {
-				d = y
-				gx, gy = 0.0, 1.0
-			}
-			if h-1-y < d {
-				d = h - 1 - y
-				gx, gy = 0.0, -1.0
-			}
-
-			if d >= bw {
-				continue
-			}
-
-			t := float64(d) / float64(bw)
-
-			// Numerical derivative
-			z1 := getProfile(t)
-			z2 := getProfile(t + 0.01)
-			slope := (z2 - z1) / 0.01
-
-			// Normal calc
-			heightScale := float64(bw) * 0.5
-			realSlope := slope * heightScale / float64(bw) // dz/dt * Zscale / (Dscale)
-
-			nx := -realSlope * gx
-			ny := -realSlope * gy
-			nz := 1.0
-
-			// Texture / Bump map
-			noiseScale := 0.2
-			n1 := math.Sin(float64(x)*0.4) * math.Cos(float64(y)*0.4)
-			n2 := math.Cos(float64(x)*0.7 + float64(y)*0.7)
-			nx += n1 * noiseScale
-			ny += n2 * noiseScale
-
-			nn := math.Sqrt(nx*nx + ny*ny + nz*nz)
-			nx, ny, nz = nx/nn, ny/nn, nz/nn
-
-			// Diffuse
-			dot := nx*lx + ny*ly + nz*lz
-			if dot < 0 {
-				dot = 0
-			}
-
-			// Specular
-			spec := 0.0
-			refZ := 2*dot*nz - lz
-			if refZ > 0 {
-				spec = math.Pow(refZ, 20) // shininess
-			}
-
-			// Composite color
-			// Ambient
-			r := float64(baseColor.R) * 0.4
-			g := float64(baseColor.G) * 0.4
-			b := float64(baseColor.B) * 0.4
-
-			// Diffuse
-			r += float64(baseColor.R) * 0.6 * dot
-			g += float64(baseColor.G) * 0.6 * dot
-			b += float64(baseColor.B) * 0.6 * dot
-
-			// Specular (white)
-			r += 255 * spec * 0.4
-			g += 255 * spec * 0.4
-			b += 255 * spec * 0.4
-
-			if r > 255 {
-				r = 255
-			}
-			if g > 255 {
-				g = 255
-			}
-			if b > 255 {
-				b = 255
-			}
-
-			img.Set(x, y, color.RGBA{uint8(r), uint8(g), uint8(b), 255})
+	goldPixel := func(x, y, totalW, totalH int) color.Color {
+		// Calculate distance to edge and gradient of distance
+		d := x
+		gx, gy := 1.0, 0.0
+		if totalW-1-x < d {
+			d = totalW - 1 - x
+			gx, gy = -1.0, 0.0
 		}
+		if y < d {
+			d = y
+			gx, gy = 0.0, 1.0
+		}
+		if totalH-1-y < d {
+			d = totalH - 1 - y
+			gx, gy = 0.0, -1.0
+		}
+
+		if d >= bw {
+			return color.RGBA{0, 0, 0, 0}
+		}
+
+		t := float64(d) / float64(bw)
+
+		// Numerical derivative
+		z1 := getProfile(t)
+		z2 := getProfile(t + 0.01)
+		slope := (z2 - z1) / 0.01
+
+		// Normal calc
+		heightScale := float64(bw) * 0.5
+		realSlope := slope * heightScale / float64(bw) // dz/dt * Zscale / (Dscale)
+
+		nx := -realSlope * gx
+		ny := -realSlope * gy
+		nz := 1.0
+
+		// Texture / Bump map
+		noiseScale := 0.2
+		n1 := math.Sin(float64(x)*0.4) * math.Cos(float64(y)*0.4)
+		n2 := math.Cos(float64(x)*0.7 + float64(y)*0.7)
+		nx += n1 * noiseScale
+		ny += n2 * noiseScale
+
+		nn := math.Sqrt(nx*nx + ny*ny + nz*nz)
+		nx, ny, nz = nx/nn, ny/nn, nz/nn
+
+		// Diffuse
+		dot := nx*lx + ny*ly + nz*lz
+		if dot < 0 {
+			dot = 0
+		}
+
+		// Specular
+		spec := 0.0
+		refZ := 2*dot*nz - lz
+		if refZ > 0 {
+			spec = math.Pow(refZ, 20) // shininess
+		}
+
+		// Composite color
+		// Ambient
+		r := float64(baseColor.R) * 0.4
+		g := float64(baseColor.G) * 0.4
+		b := float64(baseColor.B) * 0.4
+
+		// Diffuse
+		r += float64(baseColor.R) * 0.6 * dot
+		g += float64(baseColor.G) * 0.6 * dot
+		b += float64(baseColor.B) * 0.6 * dot
+
+		// Specular (white)
+		r += 255 * spec * 0.4
+		g += 255 * spec * 0.4
+		b += 255 * spec * 0.4
+
+		if r > 255 {
+			r = 255
+		}
+		if g > 255 {
+			g = 255
+		}
+		if b > 255 {
+			b = 255
+		}
+
+		return color.RGBA{uint8(r), uint8(g), uint8(b), 255}
 	}
-	return img, image.Rect(bw, bw, w-bw, h-bw), "gold"
+
+	createSlice := func(offsetX, offsetY, width, height int) image.Image {
+		img := image.NewRGBA(image.Rect(0, 0, width, height))
+		for y := 0; y < height; y++ {
+			for x := 0; x < width; x++ {
+				c := goldPixel(offsetX+x, offsetY+y, w, h)
+				img.Set(x, y, c)
+			}
+		}
+		return img
+	}
+
+	n9 := &N9{}
+	midW := w - 2*bw
+	midH := h - 2*bw
+
+	n9.TopLeft = createSlice(0, 0, bw, bw)
+	n9.Top = createSlice(bw, 0, midW, bw)
+	n9.TopRight = createSlice(w-bw, 0, bw, bw)
+
+	n9.Left = createSlice(0, bw, bw, midH)
+	n9.Right = createSlice(w-bw, bw, bw, midH)
+
+	n9.BottomLeft = createSlice(0, h-bw, bw, bw)
+	n9.Bottom = createSlice(bw, h-bw, midW, bw)
+	n9.BottomRight = createSlice(w-bw, h-bw, bw, bw)
+
+	return n9.Generate(), image.Rect(bw, bw, w-bw, h-bw), "gold"
 }
 
 func genSignConstruction(s int) (image.Image, image.Rectangle, string) {
