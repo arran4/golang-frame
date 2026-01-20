@@ -21,7 +21,9 @@ type FrameData struct {
 
 func main() {
 	dstDir := "images"
-	os.MkdirAll(dstDir, 0755)
+	if err := os.MkdirAll(dstDir, 0755); err != nil {
+		panic(err)
+	}
 
 	var frameDatas []FrameData
 
