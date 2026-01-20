@@ -12,7 +12,7 @@ var MacClassicLikeXlargePng []byte
 
 var MacClassicLikeXlarge = &Definition{
 	Name: "mac_classic_like_xlarge",
-	Middle: image.Rect(12, 12, 84, 84),
+	Middle: image.Rect(60, 66, 132, 132),
 }
 
 func init() {
