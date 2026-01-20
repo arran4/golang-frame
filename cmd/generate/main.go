@@ -839,16 +839,27 @@ func genHearts(s int) (image.Image, image.Rectangle, string) {
 	img := solid(w, h, color.RGBA{255, 240, 245, 255})
 	red := color.RGBA{220, 20, 60, 255}
 	drawHeart := func(cx, cy, size int) {
+		scale := 1.4
 		for y := -size; y <= size; y++ {
 			for x := -size; x <= size; x++ {
-				xf, yf := float64(x)/float64(size), float64(y)/float64(size)
+				xf, yf := float64(x)/float64(size)*scale, float64(y)/float64(size)*scale
 				if math.Pow(xf*xf+yf*yf-1, 3)-xf*xf*yf*yf*yf <= 0 {
 					img.Set(cx+x, cy-y, red)
 				}
 			}
 		}
 	}
-	drawHeart(16*s, 16*s, 6*s)
+	off := 8 * s
+	drawHeart(off, off, 6*s)
+	drawHeart(w-off, off, 6*s)
+	drawHeart(off, h-off, 6*s)
+	drawHeart(w-off, h-off, 6*s)
+
+	drawHeart(w/2, off, 6*s)
+	drawHeart(w/2, h-off, 6*s)
+	drawHeart(off, h/2, 6*s)
+	drawHeart(w-off, h/2, 6*s)
+
 	return img, image.Rect(16*s, 16*s, w-16*s, h-16*s), "hearts"
 }
 
