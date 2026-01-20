@@ -865,7 +865,66 @@ func genHearts(s int) (image.Image, image.Rectangle, string) {
 
 func genWaves(s int) (image.Image, image.Rectangle, string) {
 	w, h := 64*s, 64*s
-	img := solid(w, h, color.RGBA{0, 105, 148, 255})
+	img := solid(w, h, color.RGBA{0, 0, 60, 255}) // Dark Blue Background
+
+	border := 8 * s
+
+	// Colors
+	c1 := color.RGBA{30, 144, 255, 255}  // DodgerBlue
+	c2 := color.RGBA{0, 191, 255, 255}   // DeepSkyBlue
+	c3 := color.RGBA{255, 255, 255, 255} // White
+
+	drawStrip := func(xStart, yStart, wStrip, hStrip int, isVertical bool) {
+		for i := 0; i < wStrip; i++ {
+			for j := 0; j < hStrip; j++ {
+				x, y := xStart+i, yStart+j
+
+				var long, short float64
+				var thickness float64
+
+				if isVertical {
+					long = float64(y)
+					short = float64(i)
+					thickness = float64(wStrip)
+				} else {
+					long = float64(x)
+					short = float64(j)
+					thickness = float64(hStrip)
+				}
+
+				period := float64(border) * 2.0
+				freq := 2.0 * math.Pi / period
+
+				// Wave 1
+				amp1 := thickness / 4.0
+				v1 := amp1*math.Sin(long*freq) + thickness/2.0
+				if math.Abs(short-v1) < thickness/4.0 {
+					img.Set(x, y, c1)
+				}
+
+				// Wave 2
+				amp2 := thickness / 4.0
+				v2 := amp2*math.Sin(long*freq+math.Pi/2) + thickness/2.0
+				if math.Abs(short-v2) < thickness/6.0 {
+					img.Set(x, y, c2)
+				}
+
+				// Wave 3
+				amp3 := thickness / 3.0
+				v3 := amp3*math.Sin(long*freq+math.Pi) + thickness/2.0
+				if math.Abs(short-v3) < thickness/10.0 {
+					img.Set(x, y, c3)
+				}
+			}
+		}
+	}
+
+	// Draw Borders
+	drawStrip(0, 0, w, border, false)        // Top
+	drawStrip(0, h-border, w, border, false) // Bottom
+	drawStrip(0, 0, border, h, true)         // Left
+	drawStrip(w-border, 0, border, h, true)  // Right
+
 	return img, image.Rect(8*s, 8*s, w-8*s, h-8*s), "waves"
 }
 
