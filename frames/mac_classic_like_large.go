@@ -12,7 +12,7 @@ var MacClassicLikeLargePng []byte
 
 var MacClassicLikeLarge = &Definition{
 	Name: "mac_classic_like_large",
-	Middle: image.Rect(8, 8, 56, 56),
+	Middle: image.Rect(40, 44, 88, 88),
 }
 
 func init() {

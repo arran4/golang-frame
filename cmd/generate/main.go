@@ -619,10 +619,40 @@ func genWin95(s int) (image.Image, image.Rectangle, string) {
 }
 
 func genMacClassic(s int) (image.Image, image.Rectangle, string) {
-	w, h := 32*s, 32*s
-	img := solid(w, h, color.White)
-	rect(img, image.Rect(0, 0, w, s), color.Black)
-	return img, image.Rect(4*s, 4*s, w-4*s, h-4*s), "mac_classic_like"
+	w, h := 48*s, 48*s
+	img := image.NewRGBA(image.Rect(0, 0, w, h))
+	white := color.RGBA{255, 255, 255, 255}
+	black := color.RGBA{0, 0, 0, 255}
+
+	draw.Draw(img, img.Bounds(), &image.Uniform{white}, image.Point{}, draw.Src)
+
+	// Outline
+	rect(img, image.Rect(0, 0, w, s), black)
+	rect(img, image.Rect(0, h-s, w, h), black)
+	rect(img, image.Rect(0, 0, s, h), black)
+	rect(img, image.Rect(w-s, 0, w, h), black)
+
+	// Title bar
+	titleBarH := 21 * s
+	rect(img, image.Rect(0, titleBarH, w, titleBarH+s), black)
+
+	// Stripes
+	for y := 2 * s; y < titleBarH; y += 2 * s {
+		rect(img, image.Rect(s, y, w-s, y+s), black)
+	}
+
+	// Close box
+	cbSize := 11 * s
+	cbX := 6 * s
+	cbY := 5 * s
+
+	rect(img, image.Rect(cbX, cbY, cbX+cbSize, cbY+cbSize), white)
+	rect(img, image.Rect(cbX, cbY, cbX+cbSize, cbY+s), black)
+	rect(img, image.Rect(cbX, cbY+cbSize-s, cbX+cbSize, cbY+cbSize), black)
+	rect(img, image.Rect(cbX, cbY, cbX+s, cbY+cbSize), black)
+	rect(img, image.Rect(cbX+cbSize-s, cbY, cbX+cbSize, cbY+cbSize), black)
+
+	return img, image.Rect(20*s, 22*s, w-4*s, h-4*s), "mac_classic_like"
 }
 
 func genMacOSX(s int) (image.Image, image.Rectangle, string) {
