@@ -94,7 +94,9 @@ func generate(filename string, size int, border int) {
 		panic(err)
 	}
 	defer f.Close()
-	png.Encode(f, img)
+	if err := png.Encode(f, img); err != nil {
+		panic(err)
+	}
 }
 
 func woodColor(x, y int, vertical bool, base color.RGBA) color.RGBA {

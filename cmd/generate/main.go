@@ -59,7 +59,9 @@ var generators = []Generator{
 
 func main() {
 	dstDir := "frames"
-	os.MkdirAll(dstDir, 0755)
+	if err := os.MkdirAll(dstDir, 0755); err != nil {
+		panic(err)
+	}
 
 	files, _ := filepath.Glob(filepath.Join(dstDir, "*"))
 	for _, f := range files {
@@ -95,8 +97,13 @@ func main() {
 			name := baseName + variant.Suffix
 
 			filename := name + ".png"
-			f, _ := os.Create(filepath.Join(dstDir, filename))
-			png.Encode(f, img)
+			f, err := os.Create(filepath.Join(dstDir, filename))
+			if err != nil {
+				panic(err)
+			}
+			if err := png.Encode(f, img); err != nil {
+				panic(err)
+			}
 			f.Close()
 
 			exportedName := toExportedName(name)
