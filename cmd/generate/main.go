@@ -443,12 +443,38 @@ func genChinaPattern(s int) (image.Image, image.Rectangle, string) {
 }
 
 func genFutureWindow(s int) (image.Image, image.Rectangle, string) {
-	w, h := 64*s, 64*s
+	w, h := 96*s, 96*s
 	img := solid(w, h, color.RGBA{10, 10, 25, 240})
 	cyan := color.RGBA{0, 255, 255, 255}
-	rectHighlight(img, image.Rect(0, 0, w, s), cyan)
-	rectHighlight(img, image.Rect(w-s, 0, w, h), cyan)
-	rectHighlight(img, image.Rect(w-8*s, 2*s, w-2*s, 6*s), cyan)
+
+	borderThickness := 2 * s
+	rectHighlight(img, image.Rect(0, 0, w, borderThickness), cyan)
+	rectHighlight(img, image.Rect(0, h-borderThickness, w, h), cyan)
+	rectHighlight(img, image.Rect(0, 0, borderThickness, h), cyan)
+	rectHighlight(img, image.Rect(w-borderThickness, 0, w, h), cyan)
+
+	iconSize := 6 * s
+	padding := 2 * s
+	marginRight := 4 * s
+	marginTop := 4 * s
+
+	for i := 0; i < 3; i++ {
+		x := w - marginRight - (i+1)*(iconSize+padding)
+		y := marginTop
+		r := image.Rect(x, y, x+iconSize, y+iconSize)
+		rectHighlight(img, r, cyan)
+
+		inner := 1 * s
+		if i == 0 { // Close
+			rectHighlight(img, r.Inset(inner), color.RGBA{255, 0, 0, 200})
+		} else if i == 1 { // Max
+			rectHighlight(img, r.Inset(inner), color.RGBA{0, 0, 0, 255})
+			rectHighlight(img, r.Inset(inner*2), cyan)
+		} else { // Min
+			rectHighlight(img, image.Rect(x+inner, y+iconSize-2*inner, x+iconSize-inner, y+iconSize-inner), color.RGBA{0, 0, 0, 255})
+		}
+	}
+
 	return img, image.Rect(12*s, 24*s, w-12*s, h-12*s), "window_future"
 }
 
