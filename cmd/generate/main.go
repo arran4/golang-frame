@@ -40,7 +40,6 @@ var generators = []Generator{
 	// Fancy / Pattern
 	genFloral,
 	genHearts,
-	genStars,
 	genCheckers,
 	genDots,
 	genWaves,
@@ -335,26 +334,6 @@ func genFloral(s int) (image.Image, image.Rectangle, string) {
 	return img, image.Rect(16*s, 16*s, w-16*s, h-16*s), "floral"
 }
 
-func genStars(s int) (image.Image, image.Rectangle, string) {
-	w, h := 64*s, 64*s
-	img := image.NewRGBA(image.Rect(0, 0, w, h))
-	for y := 0; y < h; y++ {
-		for x := 0; x < w; x++ {
-			f := float64(y) / float64(h)
-			img.Set(x, y, color.RGBA{uint8(5 + f*10), uint8(5 + f*10), uint8(20 + f*20), 255})
-		}
-	}
-	for i := 0; i < 30*s; i++ {
-		x, y := (i*137)%w, (i*149)%h
-		c := color.RGBA{255, 255, 200, 255}
-		img.Set(x, y, c)
-		if s > 1 {
-			rectHighlight(img, image.Rect(x-s, y, x+s+1, y+1), color.RGBA{c.R, c.G, c.B, 100})
-			rectHighlight(img, image.Rect(x, y-s, x+1, y+s+1), color.RGBA{c.R, c.G, c.B, 100})
-		}
-	}
-	return img, image.Rect(8*s, 8*s, w-8*s, h-8*s), "stars"
-}
 
 func genGold(s int) (image.Image, image.Rectangle, string) {
 	w, h := 96*s, 96*s

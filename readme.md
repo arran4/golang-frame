@@ -880,39 +880,6 @@ import "github.com/arran4/golang-frame/frames"
 fr := frame.NewFrame(destRect, frames.SignWarningXlarge.Image, frames.SignWarningXlarge.Middle)
 ```
 
-### Stars
-
-![](images/gallery_stars.png)
-
-```go
-import "github.com/arran4/golang-frame/frames"
-
-// Use it directly
-fr := frame.NewFrame(destRect, frames.Stars.Image, frames.Stars.Middle)
-```
-
-### StarsLarge
-
-![](images/gallery_stars_large.png)
-
-```go
-import "github.com/arran4/golang-frame/frames"
-
-// Use it directly
-fr := frame.NewFrame(destRect, frames.StarsLarge.Image, frames.StarsLarge.Middle)
-```
-
-### StarsXlarge
-
-![](images/gallery_stars_xlarge.png)
-
-```go
-import "github.com/arran4/golang-frame/frames"
-
-// Use it directly
-fr := frame.NewFrame(destRect, frames.StarsXlarge.Image, frames.StarsXlarge.Middle)
-```
-
 ### Waves
 
 ![](images/gallery_waves.png)
