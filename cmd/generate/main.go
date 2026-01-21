@@ -40,7 +40,6 @@ var generators = []Generator{
 	// Fancy / Pattern
 	genFloral,
 	genHearts,
-	genStars,
 	genCheckers,
 	genDots,
 	genWaves,
@@ -98,7 +97,10 @@ func main() {
 			name := baseName + variant.Suffix
 
 			filename := name + ".png"
-			f, _ := os.Create(filepath.Join(dstDir, filename))
+			f, err := os.Create(filepath.Join(dstDir, filename))
+			if err != nil {
+				panic(err)
+			}
 			if err := png.Encode(f, img); err != nil {
 				panic(err)
 			}
@@ -339,26 +341,6 @@ func genFloral(s int) (image.Image, image.Rectangle, string) {
 	return img, image.Rect(16*s, 16*s, w-16*s, h-16*s), "floral"
 }
 
-func genStars(s int) (image.Image, image.Rectangle, string) {
-	w, h := 64*s, 64*s
-	img := image.NewRGBA(image.Rect(0, 0, w, h))
-	for y := 0; y < h; y++ {
-		for x := 0; x < w; x++ {
-			f := float64(y) / float64(h)
-			img.Set(x, y, color.RGBA{uint8(5 + f*10), uint8(5 + f*10), uint8(20 + f*20), 255})
-		}
-	}
-	for i := 0; i < 30*s; i++ {
-		x, y := (i*137)%w, (i*149)%h
-		c := color.RGBA{255, 255, 200, 255}
-		img.Set(x, y, c)
-		if s > 1 {
-			rectHighlight(img, image.Rect(x-s, y, x+s+1, y+1), color.RGBA{c.R, c.G, c.B, 100})
-			rectHighlight(img, image.Rect(x, y-s, x+1, y+s+1), color.RGBA{c.R, c.G, c.B, 100})
-		}
-	}
-	return img, image.Rect(8*s, 8*s, w-8*s, h-8*s), "stars"
-}
 
 func genGold(s int) (image.Image, image.Rectangle, string) {
 	w, h := 96*s, 96*s
@@ -563,12 +545,38 @@ func genChinaPattern(s int) (image.Image, image.Rectangle, string) {
 }
 
 func genFutureWindow(s int) (image.Image, image.Rectangle, string) {
-	w, h := 64*s, 64*s
+	w, h := 96*s, 96*s
 	img := solid(w, h, color.RGBA{10, 10, 25, 240})
 	cyan := color.RGBA{0, 255, 255, 255}
-	rectHighlight(img, image.Rect(0, 0, w, s), cyan)
-	rectHighlight(img, image.Rect(w-s, 0, w, h), cyan)
-	rectHighlight(img, image.Rect(w-8*s, 2*s, w-2*s, 6*s), cyan)
+
+	borderThickness := 2 * s
+	rectHighlight(img, image.Rect(0, 0, w, borderThickness), cyan)
+	rectHighlight(img, image.Rect(0, h-borderThickness, w, h), cyan)
+	rectHighlight(img, image.Rect(0, 0, borderThickness, h), cyan)
+	rectHighlight(img, image.Rect(w-borderThickness, 0, w, h), cyan)
+
+	iconSize := 6 * s
+	padding := 2 * s
+	marginRight := 4 * s
+	marginTop := 4 * s
+
+	for i := 0; i < 3; i++ {
+		x := w - marginRight - (i+1)*(iconSize+padding)
+		y := marginTop
+		r := image.Rect(x, y, x+iconSize, y+iconSize)
+		rectHighlight(img, r, cyan)
+
+		inner := 1 * s
+		if i == 0 { // Close
+			rectHighlight(img, r.Inset(inner), color.RGBA{255, 0, 0, 200})
+		} else if i == 1 { // Max
+			rectHighlight(img, r.Inset(inner), color.RGBA{0, 0, 0, 255})
+			rectHighlight(img, r.Inset(inner*2), cyan)
+		} else { // Min
+			rectHighlight(img, image.Rect(x+inner, y+iconSize-2*inner, x+iconSize-inner, y+iconSize-inner), color.RGBA{0, 0, 0, 255})
+		}
+	}
+
 	return img, image.Rect(12*s, 24*s, w-12*s, h-12*s), "window_future"
 }
 
@@ -616,9 +624,24 @@ func genWin31(s int) (image.Image, image.Rectangle, string) {
 
 func genWin95(s int) (image.Image, image.Rectangle, string) {
 	w, h := 32*s, 32*s
-	img := solid(w, h, color.RGBA{192, 192, 192, 255})
-	rect(img, image.Rect(0, 0, w, s), color.White)
-	rect(img, image.Rect(w-s, 0, w, h), color.Black)
+	face := color.RGBA{192, 192, 192, 255}
+	white := color.White
+	darkGrey := color.RGBA{128, 128, 128, 255}
+	black := color.Black
+
+	img := solid(w, h, face)
+	// Top & Left (White)
+	rect(img, image.Rect(0, 0, w, s), white)
+	rect(img, image.Rect(0, 0, s, h), white)
+
+	// Bottom & Right (Black) - Outermost
+	rect(img, image.Rect(w-s, 0, w, h), black)
+	rect(img, image.Rect(0, h-s, w, h), black)
+
+	// Bottom & Right (Dark Grey) - Inner
+	rect(img, image.Rect(w-2*s, s, w-s, h-s), darkGrey)
+	rect(img, image.Rect(s, h-2*s, w-s, h-s), darkGrey)
+
 	return img, image.Rect(4*s, 4*s, w-4*s, h-4*s), "win95_like"
 }
 
@@ -746,10 +769,53 @@ func genMWM(s int) (image.Image, image.Rectangle, string) {
 }
 
 func genNeXT(s int) (image.Image, image.Rectangle, string) {
-	w, h := 32*s, 32*s
-	img := solid(w, h, color.Black)
-	rect(img, image.Rect(s, s, w-s, h-s), color.RGBA{150, 150, 150, 255})
-	return img, image.Rect(6*s, 6*s, w-6*s, h-6*s), "next_like"
+	w, h := 48*s, 48*s
+	// Colors
+	black := color.RGBA{0, 0, 0, 255}
+	darkGray := color.RGBA{85, 85, 85, 255}
+	lightGray := color.RGBA{179, 179, 179, 255}
+	white := color.RGBA{255, 255, 255, 255}
+
+	img := solid(w, h, lightGray)
+
+	// Outer border
+	rect(img, image.Rect(0, 0, w, s), black)   // Top
+	rect(img, image.Rect(0, 0, s, h), black)   // Left
+	rect(img, image.Rect(w-s, 0, w, h), black) // Right
+	rect(img, image.Rect(0, h-s, w, h), black) // Bottom
+
+	// Title bar
+	titleHeight := 14 * s
+	rect(img, image.Rect(s, s, w-s, s+titleHeight), black)
+
+	// Content Well (Sunken)
+	// Margins
+	marginLeft := 4 * s
+	marginRight := 4 * s
+	marginBottom := 4 * s
+	// Top margin includes title bar and a small gap
+	marginTop := s + titleHeight + 2*s
+
+	// Draw the "Sunken" bezel for the content
+	// Outer bounds of the well
+	wellX1 := marginLeft
+	wellY1 := marginTop
+	wellX2 := w - marginRight
+	wellY2 := h - marginBottom
+
+	// Top Shadow
+	rect(img, image.Rect(wellX1, wellY1, wellX2, wellY1+s), darkGray)
+	// Left Shadow
+	rect(img, image.Rect(wellX1, wellY1, wellX1+s, wellY2), darkGray)
+	// Right Highlight
+	rect(img, image.Rect(wellX2-s, wellY1, wellX2, wellY2), white)
+	// Bottom Highlight
+	rect(img, image.Rect(wellX1, wellY2-s, wellX2, wellY2), white)
+
+	// Middle is the area inside the well bezel
+	middle := image.Rect(wellX1+s, wellY1+s, wellX2-s, wellY2-s)
+
+	return img, middle, "next_like"
 }
 
 func genBeOS(s int) (image.Image, image.Rectangle, string) {
@@ -767,6 +833,52 @@ func genAmiga(s int) (image.Image, image.Rectangle, string) {
 func genRetroWindow(s int) (image.Image, image.Rectangle, string) {
 	w, h := 64*s, 64*s
 	img := solid(w, h, color.RGBA{192, 192, 192, 255})
+
+	white := color.RGBA{255, 255, 255, 255}
+	grayDark := color.RGBA{128, 128, 128, 255}
+	black := color.RGBA{0, 0, 0, 255}
+	blue := color.RGBA{0, 0, 128, 255}
+
+	// Outer Border
+	rect(img, image.Rect(0, 0, w, s), white)
+	rect(img, image.Rect(0, 0, s, h), white)
+	rect(img, image.Rect(w-s, 0, w, h), black)
+	rect(img, image.Rect(w-2*s, s, w-s, h-s), grayDark)
+	rect(img, image.Rect(0, h-s, w, h), black)
+	rect(img, image.Rect(s, h-2*s, w-s, h-s), grayDark)
+
+	// Title Bar
+	titleBarRect := image.Rect(4*s, 4*s, w-4*s, 16*s)
+	rect(img, titleBarRect, blue)
+
+	// Title Bar Text Placeholder
+	rect(img, image.Rect(6*s, 6*s, 14*s, 14*s), white)
+
+	// Close button
+	btnRect := image.Rect(w-14*s, 6*s, w-6*s, 14*s)
+	rect(img, btnRect, color.RGBA{192, 192, 192, 255})
+	rect(img, image.Rect(btnRect.Min.X, btnRect.Min.Y, btnRect.Max.X, btnRect.Min.Y+s), white)
+	rect(img, image.Rect(btnRect.Min.X, btnRect.Min.Y, btnRect.Min.X+s, btnRect.Max.Y), white)
+	rect(img, image.Rect(btnRect.Max.X-s, btnRect.Min.Y, btnRect.Max.X, btnRect.Max.Y), black)
+	rect(img, image.Rect(btnRect.Min.X, btnRect.Max.Y-s, btnRect.Max.X, btnRect.Max.Y), black)
+
+	// Inner Border (around the content)
+	// Left Inner Border
+	rect(img, image.Rect(6*s, 18*s, 7*s, h-6*s), grayDark)
+	rect(img, image.Rect(7*s, 19*s, 8*s, h-7*s), black)
+
+	// Top Inner Border
+	rect(img, image.Rect(6*s, 18*s, w-6*s, 19*s), grayDark)
+	rect(img, image.Rect(7*s, 19*s, w-7*s, 20*s), black)
+
+	// Right Inner Border
+	rect(img, image.Rect(w-8*s, 19*s, w-7*s, h-7*s), white)
+	rect(img, image.Rect(w-7*s, 18*s, w-6*s, h-6*s), white)
+
+	// Bottom Inner Border
+	rect(img, image.Rect(7*s, h-8*s, w-7*s, h-7*s), white)
+	rect(img, image.Rect(6*s, h-7*s, w-6*s, h-6*s), white)
+
 	return img, image.Rect(8*s, 20*s, w-8*s, h-8*s), "window_retro"
 }
 
@@ -800,22 +912,92 @@ func genHearts(s int) (image.Image, image.Rectangle, string) {
 	img := solid(w, h, color.RGBA{255, 240, 245, 255})
 	red := color.RGBA{220, 20, 60, 255}
 	drawHeart := func(cx, cy, size int) {
+		scale := 1.4
 		for y := -size; y <= size; y++ {
 			for x := -size; x <= size; x++ {
-				xf, yf := float64(x)/float64(size), float64(y)/float64(size)
+				xf, yf := float64(x)/float64(size)*scale, float64(y)/float64(size)*scale
 				if math.Pow(xf*xf+yf*yf-1, 3)-xf*xf*yf*yf*yf <= 0 {
 					img.Set(cx+x, cy-y, red)
 				}
 			}
 		}
 	}
-	drawHeart(16*s, 16*s, 6*s)
+	off := 8 * s
+	drawHeart(off, off, 6*s)
+	drawHeart(w-off, off, 6*s)
+	drawHeart(off, h-off, 6*s)
+	drawHeart(w-off, h-off, 6*s)
+
+	drawHeart(w/2, off, 6*s)
+	drawHeart(w/2, h-off, 6*s)
+	drawHeart(off, h/2, 6*s)
+	drawHeart(w-off, h/2, 6*s)
+
 	return img, image.Rect(16*s, 16*s, w-16*s, h-16*s), "hearts"
 }
 
 func genWaves(s int) (image.Image, image.Rectangle, string) {
 	w, h := 64*s, 64*s
-	img := solid(w, h, color.RGBA{0, 105, 148, 255})
+	img := solid(w, h, color.RGBA{0, 0, 60, 255}) // Dark Blue Background
+
+	border := 8 * s
+
+	// Colors
+	c1 := color.RGBA{30, 144, 255, 255}  // DodgerBlue
+	c2 := color.RGBA{0, 191, 255, 255}   // DeepSkyBlue
+	c3 := color.RGBA{255, 255, 255, 255} // White
+
+	drawStrip := func(xStart, yStart, wStrip, hStrip int, isVertical bool) {
+		for i := 0; i < wStrip; i++ {
+			for j := 0; j < hStrip; j++ {
+				x, y := xStart+i, yStart+j
+
+				var long, short float64
+				var thickness float64
+
+				if isVertical {
+					long = float64(y)
+					short = float64(i)
+					thickness = float64(wStrip)
+				} else {
+					long = float64(x)
+					short = float64(j)
+					thickness = float64(hStrip)
+				}
+
+				period := float64(border) * 2.0
+				freq := 2.0 * math.Pi / period
+
+				// Wave 1
+				amp1 := thickness / 4.0
+				v1 := amp1*math.Sin(long*freq) + thickness/2.0
+				if math.Abs(short-v1) < thickness/4.0 {
+					img.Set(x, y, c1)
+				}
+
+				// Wave 2
+				amp2 := thickness / 4.0
+				v2 := amp2*math.Sin(long*freq+math.Pi/2) + thickness/2.0
+				if math.Abs(short-v2) < thickness/6.0 {
+					img.Set(x, y, c2)
+				}
+
+				// Wave 3
+				amp3 := thickness / 3.0
+				v3 := amp3*math.Sin(long*freq+math.Pi) + thickness/2.0
+				if math.Abs(short-v3) < thickness/10.0 {
+					img.Set(x, y, c3)
+				}
+			}
+		}
+	}
+
+	// Draw Borders
+	drawStrip(0, 0, w, border, false)        // Top
+	drawStrip(0, h-border, w, border, false) // Bottom
+	drawStrip(0, 0, border, h, true)         // Left
+	drawStrip(w-border, 0, border, h, true)  // Right
+
 	return img, image.Rect(8*s, 8*s, w-8*s, h-8*s), "waves"
 }
 
@@ -847,6 +1029,13 @@ func genSciFiTech(s int) (image.Image, image.Rectangle, string) {
 func genSignStreet(s int) (image.Image, image.Rectangle, string) {
 	w, h := 64*s, 64*s
 	img := solid(w, h, color.RGBA{0, 100, 0, 255})
+	white := color.RGBA{255, 255, 255, 255}
+	margin := s
+	thickness := s
+	rect(img, image.Rect(margin, margin, w-margin, margin+thickness), white)
+	rect(img, image.Rect(margin, h-margin-thickness, w-margin, h-margin), white)
+	rect(img, image.Rect(margin, margin, margin+thickness, h-margin), white)
+	rect(img, image.Rect(w-margin-thickness, margin, w-margin, h-margin), white)
 	return img, image.Rect(8*s, 8*s, w-8*s, h-8*s), "sign_street"
 }
 
