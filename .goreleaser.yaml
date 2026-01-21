@@ -1,0 +1,12 @@
+version: 2
+
+builds:
+  - id: frames
+    binary: frames
+    main: ./cmd/frames
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
