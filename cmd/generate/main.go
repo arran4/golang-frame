@@ -169,7 +169,9 @@ func (n *N9) Generate() image.Image {
 
 func main() {
 	dstDir := "frames"
-	os.MkdirAll(dstDir, 0755)
+	if err := os.MkdirAll(dstDir, 0755); err != nil {
+		panic(err)
+	}
 
 	files, _ := filepath.Glob(filepath.Join(dstDir, "*"))
 	for _, f := range files {
@@ -206,7 +208,9 @@ func main() {
 
 			filename := name + ".png"
 			f, _ := os.Create(filepath.Join(dstDir, filename))
-			png.Encode(f, img)
+			if err := png.Encode(f, img); err != nil {
+				panic(err)
+			}
 			f.Close()
 
 			exportedName := toExportedName(name)
