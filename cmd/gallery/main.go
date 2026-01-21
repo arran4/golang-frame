@@ -21,7 +21,9 @@ type FrameData struct {
 
 func main() {
 	dstDir := "images"
-	os.MkdirAll(dstDir, 0755)
+	if err := os.MkdirAll(dstDir, 0755); err != nil {
+		panic(err)
+	}
 
 	var frameDatas []FrameData
 
@@ -53,7 +55,9 @@ func main() {
 		if err := png.Encode(f, dst); err != nil {
 			panic(err)
 		}
-		f.Close()
+		if err := f.Close(); err != nil {
+			panic(err)
+		}
 
 		exportedName := toExportedName(def.Name)
 		frameDatas = append(frameDatas, FrameData{
@@ -71,7 +75,11 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	defer readmeFile.Close()
+	defer func() {
+		if err := readmeFile.Close(); err != nil {
+			panic(err)
+		}
+	}()
 
 	data := struct {
 		Frames []FrameData

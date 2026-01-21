@@ -1,6 +1,8 @@
 package frame
 
 import (
+	"fmt"
+
 	"github.com/arran4/golang-frame/draw"
 	"image"
 	"image/color"
@@ -206,4 +208,59 @@ func NewFrame(dest image.Rectangle, base image.Image, middle image.Rectangle, op
 		o.Option(f)
 	}
 	return f
+}
+
+// ValidateSize checks if the frame size is valid for the current configuration
+func (f *Frame) ValidateSize(width, height int) error {
+	if f.BorderMode != Repeating {
+		return nil
+	}
+	// Width calculation:
+	baseDx := f.Base.Bounds().Dx()
+	midDx := f.Middle.Dx()
+	if width < baseDx {
+		return fmt.Errorf("width %d is too small, minimum is %d", width, baseDx)
+	}
+	if (width-baseDx)%midDx != 0 {
+		lower := width - ((width - baseDx) % midDx)
+		higher := lower + midDx
+		return fmt.Errorf("width %d is invalid; try %d or %d", width, lower, higher)
+	}
+	// Height calculation:
+	baseDy := f.Base.Bounds().Dy()
+	midDy := f.Middle.Dy()
+	if height < baseDy {
+		return fmt.Errorf("height %d is too small, minimum is %d", height, baseDy)
+	}
+	if (height-baseDy)%midDy != 0 {
+		lower := height - ((height - baseDy) % midDy)
+		higher := lower + midDy
+		return fmt.Errorf("height %d is invalid; try %d or %d", height, lower, higher)
+	}
+	return nil
+}
+
+// MeasureFrame returns the valid dimensions for a frame given the base image, middle rectangle, and target dimensions.
+// It assumes Repeating border mode.
+func MeasureFrame(base image.Image, middle image.Rectangle, targetWidth, targetHeight int) (widthLow, widthHigh, heightLow, heightHigh int) {
+	baseDx := base.Bounds().Dx()
+	midDx := middle.Dx()
+	if targetWidth < baseDx {
+		widthLow = baseDx
+		widthHigh = baseDx
+	} else {
+		widthLow = targetWidth - ((targetWidth - baseDx) % midDx)
+		widthHigh = widthLow + midDx
+	}
+
+	baseDy := base.Bounds().Dy()
+	midDy := middle.Dy()
+	if targetHeight < baseDy {
+		heightLow = baseDy
+		heightHigh = baseDy
+	} else {
+		heightLow = targetHeight - ((targetHeight - baseDy) % midDy)
+		heightHigh = heightLow + midDy
+	}
+	return widthLow, widthHigh, heightLow, heightHigh
 }
