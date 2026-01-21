@@ -1,4 +1,4 @@
-package main
+package cli
 
 import (
 	"image"
@@ -8,13 +8,24 @@ import (
 	"os"
 )
 
-func main() {
-	generate("frames/wood.png", 96, 16)
-	generate("frames/wood_large.png", 192, 32)
-	generate("frames/wood_xlarge.png", 288, 48)
+// Wood is a subcommand `frames wood` Generates wood frame images
+func Wood() error {
+	if err := os.MkdirAll("frames", 0755); err != nil {
+		return err
+	}
+	if err := generateWood("frames/wood.png", 96, 16); err != nil {
+		return err
+	}
+	if err := generateWood("frames/wood_large.png", 192, 32); err != nil {
+		return err
+	}
+	if err := generateWood("frames/wood_xlarge.png", 288, 48); err != nil {
+		return err
+	}
+	return nil
 }
 
-func generate(filename string, size int, border int) {
+func generateWood(filename string, size int, border int) error {
 	img := image.NewRGBA(image.Rect(0, 0, size, size))
 
 	// 1. Generate Background (Inner part)
@@ -91,12 +102,13 @@ func generate(filename string, size int, border int) {
 
 	f, err := os.Create(filename)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	defer f.Close()
 	if err := png.Encode(f, img); err != nil {
-		panic(err)
+		return err
 	}
+	return nil
 }
 
 func woodColor(x, y int, vertical bool, base color.RGBA) color.RGBA {

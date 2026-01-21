@@ -1,4 +1,4 @@
-package main
+package cli
 
 import (
 	"fmt"
@@ -57,10 +57,11 @@ var generators = []Generator{
 	genSignConstruction,
 }
 
-func main() {
+// Generate is a subcommand `frames generate` Generates frame assets and go code
+func Generate() error {
 	dstDir := "frames"
 	if err := os.MkdirAll(dstDir, 0755); err != nil {
-		panic(err)
+		return err
 	}
 
 	files, _ := filepath.Glob(filepath.Join(dstDir, "*"))
@@ -99,10 +100,10 @@ func main() {
 			filename := name + ".png"
 			f, err := os.Create(filepath.Join(dstDir, filename))
 			if err != nil {
-				panic(err)
+				return err
 			}
 			if err := png.Encode(f, img); err != nil {
-				panic(err)
+				return err
 			}
 			f.Close()
 
@@ -146,25 +147,7 @@ func main() {
 	}
 	fmt.Fprintln(allFile, "}")
 	allFile.Close()
-}
-
-func toExportedName(s string) string {
-	res := ""
-	nextUpper := true
-	for _, c := range s {
-		if c == '_' {
-			nextUpper = true
-		} else {
-			if nextUpper {
-				if c >= 'a' && c <= 'z' {
-					c = c - 32
-				}
-				nextUpper = false
-			}
-			res += string(c)
-		}
-	}
-	return res
+	return nil
 }
 
 func solid(w, h int, c color.Color) *image.RGBA {
