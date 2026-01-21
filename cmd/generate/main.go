@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	frame_draw "github.com/arran4/golang-frame/draw"
 	"image"
 	"image/color"
 	"image/draw"
@@ -58,114 +59,6 @@ var generators = []Generator{
 	genSignConstruction,
 }
 
-type N9 struct {
-	TopLeft, Top, TopRight          image.Image
-	Left, Center, Right             image.Image
-	BottomLeft, Bottom, BottomRight image.Image
-}
-
-func (n *N9) Generate() image.Image {
-	// helper to get bounds
-	dx := func(i image.Image) int {
-		if i == nil {
-			return 0
-		}
-		return i.Bounds().Dx()
-	}
-	dy := func(i image.Image) int {
-		if i == nil {
-			return 0
-		}
-		return i.Bounds().Dy()
-	}
-
-	c0 := 0
-	if v := dx(n.TopLeft); v > c0 {
-		c0 = v
-	}
-	if v := dx(n.Left); v > c0 {
-		c0 = v
-	}
-	if v := dx(n.BottomLeft); v > c0 {
-		c0 = v
-	}
-	c1 := 0
-	if v := dx(n.Top); v > c1 {
-		c1 = v
-	}
-	if v := dx(n.Center); v > c1 {
-		c1 = v
-	}
-	if v := dx(n.Bottom); v > c1 {
-		c1 = v
-	}
-	c2 := 0
-	if v := dx(n.TopRight); v > c2 {
-		c2 = v
-	}
-	if v := dx(n.Right); v > c2 {
-		c2 = v
-	}
-	if v := dx(n.BottomRight); v > c2 {
-		c2 = v
-	}
-
-	r0 := 0
-	if v := dy(n.TopLeft); v > r0 {
-		r0 = v
-	}
-	if v := dy(n.Top); v > r0 {
-		r0 = v
-	}
-	if v := dy(n.TopRight); v > r0 {
-		r0 = v
-	}
-	r1 := 0
-	if v := dy(n.Left); v > r1 {
-		r1 = v
-	}
-	if v := dy(n.Center); v > r1 {
-		r1 = v
-	}
-	if v := dy(n.Right); v > r1 {
-		r1 = v
-	}
-	r2 := 0
-	if v := dy(n.BottomLeft); v > r2 {
-		r2 = v
-	}
-	if v := dy(n.Bottom); v > r2 {
-		r2 = v
-	}
-	if v := dy(n.BottomRight); v > r2 {
-		r2 = v
-	}
-
-	w, h := c0+c1+c2, r0+r1+r2
-	img := image.NewRGBA(image.Rect(0, 0, w, h))
-
-	drawImage := func(src image.Image, x, y int) {
-		if src == nil {
-			return
-		}
-		r := image.Rect(x, y, x+src.Bounds().Dx(), y+src.Bounds().Dy())
-		draw.Draw(img, r, src, image.Point{}, draw.Src)
-	}
-
-	drawImage(n.TopLeft, 0, 0)
-	drawImage(n.Top, c0, 0)
-	drawImage(n.TopRight, c0+c1, 0)
-
-	drawImage(n.Left, 0, r0)
-	drawImage(n.Center, c0, r0)
-	drawImage(n.Right, c0+c1, r0)
-
-	drawImage(n.BottomLeft, 0, r0+r1)
-	drawImage(n.Bottom, c0, r0+r1)
-	drawImage(n.BottomRight, c0+c1, r0+r1)
-
-	return img
-}
 
 func main() {
 	dstDir := "frames"
@@ -613,7 +506,7 @@ func genGold(s int) (image.Image, image.Rectangle, string) {
 		return img
 	}
 
-	n9 := &N9{}
+	n9 := &frame_draw.N9{}
 	midW := w - 2*bw
 	midH := h - 2*bw
 
@@ -628,7 +521,7 @@ func genGold(s int) (image.Image, image.Rectangle, string) {
 	n9.Bottom = createSlice(bw, h-bw, midW, bw)
 	n9.BottomRight = createSlice(w-bw, h-bw, bw, bw)
 
-	return n9.Generate(), image.Rect(bw, bw, w-bw, h-bw), "gold"
+	return n9, image.Rect(bw, bw, w-bw, h-bw), "gold"
 }
 
 func genSignConstruction(s int) (image.Image, image.Rectangle, string) {
