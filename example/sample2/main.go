@@ -30,7 +30,9 @@ func main() {
 }
 
 func SaveFile(i *image.RGBA) {
-	_ = os.MkdirAll("images", 0755)
+	if err := os.MkdirAll("images", 0755); err != nil {
+		log.Panicf("File create error: %v", err)
+	}
 	fi, err := os.Create("images/sample2.png")
 	if err != nil {
 		log.Panicf("File create error: %v", err)
