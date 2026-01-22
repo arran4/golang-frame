@@ -1,4 +1,4 @@
-package main
+package cli
 
 import (
 	"fmt"
@@ -19,9 +19,12 @@ type FrameData struct {
 	ExportedName string
 }
 
-func main() {
+// Gallery is a subcommand `frames gallery` Generates gallery images and readme
+func Gallery() error {
 	dstDir := "images"
-	os.MkdirAll(dstDir, 0755)
+	if err := os.MkdirAll(dstDir, 0755); err != nil {
+		return err
+	}
 
 	var frameDatas []FrameData
 
@@ -48,10 +51,10 @@ func main() {
 		filename := fmt.Sprintf("gallery_%s.png", def.Name)
 		f, err := os.Create(filepath.Join(dstDir, filename))
 		if err != nil {
-			panic(err)
+			return err
 		}
 		if err := png.Encode(f, dst); err != nil {
-			panic(err)
+			return err
 		}
 		f.Close()
 
@@ -64,12 +67,12 @@ func main() {
 
 	tmpl, err := template.ParseFiles("readme.md.tmpl")
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	readmeFile, err := os.Create("readme.md")
 	if err != nil {
-		panic(err)
+		return err
 	}
 	defer readmeFile.Close()
 
@@ -80,27 +83,9 @@ func main() {
 	}
 
 	if err := tmpl.Execute(readmeFile, data); err != nil {
-		panic(err)
+		return err
 	}
 
 	fmt.Println("Successfully generated images/ and readme.md")
-}
-
-func toExportedName(s string) string {
-	res := ""
-	nextUpper := true
-	for _, c := range s {
-		if c == '_' {
-			nextUpper = true
-		} else {
-			if nextUpper {
-				if c >= 'a' && c <= 'z' {
-					c = c - 32
-				}
-				nextUpper = false
-			}
-			res += string(c)
-		}
-	}
-	return res
+	return nil
 }

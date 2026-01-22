@@ -12,7 +12,7 @@ var GoldLargePng []byte
 
 var GoldLarge = &Definition{
 	Name: "gold_large",
-	Middle: image.Rect(24, 24, 104, 104),
+	Middle: image.Rect(32, 32, 160, 160),
 }
 
 func init() {

@@ -1,0 +1,5 @@
+Usage: frames gallery
+
+Subcommands:
+    help         Print this help message
+    usage        Print this usage message

@@ -12,7 +12,7 @@ var MacosxLikePng []byte
 
 var MacosxLike = &Definition{
 	Name: "macosx_like",
-	Middle: image.Rect(8, 16, 40, 40),
+	Middle: image.Rect(54, 24, 60, 60),
 }
 
 func init() {
