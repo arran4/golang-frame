@@ -32,7 +32,7 @@ var generators = []Generator{
 	genGlassWindow,
 
 	// Actual / Material
-	genWood,
+	GenWood,
 	genGold,
 	genMetal,
 	genRidge,
@@ -222,60 +222,6 @@ func genSignWarning(s int) (image.Image, image.Rectangle, string) {
 	drawRivet(w-bw/2, h-bw/2)
 
 	return img, image.Rect(bw, bw, w-bw, h-bw), "sign_warning"
-}
-
-func genWood(s int) (image.Image, image.Rectangle, string) {
-	w, h := 96*s, 96*s
-	img := image.NewRGBA(image.Rect(0, 0, w, h))
-	c1, c2, c3 := color.RGBA{110, 60, 30, 255}, color.RGBA{80, 40, 20, 255}, color.RGBA{50, 25, 10, 255}
-
-	for y := 0; y < h; y++ {
-		for x := 0; x < w; x++ {
-			xf, yf := float64(x), float64(y)
-
-			// Plank gaps every 24 pixels
-			if (y/s)%24 < 2 {
-				img.Set(x, y, color.RGBA{30, 15, 5, 255})
-				continue
-			}
-
-			// Organic fibrous grain
-			grain := math.Sin(yf/float64(s)+math.Sin(xf/float64(s*12))*5.0) * 0.5
-			fineNoise := math.Sin(xf*10+yf*0.5) * 0.2
-
-			// Knots
-			knot := 0.0
-			for _, k := range []image.Point{{w / 3, h / 4}, {2 * w / 3, 3 * h / 4}} {
-				dx, dy := xf-float64(k.X), yf-float64(k.Y)
-				d := math.Sqrt(dx*dx + dy*dy)
-				knot += math.Exp(-d/float64(8*s)) * math.Sin(d/float64(s)) * 4.0
-			}
-
-			f := (grain + fineNoise + knot + 1.5) / 3.0
-			if f < 0 {
-				f = 0
-			} else if f > 1 {
-				f = 1
-			}
-
-			var c color.RGBA
-			if f < 0.5 {
-				t := f * 2
-				c = color.RGBA{uint8(float64(c1.R)*(1-t) + float64(c2.R)*t), uint8(float64(c1.G)*(1-t) + float64(c2.G)*t), uint8(float64(c1.B)*(1-t) + float64(c2.B)*t), 255}
-			} else {
-				t := (f - 0.5) * 2
-				c = color.RGBA{uint8(float64(c2.R)*(1-t) + float64(c3.R)*t), uint8(float64(c2.G)*(1-t) + float64(c3.G)*t), uint8(float64(c2.B)*(1-t) + float64(c3.B)*t), 255}
-			}
-			img.Set(x, y, c)
-		}
-	}
-	bw := 16 * s
-	for i := 0; i < bw; i++ {
-		fade := uint8(40 - i*40/bw)
-		rectHighlight(img, image.Rect(i, i, w-i, i+1), color.RGBA{255, 255, 255, fade})
-		rectHighlight(img, image.Rect(0, i, i+1, h), color.RGBA{255, 255, 255, fade})
-	}
-	return img, image.Rect(bw, bw, w-bw, h-bw), "wood"
 }
 
 func genFloral(s int) (image.Image, image.Rectangle, string) {

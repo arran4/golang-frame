@@ -1,3 +1,3 @@
 package cli
 
-//go:generate go run github.com/arran4/go-subcommand/cmd/gosubc generate --dir .. .
+//go:generate sh -c "cd .. && gosubc generate --dir cmd/frames cli"

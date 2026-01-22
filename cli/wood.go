@@ -3,29 +3,14 @@ package cli
 import (
 	"image"
 	"image/color"
-	"image/png"
 	"math"
-	"os"
 )
 
-// Wood is a subcommand `frames wood` Generates wood frame images
-func Wood() error {
-	if err := os.MkdirAll("frames", 0755); err != nil {
-		return err
-	}
-	if err := generateWood("frames/wood.png", 96, 16); err != nil {
-		return err
-	}
-	if err := generateWood("frames/wood_large.png", 192, 32); err != nil {
-		return err
-	}
-	if err := generateWood("frames/wood_xlarge.png", 288, 48); err != nil {
-		return err
-	}
-	return nil
-}
+// GenWood generates a wood frame image
+func GenWood(s int) (image.Image, image.Rectangle, string) {
+	size := 96 * s
+	border := 16 * s
 
-func generateWood(filename string, size int, border int) error {
 	img := image.NewRGBA(image.Rect(0, 0, size, size))
 
 	// 1. Generate Background (Inner part)
@@ -100,15 +85,7 @@ func generateWood(filename string, size int, border int) error {
     drawRect(img, image.Rect(0,0,size,size), color.RGBA{60,30,0,255}) // Outer
     drawRect(img, image.Rect(border, border, size-border, size-border), color.RGBA{60,30,0,255}) // Inner
 
-	f, err := os.Create(filename)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-	if err := png.Encode(f, img); err != nil {
-		return err
-	}
-	return nil
+	return img, image.Rect(border, border, size-border, size-border), "wood"
 }
 
 func woodColor(x, y int, vertical bool, base color.RGBA) color.RGBA {

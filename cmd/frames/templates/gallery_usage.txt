@@ -1,5 +1,5 @@
-Usage: frames gallery
+Usage: frames gallery <subcommand> [arguments]
 
 Subcommands:
-    help         Print this help message
-    usage        Print this usage message
+
+    version      Print version information

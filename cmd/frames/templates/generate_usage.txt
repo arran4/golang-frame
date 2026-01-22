@@ -1,5 +1,5 @@
-Usage: frames generate
+Usage: frames generate <subcommand> [arguments]
 
 Subcommands:
-    help         Print this help message
-    usage        Print this usage message
+
+    version      Print version information
