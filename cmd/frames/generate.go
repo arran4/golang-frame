@@ -34,7 +34,9 @@ func (c *generateCmd) Execute(args []string) error {
 	if err != nil {
 		return NewUserError(err, fmt.Sprintf("flag parse error %s", err.Error()))
 	}
-	cli.Generate()
+	if err := cli.Generate(); err != nil {
+		return fmt.Errorf("generate failed: %w", err)
+	}
 	return nil
 }
 

@@ -34,7 +34,9 @@ func (c *galleryCmd) Execute(args []string) error {
 	if err != nil {
 		return NewUserError(err, fmt.Sprintf("flag parse error %s", err.Error()))
 	}
-	cli.Gallery()
+	if err := cli.Gallery(); err != nil {
+		return fmt.Errorf("gallery failed: %w", err)
+	}
 	return nil
 }
 
