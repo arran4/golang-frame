@@ -33,6 +33,7 @@ type frameGeometry struct {
 	midStartX, midStartY                               int
 	midEndX, midEndY                                   int
 	baseBoundsDx, baseBoundsDy                         int
+	ratioX, ratioY                                     int
 }
 
 // ColorModel Pass through to base image.
@@ -49,6 +50,19 @@ func (f *Frame) ensureGeom() {
 	if f.geom != nil {
 		return
 	}
+	midStartX := f.Middle.Min.X - f.Base.Bounds().Min.X
+	midStartY := f.Middle.Min.Y - f.Base.Bounds().Min.Y
+	midEndX := f.Dest.Dx() - (f.Base.Bounds().Max.X - f.Middle.Max.X)
+	midEndY := f.Dest.Dy() - (f.Base.Bounds().Max.Y - f.Middle.Max.Y)
+	middleDx := f.Middle.Dx()
+	middleDy := f.Middle.Dy()
+	var ratioX, ratioY int
+	if w := midEndX - midStartX; w > 0 {
+		ratioX = int((int64(middleDx) << 16) / int64(w))
+	}
+	if h := midEndY - midStartY; h > 0 {
+		ratioY = int((int64(middleDy) << 16) / int64(h))
+	}
 	f.geom = &frameGeometry{
 		destDx:                     f.Dest.Dx(),
 		destDy:                     f.Dest.Dy(),
@@ -56,14 +70,16 @@ func (f *Frame) ensureGeom() {
 		baseBoundsMinY:             f.Base.Bounds().Min.Y,
 		baseBoundsMaxSubMiddleMaxX: f.Base.Bounds().Max.Sub(f.Middle.Max).X,
 		baseBoundsMaxSubMiddleMaxY: f.Base.Bounds().Max.Sub(f.Middle.Max).Y,
-		middleDx:                   f.Middle.Dx(),
-		middleDy:                   f.Middle.Dy(),
-		midStartX:                  f.Middle.Min.X - f.Base.Bounds().Min.X,
-		midStartY:                  f.Middle.Min.Y - f.Base.Bounds().Min.Y,
-		midEndX:                    f.Dest.Dx() - (f.Base.Bounds().Max.X - f.Middle.Max.X),
-		midEndY:                    f.Dest.Dy() - (f.Base.Bounds().Max.Y - f.Middle.Max.Y),
+		middleDx:                   middleDx,
+		middleDy:                   middleDy,
+		midStartX:                  midStartX,
+		midStartY:                  midStartY,
+		midEndX:                    midEndX,
+		midEndY:                    midEndY,
 		baseBoundsDx:               f.Base.Bounds().Dx(),
 		baseBoundsDy:               f.Base.Bounds().Dy(),
+		ratioX:                     ratioX,
+		ratioY:                     ratioY,
 	}
 }
 
@@ -79,7 +95,7 @@ func (f *Frame) At(x, y int) color.Color {
 	} else if p.X > f.geom.midStartX {
 		switch f.BorderMode {
 		case Stretched:
-			p.X = f.geom.midStartX + int(float64(p.X-f.geom.midStartX)/float64(f.geom.midEndX-f.geom.midStartX)*float64(f.geom.middleDx))
+			p.X = f.geom.midStartX + int((int64(p.X-f.geom.midStartX)*int64(f.geom.ratioX))>>16)
 		default:
 			p.X = f.geom.midStartX + (p.X-f.geom.midStartX)%(f.geom.middleDx)
 		}
@@ -91,7 +107,7 @@ func (f *Frame) At(x, y int) color.Color {
 	} else if p.Y > f.geom.midStartY {
 		switch f.BorderMode {
 		case Stretched:
-			p.Y = f.geom.midStartY + int(float64(p.Y-f.geom.midStartY)/float64(f.geom.midEndY-f.geom.midStartY)*float64(f.geom.middleDy))
+			p.Y = f.geom.midStartY + int((int64(p.Y-f.geom.midStartY)*int64(f.geom.ratioY))>>16)
 		default:
 			p.Y = f.geom.midStartY + (p.Y-f.geom.midStartY)%(f.geom.middleDy)
 		}
