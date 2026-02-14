@@ -168,4 +168,7 @@ func TestMeasureFrame(t *testing.T) {
 	if wl != 50 || wh != 50 {
 		t.Errorf("Expected width 50, 50. Got %d, %d", wl, wh)
 	}
+	if hl != 50 || hh != 50 {
+		t.Errorf("Expected height 50, 50. Got %d, %d", hl, hh)
+	}
 }

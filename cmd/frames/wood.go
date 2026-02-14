@@ -8,15 +8,18 @@ import (
 	"os"
 	"strings"
 
+	"errors"
 	"github.com/arran4/golang-frame/cli"
+	"github.com/arran4/golang-frame/cmd"
 )
 
 var _ Cmd = (*Wood)(nil)
 
 type Wood struct {
 	*RootCmd
-	Flags       *flag.FlagSet
-	SubCommands map[string]Cmd
+	Flags         *flag.FlagSet
+	SubCommands   map[string]Cmd
+	CommandAction func(c *Wood) error
 }
 
 type UsageDataWood struct {
@@ -49,7 +52,7 @@ func (c *Wood) Execute(args []string) error {
 		if arg == "--" {
 			break
 		}
-		if strings.HasPrefix(arg, "-") {
+		if strings.HasPrefix(arg, "-") && arg != "-" {
 			name := arg
 			trimmedName := strings.TrimLeft(name, "-")
 			switch trimmedName {
@@ -62,8 +65,12 @@ func (c *Wood) Execute(args []string) error {
 		}
 	}
 
-	if err := cli.Wood(); err != nil {
-		return fmt.Errorf("wood failed: %w", err)
+	if c.CommandAction != nil {
+		if err := c.CommandAction(c); err != nil {
+			return fmt.Errorf("wood failed: %w", err)
+		}
+	} else {
+		c.Usage()
 	}
 
 	return nil
@@ -77,6 +84,23 @@ func (c *RootCmd) NewWood() *Wood {
 		SubCommands: make(map[string]Cmd),
 	}
 	set.Usage = v.Usage
+
+	v.CommandAction = func(c *Wood) error {
+
+		err := cli.Wood()
+		if err != nil {
+			if errors.Is(err, cmd.ErrPrintHelp) {
+				c.Usage()
+				return nil
+			}
+			if errors.Is(err, cmd.ErrHelp) {
+				fmt.Fprintf(os.Stderr, "Use '%s help' for more information.\n", os.Args[0])
+				return nil
+			}
+			return fmt.Errorf("wood failed: %w", err)
+		}
+		return nil
+	}
 
 	v.SubCommands["help"] = &InternalCommand{
 		Exec: func(args []string) error {
