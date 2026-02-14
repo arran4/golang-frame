@@ -8,15 +8,18 @@ import (
 	"os"
 	"strings"
 
+	"errors"
 	"github.com/arran4/golang-frame/cli"
+	"github.com/arran4/golang-frame/cmd"
 )
 
 var _ Cmd = (*Gallery)(nil)
 
 type Gallery struct {
 	*RootCmd
-	Flags       *flag.FlagSet
-	SubCommands map[string]Cmd
+	Flags         *flag.FlagSet
+	SubCommands   map[string]Cmd
+	CommandAction func(c *Gallery) error
 }
 
 type UsageDataGallery struct {
@@ -49,7 +52,7 @@ func (c *Gallery) Execute(args []string) error {
 		if arg == "--" {
 			break
 		}
-		if strings.HasPrefix(arg, "-") {
+		if strings.HasPrefix(arg, "-") && arg != "-" {
 			name := arg
 			trimmedName := strings.TrimLeft(name, "-")
 			switch trimmedName {
@@ -62,8 +65,12 @@ func (c *Gallery) Execute(args []string) error {
 		}
 	}
 
-	if err := cli.Gallery(); err != nil {
-		return fmt.Errorf("gallery failed: %w", err)
+	if c.CommandAction != nil {
+		if err := c.CommandAction(c); err != nil {
+			return fmt.Errorf("gallery failed: %w", err)
+		}
+	} else {
+		c.Usage()
 	}
 
 	return nil
@@ -77,6 +84,23 @@ func (c *RootCmd) NewGallery() *Gallery {
 		SubCommands: make(map[string]Cmd),
 	}
 	set.Usage = v.Usage
+
+	v.CommandAction = func(c *Gallery) error {
+
+		err := cli.Gallery()
+		if err != nil {
+			if errors.Is(err, cmd.ErrPrintHelp) {
+				c.Usage()
+				return nil
+			}
+			if errors.Is(err, cmd.ErrHelp) {
+				fmt.Fprintf(os.Stderr, "Use '%s help' for more information.\n", os.Args[0])
+				return nil
+			}
+			return fmt.Errorf("gallery failed: %w", err)
+		}
+		return nil
+	}
 
 	v.SubCommands["help"] = &InternalCommand{
 		Exec: func(args []string) error {
