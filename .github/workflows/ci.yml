@@ -297,11 +297,12 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version-file: go.mod
+          go-version: '1.24'
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v6
         with:
           version: latest
+          install-mode: goinstall
 
   go-test:
     name: Go test (${{ matrix.os }})
@@ -316,7 +317,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version-file: go.mod
+          go-version: '1.24'
           cache: true
       - name: Test
         run: go test ./... -v
@@ -330,7 +331,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version-file: go.mod
+          go-version: '1.24'
           cache: true
       - run: go vet ./...
 
@@ -346,7 +347,7 @@ jobs:
         if: ${{ needs.discover.outputs.has_go == 'true' }}
         uses: actions/setup-go@v5
         with:
-          go-version-file: go.mod
+          go-version: '1.24'
 
       - name: Run autofix formatters
         shell: bash
@@ -418,7 +419,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version-file: go.mod
+          go-version: '1.24'
 
       - name: Generate
         run: |
@@ -445,7 +446,7 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-go@v5
         with:
-          go-version-file: go.mod
+          go-version: '1.24'
       - name: Tag commit for release (workflow_dispatch)
         if: ${{ github.event_name == 'workflow_dispatch' && startsWith(inputs.mode, 'release-') }}
         run: |
