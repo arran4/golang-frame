@@ -1,6 +1,6 @@
 module github.com/arran4/golang-frame
 
-go 1.25.3
+go 1.26
 
 require (
 	github.com/arran4/go-subcommand v0.0.17
