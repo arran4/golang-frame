@@ -862,7 +862,7 @@ func genRetroWindow(s int) (image.Image, image.Rectangle, string) {
 	rect(img, image.Rect(7*s, h-8*s, w-7*s, h-7*s), white)
 	rect(img, image.Rect(6*s, h-7*s, w-6*s, h-6*s), white)
 
-	return img, image.Rect(8*s, 20*s, w-8*s, h-8*s), "window_retro"
+	return img, image.Rect(14*s, 20*s, w-14*s, h-8*s), "window_retro"
 }
 
 func genPaperWindow(s int) (image.Image, image.Rectangle, string) {
