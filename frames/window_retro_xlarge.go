@@ -12,7 +12,7 @@ var WindowRetroXlargePng []byte
 
 var WindowRetroXlarge = &Definition{
 	Name: "window_retro_xlarge",
-	Middle: image.Rect(24, 60, 168, 168),
+	Middle: image.Rect(42, 60, 150, 168),
 }
 
 func init() {

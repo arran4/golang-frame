@@ -12,7 +12,7 @@ var WindowRetroPng []byte
 
 var WindowRetro = &Definition{
 	Name: "window_retro",
-	Middle: image.Rect(8, 20, 56, 56),
+	Middle: image.Rect(14, 20, 50, 56),
 }
 
 func init() {
