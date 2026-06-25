@@ -1,0 +1,21 @@
+--- cli/generate.go
++++ cli/generate.go
+@@ -957,8 +957,17 @@
+
+ func genChains(s int) (image.Image, image.Rectangle, string) {
+	w, h := 64*s, 64*s
+	img := solid(w, h, color.White)
+-	return img, image.Rect(8*s, 8*s, w-8*s, h-8*s), "chains"
++	// Draw simple chain links on borders
++	gray := color.RGBA{128, 128, 128, 255}
++	black := color.Black
++	rect(img, image.Rect(0, 0, w, 8*s), gray)
++	rect(img, image.Rect(0, h-8*s, w, h), gray)
++	rect(img, image.Rect(0, 0, 8*s, h), gray)
++	rect(img, image.Rect(w-8*s, 0, w, h), gray)
++	rect(img, image.Rect(0, 0, w, s), black)
++	rect(img, image.Rect(0, 0, s, h), black)
++	return img, image.Rect(12*s, 12*s, w-12*s, h-12*s), "chains"
+ }
+
+ func genRainbow(s int) (image.Image, image.Rectangle, string) {

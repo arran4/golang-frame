@@ -12,7 +12,7 @@ var AmigaLikeXlargePng []byte
 
 var AmigaLikeXlarge = &Definition{
 	Name: "amiga_like_xlarge",
-	Middle: image.Rect(18, 18, 78, 78),
+	Middle: image.Rect(24, 66, 120, 120),
 }
 
 func init() {
