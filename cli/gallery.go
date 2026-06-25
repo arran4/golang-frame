@@ -29,8 +29,8 @@ func Gallery() error {
 	var frameDatas []FrameData
 
 	for _, def := range frames.All {
-		// Create a sample image for this frame
-		w, h := 240, 160
+		wLow, _, hLow, _ := frame.MeasureFrame(def.Image, def.Middle, 180, 100)
+		w, h := wLow+60, hLow+60
 		dst := image.NewRGBA(image.Rect(0, 0, w, h))
 		// Light transparent grey background to show transparency
 		for y := 0; y < h; y++ {
@@ -44,7 +44,7 @@ func Gallery() error {
 		}
 
 		// Create frame
-		rect := image.Rect(30, 30, w-30, h-30)
+		rect := image.Rect(30, 30, 30+wLow, 30+hLow)
 		fr := frame.NewFrame(rect, def.Image, def.Middle)
 		draw.Draw(dst, rect, fr, rect.Min, draw.Over)
 
