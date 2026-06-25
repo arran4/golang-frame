@@ -49,4 +49,12 @@ func TestOverMath(t *testing.T) {
 	if res.R != 0 || res.G != 80 || res.B != 160 || res.A != 255 {
 		t.Errorf("Expected {0, 80, 160, 255}, got %v. Math overflow likely occurred.", res)
 	}
+	// Test semi-transparent overlay
+	semiColor := color.RGBA{0, 80, 160, 128}
+	sr, sg, sb, sa := semiColor.RGBA()
+	resSemi := Over(baseColor, sa, sr, sg, sb)
+
+	if resSemi.R != 49 || resSemi.G != 130 || resSemi.B != 210 || resSemi.A != 255 {
+		t.Errorf("Expected {49, 130, 210, 255}, got %v", resSemi)
+	}
 }
