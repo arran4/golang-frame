@@ -746,9 +746,29 @@ func genMacOSX(s int) (image.Image, image.Rectangle, string) {
 
 func genMWM(s int) (image.Image, image.Rectangle, string) {
 	w, h := 48*s, 48*s
-	img := solid(w, h, color.RGBA{180, 180, 180, 255})
-	rect(img, image.Rect(0, 0, w, 4*s), color.White)
-	return img, image.Rect(6*s, 6*s, w-6*s, h-6*s), "mwm_like"
+	bg := color.RGBA{180, 180, 180, 255}
+	img := solid(w, h, bg)
+	white := color.White
+	black := color.Black
+
+	// Outer bevel
+	rect(img, image.Rect(0, 0, w, s), white)
+	rect(img, image.Rect(0, 0, s, h), white)
+	rect(img, image.Rect(w-s, 0, w, h), black)
+	rect(img, image.Rect(0, h-s, w, h), black)
+
+	// Title area separator
+	top := 18 * s
+	rect(img, image.Rect(0, top-2*s, w, top-s), black)
+	rect(img, image.Rect(0, top-s, w, top), white)
+
+	// Inner bevel around content
+	rect(img, image.Rect(12*s, top, w-12*s, top+s), black)
+	rect(img, image.Rect(12*s, top, 12*s+s, h-12*s), black)
+	rect(img, image.Rect(w-12*s-s, top, w-12*s, h-12*s), white)
+	rect(img, image.Rect(12*s, h-12*s-s, w-12*s, h-12*s), white)
+
+	return img, image.Rect(12*s+s, top+s, w-12*s-s, h-12*s-s), "mwm_like"
 }
 
 func genNeXT(s int) (image.Image, image.Rectangle, string) {
@@ -802,52 +822,15 @@ func genNeXT(s int) (image.Image, image.Rectangle, string) {
 }
 
 func genBeOS(s int) (image.Image, image.Rectangle, string) {
-	w, h := 48*s, 48*s
-	bg := color.RGBA{216, 216, 216, 255}
-	tab := color.RGBA{255, 204, 0, 255}
-	white := color.White
-	grayDark := color.RGBA{136, 136, 136, 255}
-	black := color.Black
-	img := solid(w, h, bg)
-
-	// Tab on top
-	tabH := 16*s
-	tabW := w/2 + 4*s
-	rect(img, image.Rect(0, 0, tabW, tabH), tab)
-	rect(img, image.Rect(0, 0, tabW, s), white)
-	rect(img, image.Rect(0, 0, s, tabH), white)
-	rect(img, image.Rect(tabW-s, 0, tabW, tabH), black)
-	rect(img, image.Rect(tabW-2*s, s, tabW-s, tabH), grayDark)
-
-	// Main content window border
-	rect(img, image.Rect(0, tabH, w, h), bg)
-	rect(img, image.Rect(0, tabH, w, tabH+s), white)
-	rect(img, image.Rect(0, tabH, s, h), white)
-	rect(img, image.Rect(w-s, tabH, w, h), black)
-	rect(img, image.Rect(w-2*s, tabH+s, w-s, h-s), grayDark)
-	rect(img, image.Rect(0, h-s, w, h), black)
-	rect(img, image.Rect(s, h-2*s, w-s, h-s), grayDark)
-
-	return img, image.Rect(8*s, tabH+8*s, w-8*s, h-8*s), "beos_like"
+	w, h := 32*s, 32*s
+	img := solid(w, h, color.RGBA{255, 204, 0, 255})
+	return img, image.Rect(4*s, 4*s, w-4*s, h-4*s), "beos_like"
 }
 
 func genAmiga(s int) (image.Image, image.Rectangle, string) {
-	w, h := 48*s, 48*s
-	bg := color.RGBA{0, 80, 160, 255}
-	white := color.White
-	black := color.Black
-	img := solid(w, h, bg)
-	rect(img, image.Rect(0, 0, w, 14*s), white) // Title bar
-	rect(img, image.Rect(0, 0, w, s), black)
-	rect(img, image.Rect(0, 0, s, h), black)
-	rect(img, image.Rect(w-s, 0, w, h), black)
-	rect(img, image.Rect(0, h-s, w, h), black)
-	rect(img, image.Rect(0, 13*s, w, 14*s), black)
-
-	// Inner box
-	rect(img, image.Rect(4*s, 18*s, w-4*s, h-4*s), black)
-	rect(img, image.Rect(5*s, 19*s, w-5*s, h-5*s), bg)
-	return img, image.Rect(8*s, 22*s, w-8*s, h-8*s), "amiga_like"
+	w, h := 32*s, 32*s
+	img := solid(w, h, color.RGBA{0, 80, 160, 255})
+	return img, image.Rect(6*s, 6*s, w-6*s, h-6*s), "amiga_like"
 }
 
 func genRetroWindow(s int) (image.Image, image.Rectangle, string) {
@@ -1024,16 +1007,7 @@ func genWaves(s int) (image.Image, image.Rectangle, string) {
 func genChains(s int) (image.Image, image.Rectangle, string) {
 	w, h := 64*s, 64*s
 	img := solid(w, h, color.White)
-	// Draw simple chain links on borders
-	gray := color.RGBA{128, 128, 128, 255}
-	black := color.Black
-	rect(img, image.Rect(0, 0, w, 8*s), gray)
-	rect(img, image.Rect(0, h-8*s, w, h), gray)
-	rect(img, image.Rect(0, 0, 8*s, h), gray)
-	rect(img, image.Rect(w-8*s, 0, w, h), gray)
-	rect(img, image.Rect(0, 0, w, s), black)
-	rect(img, image.Rect(0, 0, s, h), black)
-	return img, image.Rect(12*s, 12*s, w-12*s, h-12*s), "chains"
+	return img, image.Rect(8*s, 8*s, w-8*s, h-8*s), "chains"
 }
 
 func genRainbow(s int) (image.Image, image.Rectangle, string) {
