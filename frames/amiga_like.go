@@ -12,7 +12,7 @@ var AmigaLikePng []byte
 
 var AmigaLike = &Definition{
 	Name: "amiga_like",
-	Middle: image.Rect(6, 6, 26, 26),
+	Middle: image.Rect(20, 13, 40, 57),
 }
 
 func init() {
