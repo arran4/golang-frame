@@ -868,32 +868,22 @@ func genAmiga(s int) (image.Image, image.Rectangle, string) {
 	rect(img, image.Rect(stripesStartX, stripeY2, stripesEndX, stripeY2+stripeH), blue)
 	rect(img, image.Rect(stripesStartX, stripeY3, stripesEndX, stripeY3+stripeH), blue)
 
+	drawGadget := func(gx, gy int) {
+		rect(img, image.Rect(gx, gy, gx+gadgetSize, gy+topH-1*s), white)
+		rect(img, image.Rect(gx+1*s, gy+1*s, gx+gadgetSize-1*s, gy+topH-2*s), black)
+		rect(img, image.Rect(gx+2*s, gy+2*s, gx+gadgetSize-2*s, gy+topH-3*s), white)
+		rect(img, image.Rect(gx+3*s, gy+3*s, gx+gadgetSize-3*s, gy+topH-4*s), black)
+		rect(img, image.Rect(gx+4*s, gy+4*s, gx+gadgetSize-4*s, gy+topH-5*s), white)
+	}
+
 	g1X := 1 * s
-	g1Y := 1 * s
-
-	rect(img, image.Rect(g1X, g1Y, g1X+gadgetSize, g1Y+topH-1*s), white)
-	rect(img, image.Rect(g1X+1*s, g1Y+1*s, g1X+gadgetSize-1*s, g1Y+topH-2*s), black)
-	rect(img, image.Rect(g1X+2*s, g1Y+2*s, g1X+gadgetSize-2*s, g1Y+topH-3*s), white)
-	rect(img, image.Rect(g1X+3*s, g1Y+3*s, g1X+gadgetSize-3*s, g1Y+topH-4*s), black)
-	rect(img, image.Rect(g1X+4*s, g1Y+4*s, g1X+gadgetSize-4*s, g1Y+topH-5*s), white)
-
 	g2X := w - 1*s - gadgetSize
-	g2Y := 1 * s
-
 	g3X := g2X - gadgetSize + 1*s
-	g3Y := 1 * s
+	gY := 1 * s
 
-	rect(img, image.Rect(g3X, g3Y, g3X+gadgetSize, g3Y+topH-1*s), white)
-	rect(img, image.Rect(g3X+1*s, g3Y+1*s, g3X+gadgetSize-1*s, g3Y+topH-2*s), black)
-	rect(img, image.Rect(g3X+2*s, g3Y+2*s, g3X+gadgetSize-2*s, g3Y+topH-3*s), white)
-	rect(img, image.Rect(g3X+3*s, g3Y+3*s, g3X+gadgetSize-3*s, g3Y+topH-4*s), black)
-	rect(img, image.Rect(g3X+4*s, g3Y+4*s, g3X+gadgetSize-4*s, g3Y+topH-5*s), white)
-
-	rect(img, image.Rect(g2X, g2Y, g2X+gadgetSize, g2Y+topH-1*s), white)
-	rect(img, image.Rect(g2X+1*s, g2Y+1*s, g2X+gadgetSize-1*s, g2Y+topH-2*s), black)
-	rect(img, image.Rect(g2X+2*s, g2Y+2*s, g2X+gadgetSize-2*s, g2Y+topH-3*s), white)
-	rect(img, image.Rect(g2X+3*s, g2Y+3*s, g2X+gadgetSize-3*s, g2Y+topH-4*s), black)
-	rect(img, image.Rect(g2X+4*s, g2Y+4*s, g2X+gadgetSize-4*s, g2Y+topH-5*s), white)
+	drawGadget(g1X, gY)
+	drawGadget(g3X, gY)
+	drawGadget(g2X, gY)
 
 	rect(img, image.Rect(w-rightW-4*s, h-botH, w-1*s, h-1*s), white)
 	rect(img, image.Rect(w-rightW-4*s, h-botH, w-rightW-3*s, h-1*s), black)
