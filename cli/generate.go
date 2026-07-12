@@ -828,9 +828,68 @@ func genBeOS(s int) (image.Image, image.Rectangle, string) {
 }
 
 func genAmiga(s int) (image.Image, image.Rectangle, string) {
-	w, h := 32*s, 32*s
-	img := solid(w, h, color.RGBA{0, 80, 160, 255})
-	return img, image.Rect(6*s, 6*s, w-6*s, h-6*s), "amiga_like"
+	w, h := 64*s, 64*s
+	img := image.NewRGBA(image.Rect(0, 0, w, h))
+
+	blue := color.RGBA{0, 85, 170, 255}
+	white := color.RGBA{255, 255, 255, 255}
+	black := color.RGBA{0, 0, 0, 255}
+
+	topH := 11 * s
+	botH := 3 * s
+	leftW := 4 * s
+	rightW := 4 * s
+
+	rect(img, image.Rect(0, 0, w, 1*s), black)
+	rect(img, image.Rect(0, 0, 1*s, h), black)
+	rect(img, image.Rect(w-1*s, 0, w, h), black)
+	rect(img, image.Rect(0, h-1*s, w, h), black)
+
+	rect(img, image.Rect(1*s, 1*s, w-1*s, topH), white)
+	rect(img, image.Rect(1*s, 1*s, leftW, h-1*s), white)
+	rect(img, image.Rect(w-rightW, 1*s, w-1*s, h-1*s), white)
+	rect(img, image.Rect(1*s, h-botH, w-1*s, h-1*s), white)
+
+	rect(img, image.Rect(leftW-1*s, topH-1*s, w-rightW+1*s, topH), black)
+	rect(img, image.Rect(leftW-1*s, topH, leftW, h-botH+1*s), black)
+	rect(img, image.Rect(w-rightW, topH, w-rightW+1*s, h-botH+1*s), black)
+	rect(img, image.Rect(leftW-1*s, h-botH, w-rightW+1*s, h-botH+1*s), black)
+
+	stripeY1 := 2 * s
+	stripeY2 := 5 * s
+	stripeY3 := 8 * s
+	stripeH := 1 * s
+
+	gadgetSize := 11 * s
+	stripesStartX := 1*s + gadgetSize + 2*s
+	stripesEndX := w - 1*s - gadgetSize*2 - 2*s
+
+	rect(img, image.Rect(stripesStartX, stripeY1, stripesEndX, stripeY1+stripeH), blue)
+	rect(img, image.Rect(stripesStartX, stripeY2, stripesEndX, stripeY2+stripeH), blue)
+	rect(img, image.Rect(stripesStartX, stripeY3, stripesEndX, stripeY3+stripeH), blue)
+
+	drawGadget := func(gx, gy int) {
+		rect(img, image.Rect(gx, gy, gx+gadgetSize, gy+topH-1*s), white)
+		rect(img, image.Rect(gx+1*s, gy+1*s, gx+gadgetSize-1*s, gy+topH-2*s), black)
+		rect(img, image.Rect(gx+2*s, gy+2*s, gx+gadgetSize-2*s, gy+topH-3*s), white)
+		rect(img, image.Rect(gx+3*s, gy+3*s, gx+gadgetSize-3*s, gy+topH-4*s), black)
+		rect(img, image.Rect(gx+4*s, gy+4*s, gx+gadgetSize-4*s, gy+topH-5*s), white)
+	}
+
+	g1X := 1 * s
+	g2X := w - 1*s - gadgetSize
+	g3X := g2X - gadgetSize + 1*s
+	gY := 1 * s
+
+	drawGadget(g1X, gY)
+	drawGadget(g3X, gY)
+	drawGadget(g2X, gY)
+
+	rect(img, image.Rect(w-rightW-4*s, h-botH, w-1*s, h-1*s), white)
+	rect(img, image.Rect(w-rightW-4*s, h-botH, w-rightW-3*s, h-1*s), black)
+	rect(img, image.Rect(w-rightW-1*s, h-botH-4*s, w-1*s, h-botH-3*s), black)
+
+	return img, image.Rect(20*s, 13*s, w-24*s, h-7*s), "amiga_like"
 }
 
 func genRetroWindow(s int) (image.Image, image.Rectangle, string) {
