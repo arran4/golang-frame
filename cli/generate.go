@@ -746,9 +746,29 @@ func genMacOSX(s int) (image.Image, image.Rectangle, string) {
 
 func genMWM(s int) (image.Image, image.Rectangle, string) {
 	w, h := 48*s, 48*s
-	img := solid(w, h, color.RGBA{180, 180, 180, 255})
-	rect(img, image.Rect(0, 0, w, 4*s), color.White)
-	return img, image.Rect(6*s, 6*s, w-6*s, h-6*s), "mwm_like"
+	bg := color.RGBA{180, 180, 180, 255}
+	img := solid(w, h, bg)
+	white := color.White
+	black := color.Black
+
+	// Outer bevel
+	rect(img, image.Rect(0, 0, w, s), white)
+	rect(img, image.Rect(0, 0, s, h), white)
+	rect(img, image.Rect(w-s, 0, w, h), black)
+	rect(img, image.Rect(0, h-s, w, h), black)
+
+	// Title area separator
+	top := 18 * s
+	rect(img, image.Rect(0, top-2*s, w, top-s), black)
+	rect(img, image.Rect(0, top-s, w, top), white)
+
+	// Inner bevel around content
+	rect(img, image.Rect(12*s, top, w-12*s, top+s), black)
+	rect(img, image.Rect(12*s, top, 12*s+s, h-12*s), black)
+	rect(img, image.Rect(w-12*s-s, top, w-12*s, h-12*s), white)
+	rect(img, image.Rect(12*s, h-12*s-s, w-12*s, h-12*s), white)
+
+	return img, image.Rect(12*s+s, top+s, w-12*s-s, h-12*s-s), "mwm_like"
 }
 
 func genNeXT(s int) (image.Image, image.Rectangle, string) {

@@ -12,7 +12,7 @@ var MwmLikeXlargePng []byte
 
 var MwmLikeXlarge = &Definition{
 	Name: "mwm_like_xlarge",
-	Middle: image.Rect(18, 18, 126, 126),
+	Middle: image.Rect(39, 57, 105, 105),
 }
 
 func init() {
