@@ -1175,131 +1175,145 @@ func genWaves(s int) (image.Image, image.Rectangle, string) {
 func genChains(s int) (image.Image, image.Rectangle, string) {
 	w, h := 96*s, 96*s
 
-	// dark metallic background
 	bg := color.RGBA{40, 40, 40, 255}
 	img := solid(w, h, bg)
 
-	c1 := color.RGBA{180, 180, 180, 255} // Light link (standing up, facing us)
-	c2 := color.RGBA{100, 100, 100, 255} // Dark link (lying flat)
+	drawLinkMasked := func(cx, cy int, R, r, L float64, isH bool, colorBase color.RGBA, maskFunc func(x,y int) bool) {
+		minX, maxX := cx - int(R+r+L), cx + int(R+r+L)
+		minY, maxY := cy - int(R+r+L), cy + int(R+r+L)
+
+		for y := minY; y <= maxY; y++ {
+			for x := minX; x <= maxX; x++ {
+				if x < 0 || x >= w || y < 0 || y >= h { continue }
+				if maskFunc != nil && !maskFunc(x, y) { continue }
+
+				dx := float64(x - cx)
+				dy := float64(y - cy)
+
+				var dist float64
+				var px, py float64
+
+				if isH {
+					if dx > L/2 {
+						cx2, cy2 := float64(cx) + L/2, float64(cy)
+						dist = math.Sqrt((float64(x)-cx2)*(float64(x)-cx2) + dy*dy) - R
+						ang := math.Atan2(dy, float64(x)-cx2)
+						px = cx2 + R*math.Cos(ang)
+						py = cy2 + R*math.Sin(ang)
+					} else if dx < -L/2 {
+						cx2, cy2 := float64(cx) - L/2, float64(cy)
+						dist = math.Sqrt((float64(x)-cx2)*(float64(x)-cx2) + dy*dy) - R
+						ang := math.Atan2(dy, float64(x)-cx2)
+						px = cx2 + R*math.Cos(ang)
+						py = cy2 + R*math.Sin(ang)
+					} else {
+						dist = math.Abs(dy) - R
+						px = float64(x)
+						if dy > 0 { py = float64(cy) + R } else { py = float64(cy) - R }
+					}
+				} else {
+					if dy > L/2 {
+						cx2, cy2 := float64(cx), float64(cy) + L/2
+						dist = math.Sqrt(dx*dx + (float64(y)-cy2)*(float64(y)-cy2)) - R
+						ang := math.Atan2(float64(y)-cy2, dx)
+						px = cx2 + R*math.Cos(ang)
+						py = cy2 + R*math.Sin(ang)
+					} else if dy < -L/2 {
+						cx2, cy2 := float64(cx), float64(cy) - L/2
+						dist = math.Sqrt(dx*dx + (float64(y)-cy2)*(float64(y)-cy2)) - R
+						ang := math.Atan2(float64(y)-cy2, dx)
+						px = cx2 + R*math.Cos(ang)
+						py = cy2 + R*math.Sin(ang)
+					} else {
+						dist = math.Abs(dx) - R
+						py = float64(y)
+						if dx > 0 { px = float64(cx) + R } else { px = float64(cx) - R }
+					}
+				}
+
+				if math.Abs(dist) <= r {
+					z := math.Sqrt(r*r - dist*dist)
+
+					nx := float64(x) - px
+					ny := float64(y) - py
+					nz := z
+
+					nl := math.Sqrt(nx*nx + ny*ny + nz*nz)
+					if nl > 0 { nx /= nl; ny /= nl; nz /= nl }
+
+					lx, ly, lz := -0.5, -0.5, 1.0
+					ll := math.Sqrt(lx*lx + ly*ly + lz*lz)
+					lx /= ll; ly /= ll; lz /= ll
+
+					dot := nx*lx + ny*ly + nz*lz
+					if dot < 0 { dot = 0 }
+
+					hx, hy, hz := lx, ly, lz + 1.0
+					hl := math.Sqrt(hx*hx + hy*hy + hz*hz)
+					hx /= hl; hy /= hl; hz /= hl
+
+					spec := nx*hx + ny*hy + nz*hz
+					if spec < 0 { spec = 0 }
+					spec = math.Pow(spec, 20)
+
+					ambient := 0.3
+					diffuse := 0.6 * dot
+
+					cr := float64(colorBase.R) * (ambient + diffuse) + 255.0*spec*0.5
+					cg := float64(colorBase.G) * (ambient + diffuse) + 255.0*spec*0.5
+					cb := float64(colorBase.B) * (ambient + diffuse) + 255.0*spec*0.5
+
+					if cr > 255 { cr = 255 }
+					if cg > 255 { cg = 255 }
+					if cb > 255 { cb = 255 }
+
+					img.SetRGBA(x, y, color.RGBA{uint8(cr), uint8(cg), uint8(cb), 255})
+				}
+			}
+		}
+	}
 
 	margin := 14 * s
-	step := 20 * s
-	length := 10 * s
 
-	linkROuter := 5 * s
-	linkRInner := 2 * s
+	R := float64(4.0 * float64(s))
+	r := float64(2.0 * float64(s))
+	L := float64(8.0 * float64(s))
 
-	// draw ring function
-	drawRing := func(cx, cy int, c color.RGBA) {
-		for y := -linkROuter; y <= linkROuter; y++ {
-			for x := -linkROuter; x <= linkROuter; x++ {
-				d2 := x*x + y*y
-				if d2 <= linkROuter*linkROuter && d2 >= linkRInner*linkRInner {
-					if cx+x >= 0 && cx+x < w && cy+y >= 0 && cy+y < h {
-						img.Set(cx+x, cy+y, c)
-					}
-				}
-			}
-		}
-	}
+	baseColor := color.RGBA{160, 160, 160, 255}
 
-	// draw link segment
-	drawVLink := func(cx, cy, length int, c color.RGBA) {
-		for y := -length/2; y <= length/2; y++ {
-			for x := -linkROuter; x <= linkROuter; x++ {
-				d2 := x*x
-				if d2 <= linkROuter*linkROuter && d2 >= linkRInner*linkRInner {
-					if cx+x >= 0 && cx+x < w && cy+y >= 0 && cy+y < h {
-						img.Set(cx+x, cy+y, c)
-					}
-				}
-			}
-		}
-		drawRing(cx, cy-length/2, c)
-		drawRing(cx, cy+length/2, c)
-	}
+	step := int(L) + int(2.0*R) - int(2.0*r)
 
-	drawHLink := func(cx, cy, length int, c color.RGBA) {
-		for x := -length/2; x <= length/2; x++ {
-			for y := -linkROuter; y <= linkROuter; y++ {
-				d2 := y*y
-				if d2 <= linkROuter*linkROuter && d2 >= linkRInner*linkRInner {
-					if cx+x >= 0 && cx+x < w && cy+y >= 0 && cy+y < h {
-						img.Set(cx+x, cy+y, c)
-					}
-				}
-			}
-		}
-		drawRing(cx-length/2, cy, c)
-		drawRing(cx+length/2, cy, c)
-	}
-
-	drawRingFace := func(cx, cy int, c color.RGBA) {
-		rOuterFace := linkROuter
-		rInnerFace := linkRInner
-		for y := -rOuterFace; y <= rOuterFace; y++ {
-			for x := -rOuterFace; x <= rOuterFace; x++ {
-				d2 := x*x + y*y
-				if d2 <= rOuterFace*rOuterFace && d2 >= rInnerFace*rInnerFace {
-					if cx+x >= 0 && cx+x < w && cy+y >= 0 && cy+y < h {
-						img.Set(cx+x, cy+y, c)
-					}
-				}
-			}
-		}
-	}
-
-	drawRingHole := func(cx, cy int, c color.RGBA) {
-		rInnerFace := linkRInner
-		for y := -rInnerFace; y <= rInnerFace; y++ {
-			for x := -rInnerFace; x <= rInnerFace; x++ {
-				d2 := x*x + y*y
-				if d2 <= rInnerFace*rInnerFace {
-					if cx+x >= 0 && cx+x < w && cy+y >= 0 && cy+y < h {
-						img.Set(cx+x, cy+y, c)
-					}
-				}
-			}
-		}
-	}
-
-	// Draw lying links first
 	for x := 0; x <= w+step; x += step {
-		drawHLink(x, margin, length, c2)
-		drawHLink(x, h-margin, length, c2)
+		drawLinkMasked(x, margin, R, r, L, true, baseColor, nil)
+		drawLinkMasked(x, h-margin, R, r, L, true, baseColor, nil)
 	}
 	for y := 0; y <= h+step; y += step {
-		drawVLink(margin, y, length, c2)
-		drawVLink(w-margin, y, length, c2)
+		drawLinkMasked(margin, y, R, r, L, false, baseColor, nil)
+		drawLinkMasked(w-margin, y, R, r, L, false, baseColor, nil)
 	}
 
-	// Overlapping standing links
-	for x := 0; x <= w+step; x += step {
-		drawRingHole(x - step/2, margin, bg)
-		drawRingFace(x - step/2, margin, c1)
+	for x := step/2; x <= w+step; x += step {
+		drawLinkMasked(x, margin, R, r, L, false, baseColor, nil)
+		drawLinkMasked(x, margin, R, r, L, true, baseColor, func(px, py int) bool { return px > x })
 
-		drawRingHole(x - step/2, h-margin, bg)
-		drawRingFace(x - step/2, h-margin, c1)
-	}
-	for y := 0; y <= h+step; y += step {
-		drawRingHole(margin, y - step/2, bg)
-		drawRingFace(margin, y - step/2, c1)
-
-		drawRingHole(w-margin, y - step/2, bg)
-		drawRingFace(w-margin, y - step/2, c1)
+		drawLinkMasked(x, h-margin, R, r, L, false, baseColor, nil)
+		drawLinkMasked(x, h-margin, R, r, L, true, baseColor, func(px, py int) bool { return px < x })
 	}
 
-	// Connect corners smoothly
-	drawRingHole(margin, margin, bg)
-	drawRingFace(margin, margin, c1)
-	drawRingHole(w-margin, margin, bg)
-	drawRingFace(w-margin, margin, c1)
-	drawRingHole(margin, h-margin, bg)
-	drawRingFace(margin, h-margin, c1)
-	drawRingHole(w-margin, h-margin, bg)
-	drawRingFace(w-margin, h-margin, c1)
+	for y := step/2; y <= h+step; y += step {
+		drawLinkMasked(margin, y, R, r, L, true, baseColor, nil)
+		drawLinkMasked(margin, y, R, r, L, false, baseColor, func(px, py int) bool { return py > y })
 
-	return img, image.Rect(24*s, 24*s, w-24*s, h-24*s), "chains"
+		drawLinkMasked(w-margin, y, R, r, L, true, baseColor, nil)
+		drawLinkMasked(w-margin, y, R, r, L, false, baseColor, func(px, py int) bool { return py < y })
+	}
+
+	drawLinkMasked(margin, margin, R, r, L, true, baseColor, func(px, py int) bool { return py < margin && px > margin-int(R+r) })
+	drawLinkMasked(w-margin, margin, R, r, L, true, baseColor, func(px, py int) bool { return py < margin && px < w-margin+int(R+r) })
+	drawLinkMasked(margin, h-margin, R, r, L, true, baseColor, func(px, py int) bool { return py > h-margin && px > margin-int(R+r) })
+	drawLinkMasked(w-margin, h-margin, R, r, L, true, baseColor, func(px, py int) bool { return py > h-margin && px < w-margin+int(R+r) })
+
+	return img, image.Rect(28*s, 28*s, w-28*s, h-28*s), "chains"
 }
 
 func genRainbow(s int) (image.Image, image.Rectangle, string) {
