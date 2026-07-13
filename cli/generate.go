@@ -822,7 +822,7 @@ func genNeXT(s int) (image.Image, image.Rectangle, string) {
 }
 
 func genBeOS(s int) (image.Image, image.Rectangle, string) {
-	w, h := 64*s, 64*s
+	w, h := 80*s, 64*s // Wider frame to fit the tab within left stretch margin
 	img := image.NewRGBA(image.Rect(0, 0, w, h))
 
 	yellow := color.RGBA{255, 203, 0, 255}
@@ -837,8 +837,14 @@ func genBeOS(s int) (image.Image, image.Rectangle, string) {
 
 	topH := 21 * s // Title bar height
 	botH := 5 * s  // Bottom border
-	leftW := 5 * s // Left border
-	rightW := 5 * s // Right border
+
+	// BeOS Tab (Title Bar)
+	tabW := 45 * s
+
+	leftW := tabW + 5*s // 50 * s - The left non-stretching margin contains the whole tab.
+	rightW := 15 * s // Right border needs to hold the resize handle safely.
+
+	borderW := 5 * s // Actual window border width
 
 	// 1. Fill entire frame with transparent first
 	rect(img, image.Rect(0, 0, w, h), color.RGBA{0, 0, 0, 0})
@@ -858,19 +864,15 @@ func genBeOS(s int) (image.Image, image.Rectangle, string) {
 	rect(img, image.Rect(w-2*s, topH, w-1*s, h-1*s), darkerGray)
 
 	// Inner highlights and shadows (just outside the content area)
-	rect(img, image.Rect(leftW-2*s, topH, leftW-1*s, h-botH), darkestGray)
-	rect(img, image.Rect(leftW-1*s, h-botH+1*s, w-rightW+1*s, h-botH+2*s), lightGray)
-	rect(img, image.Rect(w-rightW+1*s, topH, w-rightW+2*s, h-botH), lightGray)
+	rect(img, image.Rect(borderW-2*s, topH, borderW-1*s, h-botH), darkestGray)
+	rect(img, image.Rect(borderW-1*s, h-botH+1*s, w-borderW+1*s, h-botH+2*s), lightGray)
+	rect(img, image.Rect(w-borderW+1*s, topH, w-borderW+2*s, h-botH), lightGray)
 
 	// Inner black border around the content area
-	rect(img, image.Rect(leftW-1*s, topH, leftW, h-botH+1*s), black)
-	rect(img, image.Rect(w-rightW, topH, w-rightW+1*s, h-botH+1*s), black)
-	rect(img, image.Rect(leftW-1*s, h-botH, w-rightW+1*s, h-botH+1*s), black)
+	rect(img, image.Rect(borderW-1*s, topH, borderW, h-botH+1*s), black)
+	rect(img, image.Rect(w-borderW, topH, w-borderW+1*s, h-botH+1*s), black)
+	rect(img, image.Rect(borderW-1*s, h-botH, w-borderW+1*s, h-botH+1*s), black)
 	rect(img, image.Rect(0, topH, w, topH+1*s), black)
-
-	// BeOS Tab (Title Bar)
-	// We'll make it partial, starting from the left, about 45px wide.
-	tabW := 45 * s
 
 	// Tab Background
 	rect(img, image.Rect(0, 0, tabW, topH), yellow)
