@@ -836,7 +836,7 @@ func genBeOS(s int) (image.Image, image.Rectangle, string) {
 	black := color.RGBA{0, 0, 0, 255}
 
 	topH := 21 * s // Title bar height
-	botH := 5 * s  // Bottom border
+	botH := 12 * s  // Bottom border
 
 	// BeOS Tab (Title Bar)
 	tabW := 45 * s

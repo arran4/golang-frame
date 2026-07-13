@@ -12,7 +12,7 @@ var BeosLikePng []byte
 
 var BeosLike = &Definition{
 	Name: "beos_like",
-	Middle: image.Rect(50, 22, 65, 59),
+	Middle: image.Rect(50, 22, 65, 52),
 }
 
 func init() {
