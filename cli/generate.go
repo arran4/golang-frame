@@ -822,9 +822,116 @@ func genNeXT(s int) (image.Image, image.Rectangle, string) {
 }
 
 func genBeOS(s int) (image.Image, image.Rectangle, string) {
-	w, h := 32*s, 32*s
-	img := solid(w, h, color.RGBA{255, 204, 0, 255})
-	return img, image.Rect(4*s, 4*s, w-4*s, h-4*s), "beos_like"
+	w, h := 64*s, 64*s
+	img := image.NewRGBA(image.Rect(0, 0, w, h))
+
+	yellow := color.RGBA{255, 203, 0, 255}
+	lightYellow := color.RGBA{255, 240, 150, 255}
+	darkYellow := color.RGBA{200, 160, 0, 255}
+
+	gray := color.RGBA{216, 216, 216, 255}
+	lightGray := color.RGBA{255, 255, 255, 255}
+	darkerGray := color.RGBA{152, 152, 152, 255}
+	darkestGray := color.RGBA{96, 96, 96, 255}
+	black := color.RGBA{0, 0, 0, 255}
+
+	topH := 21 * s // Title bar height
+	botH := 5 * s  // Bottom border
+	leftW := 5 * s // Left border
+	rightW := 5 * s // Right border
+
+	// 1. Fill entire frame with transparent first
+	rect(img, image.Rect(0, 0, w, h), color.RGBA{0, 0, 0, 0})
+
+	// Frame background (the gray part)
+	rect(img, image.Rect(0, topH, w, h), gray)
+
+	// Outer black border (sides and bottom)
+	rect(img, image.Rect(0, topH, 1*s, h), black)
+	rect(img, image.Rect(w-1*s, topH, w, h), black)
+	rect(img, image.Rect(0, h-1*s, w, h), black)
+
+	// 3D effect on window borders
+	// Outer highlights and shadows (just inside the black border)
+	rect(img, image.Rect(1*s, topH, 2*s, h-1*s), lightGray)
+	rect(img, image.Rect(1*s, h-2*s, w-1*s, h-1*s), darkerGray)
+	rect(img, image.Rect(w-2*s, topH, w-1*s, h-1*s), darkerGray)
+
+	// Inner highlights and shadows (just outside the content area)
+	rect(img, image.Rect(leftW-2*s, topH, leftW-1*s, h-botH), darkestGray)
+	rect(img, image.Rect(leftW-1*s, h-botH+1*s, w-rightW+1*s, h-botH+2*s), lightGray)
+	rect(img, image.Rect(w-rightW+1*s, topH, w-rightW+2*s, h-botH), lightGray)
+
+	// Inner black border around the content area
+	rect(img, image.Rect(leftW-1*s, topH, leftW, h-botH+1*s), black)
+	rect(img, image.Rect(w-rightW, topH, w-rightW+1*s, h-botH+1*s), black)
+	rect(img, image.Rect(leftW-1*s, h-botH, w-rightW+1*s, h-botH+1*s), black)
+	rect(img, image.Rect(0, topH, w, topH+1*s), black)
+
+	// BeOS Tab (Title Bar)
+	// We'll make it partial, starting from the left, about 45px wide.
+	tabW := 45 * s
+
+	// Tab Background
+	rect(img, image.Rect(0, 0, tabW, topH), yellow)
+
+	// Tab outer borders (black)
+	rect(img, image.Rect(0, 0, tabW, 1*s), black)
+	rect(img, image.Rect(0, 0, 1*s, topH), black)
+	rect(img, image.Rect(tabW-1*s, 0, tabW, topH), black)
+
+	// Tab 3D
+	rect(img, image.Rect(1*s, 1*s, tabW-1*s, 2*s), lightYellow) // Top highlight
+	rect(img, image.Rect(1*s, 1*s, 2*s, topH), lightYellow) // Left highlight
+	rect(img, image.Rect(tabW-2*s, 1*s, tabW-1*s, topH), darkYellow) // Right shadow
+
+	// Close button (Left side of tab)
+	closeBtnSize := 9 * s
+	closeBtnX := 5 * s
+	closeBtnY := 6 * s
+	rect(img, image.Rect(closeBtnX, closeBtnY, closeBtnX+closeBtnSize, closeBtnY+closeBtnSize), gray)
+	rect(img, image.Rect(closeBtnX, closeBtnY, closeBtnX+closeBtnSize, closeBtnY+1*s), lightGray)
+	rect(img, image.Rect(closeBtnX, closeBtnY, closeBtnX+1*s, closeBtnY+closeBtnSize), lightGray)
+	rect(img, image.Rect(closeBtnX, closeBtnY+closeBtnSize-1*s, closeBtnX+closeBtnSize, closeBtnY+closeBtnSize), darkerGray)
+	rect(img, image.Rect(closeBtnX+closeBtnSize-1*s, closeBtnY, closeBtnX+closeBtnSize, closeBtnY+closeBtnSize), darkerGray)
+	// Outer border for close button
+	rect(img, image.Rect(closeBtnX-1*s, closeBtnY-1*s, closeBtnX+closeBtnSize+1*s, closeBtnY), black)
+	rect(img, image.Rect(closeBtnX-1*s, closeBtnY+closeBtnSize, closeBtnX+closeBtnSize+1*s, closeBtnY+closeBtnSize+1*s), black)
+	rect(img, image.Rect(closeBtnX-1*s, closeBtnY-1*s, closeBtnX, closeBtnY+closeBtnSize+1*s), black)
+	rect(img, image.Rect(closeBtnX+closeBtnSize, closeBtnY-1*s, closeBtnX+closeBtnSize+1*s, closeBtnY+closeBtnSize+1*s), black)
+
+	// Zoom button (Right side of tab)
+	zoomBtnSize := 9 * s
+	zoomBtnX := tabW - 5*s - zoomBtnSize
+	zoomBtnY := 6 * s
+	rect(img, image.Rect(zoomBtnX, zoomBtnY, zoomBtnX+zoomBtnSize, zoomBtnY+zoomBtnSize), gray)
+	rect(img, image.Rect(zoomBtnX, zoomBtnY, zoomBtnX+zoomBtnSize, zoomBtnY+1*s), lightGray)
+	rect(img, image.Rect(zoomBtnX, zoomBtnY, zoomBtnX+1*s, zoomBtnY+zoomBtnSize), lightGray)
+	rect(img, image.Rect(zoomBtnX, zoomBtnY+zoomBtnSize-1*s, zoomBtnX+zoomBtnSize, zoomBtnY+zoomBtnSize), darkerGray)
+	rect(img, image.Rect(zoomBtnX+zoomBtnSize-1*s, zoomBtnY, zoomBtnX+zoomBtnSize, zoomBtnY+zoomBtnSize), darkerGray)
+	// Outer border for zoom button
+	rect(img, image.Rect(zoomBtnX-1*s, zoomBtnY-1*s, zoomBtnX+zoomBtnSize+1*s, zoomBtnY), black)
+	rect(img, image.Rect(zoomBtnX-1*s, zoomBtnY+zoomBtnSize, zoomBtnX+zoomBtnSize+1*s, zoomBtnY+zoomBtnSize+1*s), black)
+	rect(img, image.Rect(zoomBtnX-1*s, zoomBtnY-1*s, zoomBtnX, zoomBtnY+zoomBtnSize+1*s), black)
+	rect(img, image.Rect(zoomBtnX+zoomBtnSize, zoomBtnY-1*s, zoomBtnX+zoomBtnSize+1*s, zoomBtnY+zoomBtnSize+1*s), black)
+
+	// To make it look more like BeOS, there is a resize handle in the bottom right corner
+	// Draw dots/lines for resize handle
+	rect(img, image.Rect(w-11*s, h-4*s, w-10*s, h-3*s), darkestGray)
+	rect(img, image.Rect(w-9*s, h-4*s, w-8*s, h-3*s), darkestGray)
+	rect(img, image.Rect(w-7*s, h-4*s, w-6*s, h-3*s), darkestGray)
+	rect(img, image.Rect(w-5*s, h-4*s, w-4*s, h-3*s), darkestGray)
+
+	rect(img, image.Rect(w-9*s, h-6*s, w-8*s, h-5*s), darkestGray)
+	rect(img, image.Rect(w-7*s, h-6*s, w-6*s, h-5*s), darkestGray)
+	rect(img, image.Rect(w-5*s, h-6*s, w-4*s, h-5*s), darkestGray)
+
+	rect(img, image.Rect(w-7*s, h-8*s, w-6*s, h-7*s), darkestGray)
+	rect(img, image.Rect(w-5*s, h-8*s, w-4*s, h-7*s), darkestGray)
+
+	rect(img, image.Rect(w-5*s, h-10*s, w-4*s, h-9*s), darkestGray)
+
+	return img, image.Rect(leftW, topH+1*s, w-rightW, h-botH), "beos_like"
 }
 
 func genAmiga(s int) (image.Image, image.Rectangle, string) {

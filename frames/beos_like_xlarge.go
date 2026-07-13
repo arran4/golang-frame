@@ -12,7 +12,7 @@ var BeosLikeXlargePng []byte
 
 var BeosLikeXlarge = &Definition{
 	Name: "beos_like_xlarge",
-	Middle: image.Rect(12, 12, 84, 84),
+	Middle: image.Rect(15, 66, 177, 177),
 }
 
 func init() {
