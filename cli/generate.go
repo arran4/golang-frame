@@ -1256,7 +1256,7 @@ func genChains(s int) (image.Image, image.Rectangle, string) {
 
                     z := math.Sqrt(r*r - dist*dist)
 
-                    c := color.RGBA{180, 180, 185, 255}
+                    var c color.RGBA
 
                     lineWidth := float64(s) * 0.8
                     if lineWidth < 1.0 { lineWidth = 1.0 }
