@@ -1178,7 +1178,7 @@ func genChains(s int) (image.Image, image.Rectangle, string) {
 	bg := color.RGBA{40, 40, 40, 255}
 	img := solid(w, h, bg)
 
-	drawLinkMasked := func(cx, cy int, R, r, L float64, isH bool, colorBase color.RGBA, maskFunc func(x,y int) bool) {
+	drawLinkMasked := func(cx, cy int, R, r, L float64, isH bool, maskFunc func(x,y int) bool) {
 		minX, maxX := cx - int(R+r+L), cx + int(R+r+L)
 		minY, maxY := cy - int(R+r+L), cy + int(R+r+L)
 
@@ -1191,129 +1191,140 @@ func genChains(s int) (image.Image, image.Rectangle, string) {
 				dy := float64(y - cy)
 
 				var dist float64
-				var px, py float64
 
 				if isH {
 					if dx > L/2 {
 						cx2, cy2 := float64(cx) + L/2, float64(cy)
-						dist = math.Sqrt((float64(x)-cx2)*(float64(x)-cx2) + dy*dy) - R
-						ang := math.Atan2(dy, float64(x)-cx2)
-						px = cx2 + R*math.Cos(ang)
-						py = cy2 + R*math.Sin(ang)
+						dist = math.Sqrt((float64(x)-cx2)*(float64(x)-cx2) + (float64(y)-cy2)*(float64(y)-cy2)) - R
 					} else if dx < -L/2 {
 						cx2, cy2 := float64(cx) - L/2, float64(cy)
-						dist = math.Sqrt((float64(x)-cx2)*(float64(x)-cx2) + dy*dy) - R
-						ang := math.Atan2(dy, float64(x)-cx2)
-						px = cx2 + R*math.Cos(ang)
-						py = cy2 + R*math.Sin(ang)
+						dist = math.Sqrt((float64(x)-cx2)*(float64(x)-cx2) + (float64(y)-cy2)*(float64(y)-cy2)) - R
 					} else {
 						dist = math.Abs(dy) - R
-						px = float64(x)
-						if dy > 0 { py = float64(cy) + R } else { py = float64(cy) - R }
 					}
 				} else {
 					if dy > L/2 {
 						cx2, cy2 := float64(cx), float64(cy) + L/2
 						dist = math.Sqrt(dx*dx + (float64(y)-cy2)*(float64(y)-cy2)) - R
-						ang := math.Atan2(float64(y)-cy2, dx)
-						px = cx2 + R*math.Cos(ang)
-						py = cy2 + R*math.Sin(ang)
+						_ = cx2
 					} else if dy < -L/2 {
 						cx2, cy2 := float64(cx), float64(cy) - L/2
 						dist = math.Sqrt(dx*dx + (float64(y)-cy2)*(float64(y)-cy2)) - R
-						ang := math.Atan2(float64(y)-cy2, dx)
-						px = cx2 + R*math.Cos(ang)
-						py = cy2 + R*math.Sin(ang)
+						_ = cx2
 					} else {
 						dist = math.Abs(dx) - R
-						py = float64(y)
-						if dx > 0 { px = float64(cx) + R } else { px = float64(cx) - R }
 					}
 				}
 
 				if math.Abs(dist) <= r {
-					z := math.Sqrt(r*r - dist*dist)
+                    var nx, ny float64
 
-					nx := float64(x) - px
-					ny := float64(y) - py
-					nz := z
+                    if isH {
+                        if dx > L/2 {
+                            cx2_v := float64(cx)+L/2
+                            nx = float64(x) - cx2_v
+                            ny = dy
+                        } else if dx < -L/2 {
+                            cx2_v := float64(cx)-L/2
+                            nx = float64(x) - cx2_v
+                            ny = dy
+                        } else {
+                            nx = 0
+                            ny = dy
+                        }
+                    } else {
+                        if dy > L/2 {
+                            cy2_v := float64(cy)+L/2
+                            nx = dx
+                            ny = float64(y) - cy2_v
+                        } else if dy < -L/2 {
+                            cy2_v := float64(cy)-L/2
+                            nx = dx
+                            ny = float64(y) - cy2_v
+                        } else {
+                            nx = dx
+                            ny = 0
+                        }
+                    }
 
-					nl := math.Sqrt(nx*nx + ny*ny + nz*nz)
-					if nl > 0 { nx /= nl; ny /= nl; nz /= nl }
+                    nl := math.Sqrt(nx*nx + ny*ny)
+                    if nl > 0 { nx /= nl; ny /= nl }
 
-					lx, ly, lz := -0.5, -0.5, 1.0
-					ll := math.Sqrt(lx*lx + ly*ly + lz*lz)
-					lx /= ll; ly /= ll; lz /= ll
+                    if dist < 0 {
+                        nx = -nx; ny = -ny
+                    }
 
-					dot := nx*lx + ny*ly + nz*lz
-					if dot < 0 { dot = 0 }
+                    z := math.Sqrt(r*r - dist*dist)
 
-					hx, hy, hz := lx, ly, lz + 1.0
-					hl := math.Sqrt(hx*hx + hy*hy + hz*hz)
-					hx /= hl; hy /= hl; hz /= hl
+                    c := color.RGBA{180, 180, 185, 255}
 
-					spec := nx*hx + ny*hy + nz*hz
-					if spec < 0 { spec = 0 }
-					spec = math.Pow(spec, 20)
+                    lineWidth := float64(s) * 0.8
+                    if lineWidth < 1.0 { lineWidth = 1.0 }
 
-					ambient := 0.3
-					diffuse := 0.6 * dot
+                    if math.Abs(dist) > r - lineWidth {
+                        c = color.RGBA{25, 25, 30, 255} // Outline
+                    } else if math.Abs(dist) < lineWidth*0.8 {
+                        c = color.RGBA{100, 100, 105, 255} // Inner sharp line
+                    } else {
+                        // Light source from top left
+                        lx, ly := -0.6, -0.6
+                        dot := nx*lx + ny*ly
 
-					cr := float64(colorBase.R) * (ambient + diffuse) + 255.0*spec*0.5
-					cg := float64(colorBase.G) * (ambient + diffuse) + 255.0*spec*0.5
-					cb := float64(colorBase.B) * (ambient + diffuse) + 255.0*spec*0.5
+                        faceZ := r * 0.6
 
-					if cr > 255 { cr = 255 }
-					if cg > 255 { cg = 255 }
-					if cb > 255 { cb = 255 }
+                        if z > faceZ {
+                            // Flat front face
+                            c = color.RGBA{215, 215, 220, 255}
+                        } else {
+                            // Chamfered edge
+                            if dot > 0.1 {
+                                c = color.RGBA{235, 235, 245, 255} // Highlight
+                            } else {
+                                c = color.RGBA{140, 140, 150, 255} // Shadow
+                            }
+                        }
+                    }
 
-					img.SetRGBA(x, y, color.RGBA{uint8(cr), uint8(cg), uint8(cb), 255})
+					img.SetRGBA(x, y, c)
 				}
 			}
 		}
 	}
 
-	margin := 14 * s
+	R, r, L := 12.0*float64(s), 5.0*float64(s), 24.0*float64(s)
 
-	R := float64(4.0 * float64(s))
-	r := float64(2.0 * float64(s))
-	L := float64(8.0 * float64(s))
-
-	baseColor := color.RGBA{160, 160, 160, 255}
-
-	step := int(L) + int(2.0*R) - int(2.0*r)
-
-	for x := 0; x <= w+step; x += step {
-		drawLinkMasked(x, margin, R, r, L, true, baseColor, nil)
-		drawLinkMasked(x, h-margin, R, r, L, true, baseColor, nil)
-	}
-	for y := 0; y <= h+step; y += step {
-		drawLinkMasked(margin, y, R, r, L, false, baseColor, nil)
-		drawLinkMasked(w-margin, y, R, r, L, false, baseColor, nil)
+	for x := 24*s; x <= w-24*s; x += 48*s {
+		drawLinkMasked(x, 24*s, R, r, L, true, nil)
+		drawLinkMasked(x, h-24*s, R, r, L, true, nil)
 	}
 
-	for x := step/2; x <= w+step; x += step {
-		drawLinkMasked(x, margin, R, r, L, false, baseColor, nil)
-		drawLinkMasked(x, margin, R, r, L, true, baseColor, func(px, py int) bool { return px > x })
-
-		drawLinkMasked(x, h-margin, R, r, L, false, baseColor, nil)
-		drawLinkMasked(x, h-margin, R, r, L, true, baseColor, func(px, py int) bool { return px < x })
+	for y := 24*s; y <= h-24*s; y += 48*s {
+		drawLinkMasked(24*s, y, R, r, L, false, func(vx,vy int) bool {
+			if y == 24*s && vy < 24*s { return false }
+			if y == h-24*s && vy > h-24*s { return false }
+			return vy > y
+		})
+		drawLinkMasked(w-24*s, y, R, r, L, false, func(vx,vy int) bool {
+			if y == 24*s && vy < 24*s { return false }
+			if y == h-24*s && vy > h-24*s { return false }
+			return vy <= y
+		})
 	}
 
-	for y := step/2; y <= h+step; y += step {
-		drawLinkMasked(margin, y, R, r, L, true, baseColor, nil)
-		drawLinkMasked(margin, y, R, r, L, false, baseColor, func(px, py int) bool { return py > y })
+	drawLinkMasked(24*s, 24*s, R, r, L, false, func(vx,vy int) bool {
+		return vy <= 24*s
+	})
+	drawLinkMasked(w-24*s, 24*s, R, r, L, false, func(vx,vy int) bool {
+		return vy <= 24*s
+	})
+	drawLinkMasked(24*s, h-24*s, R, r, L, false, func(vx,vy int) bool {
+		return vy > h-24*s
+	})
+	drawLinkMasked(w-24*s, h-24*s, R, r, L, false, func(vx,vy int) bool {
+		return vy > h-24*s
+	})
 
-		drawLinkMasked(w-margin, y, R, r, L, true, baseColor, nil)
-		drawLinkMasked(w-margin, y, R, r, L, false, baseColor, func(px, py int) bool { return py < y })
-	}
-
-	drawLinkMasked(margin, margin, R, r, L, true, baseColor, func(px, py int) bool { return py < margin && px > margin-int(R+r) })
-	drawLinkMasked(w-margin, margin, R, r, L, true, baseColor, func(px, py int) bool { return py < margin && px < w-margin+int(R+r) })
-	drawLinkMasked(margin, h-margin, R, r, L, true, baseColor, func(px, py int) bool { return py > h-margin && px > margin-int(R+r) })
-	drawLinkMasked(w-margin, h-margin, R, r, L, true, baseColor, func(px, py int) bool { return py > h-margin && px < w-margin+int(R+r) })
-
-	return img, image.Rect(28*s, 28*s, w-28*s, h-28*s), "chains"
+	return img, image.Rect(24*s, 24*s, w-24*s, h-24*s), "chains"
 }
 
 func genRainbow(s int) (image.Image, image.Rectangle, string) {
