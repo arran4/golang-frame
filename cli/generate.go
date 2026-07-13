@@ -1173,9 +1173,133 @@ func genWaves(s int) (image.Image, image.Rectangle, string) {
 }
 
 func genChains(s int) (image.Image, image.Rectangle, string) {
-	w, h := 64*s, 64*s
-	img := solid(w, h, color.White)
-	return img, image.Rect(8*s, 8*s, w-8*s, h-8*s), "chains"
+	w, h := 96*s, 96*s
+
+	// dark metallic background
+	bg := color.RGBA{40, 40, 40, 255}
+	img := solid(w, h, bg)
+
+	c1 := color.RGBA{180, 180, 180, 255} // Light link (standing up, facing us)
+	c2 := color.RGBA{100, 100, 100, 255} // Dark link (lying flat)
+
+	margin := 14 * s
+	step := 20 * s
+	length := 10 * s
+
+	linkROuter := 5 * s
+	linkRInner := 2 * s
+
+	// draw ring function
+	drawRing := func(cx, cy int, c color.RGBA) {
+		for y := -linkROuter; y <= linkROuter; y++ {
+			for x := -linkROuter; x <= linkROuter; x++ {
+				d2 := x*x + y*y
+				if d2 <= linkROuter*linkROuter && d2 >= linkRInner*linkRInner {
+					if cx+x >= 0 && cx+x < w && cy+y >= 0 && cy+y < h {
+						img.Set(cx+x, cy+y, c)
+					}
+				}
+			}
+		}
+	}
+
+	// draw link segment
+	drawVLink := func(cx, cy, length int, c color.RGBA) {
+		for y := -length/2; y <= length/2; y++ {
+			for x := -linkROuter; x <= linkROuter; x++ {
+				d2 := x*x
+				if d2 <= linkROuter*linkROuter && d2 >= linkRInner*linkRInner {
+					if cx+x >= 0 && cx+x < w && cy+y >= 0 && cy+y < h {
+						img.Set(cx+x, cy+y, c)
+					}
+				}
+			}
+		}
+		drawRing(cx, cy-length/2, c)
+		drawRing(cx, cy+length/2, c)
+	}
+
+	drawHLink := func(cx, cy, length int, c color.RGBA) {
+		for x := -length/2; x <= length/2; x++ {
+			for y := -linkROuter; y <= linkROuter; y++ {
+				d2 := y*y
+				if d2 <= linkROuter*linkROuter && d2 >= linkRInner*linkRInner {
+					if cx+x >= 0 && cx+x < w && cy+y >= 0 && cy+y < h {
+						img.Set(cx+x, cy+y, c)
+					}
+				}
+			}
+		}
+		drawRing(cx-length/2, cy, c)
+		drawRing(cx+length/2, cy, c)
+	}
+
+	drawRingFace := func(cx, cy int, c color.RGBA) {
+		rOuterFace := linkROuter
+		rInnerFace := linkRInner
+		for y := -rOuterFace; y <= rOuterFace; y++ {
+			for x := -rOuterFace; x <= rOuterFace; x++ {
+				d2 := x*x + y*y
+				if d2 <= rOuterFace*rOuterFace && d2 >= rInnerFace*rInnerFace {
+					if cx+x >= 0 && cx+x < w && cy+y >= 0 && cy+y < h {
+						img.Set(cx+x, cy+y, c)
+					}
+				}
+			}
+		}
+	}
+
+	drawRingHole := func(cx, cy int, c color.RGBA) {
+		rInnerFace := linkRInner
+		for y := -rInnerFace; y <= rInnerFace; y++ {
+			for x := -rInnerFace; x <= rInnerFace; x++ {
+				d2 := x*x + y*y
+				if d2 <= rInnerFace*rInnerFace {
+					if cx+x >= 0 && cx+x < w && cy+y >= 0 && cy+y < h {
+						img.Set(cx+x, cy+y, c)
+					}
+				}
+			}
+		}
+	}
+
+	// Draw lying links first
+	for x := 0; x <= w+step; x += step {
+		drawHLink(x, margin, length, c2)
+		drawHLink(x, h-margin, length, c2)
+	}
+	for y := 0; y <= h+step; y += step {
+		drawVLink(margin, y, length, c2)
+		drawVLink(w-margin, y, length, c2)
+	}
+
+	// Overlapping standing links
+	for x := 0; x <= w+step; x += step {
+		drawRingHole(x - step/2, margin, bg)
+		drawRingFace(x - step/2, margin, c1)
+
+		drawRingHole(x - step/2, h-margin, bg)
+		drawRingFace(x - step/2, h-margin, c1)
+	}
+	for y := 0; y <= h+step; y += step {
+		drawRingHole(margin, y - step/2, bg)
+		drawRingFace(margin, y - step/2, c1)
+
+		drawRingHole(w-margin, y - step/2, bg)
+		drawRingFace(w-margin, y - step/2, c1)
+	}
+
+	// Connect corners smoothly
+	drawRingHole(margin, margin, bg)
+	drawRingFace(margin, margin, c1)
+	drawRingHole(w-margin, margin, bg)
+	drawRingFace(w-margin, margin, c1)
+	drawRingHole(margin, h-margin, bg)
+	drawRingFace(margin, h-margin, c1)
+	drawRingHole(w-margin, h-margin, bg)
+	drawRingFace(w-margin, h-margin, c1)
+
+	return img, image.Rect(24*s, 24*s, w-24*s, h-24*s), "chains"
 }
 
 func genRainbow(s int) (image.Image, image.Rectangle, string) {
