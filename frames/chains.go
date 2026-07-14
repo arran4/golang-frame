@@ -12,7 +12,7 @@ var ChainsPng []byte
 
 var Chains = &Definition{
 	Name: "chains",
-	Middle: image.Rect(35, 35, 61, 61),
+	Middle: image.Rect(39, 39, 57, 57),
 }
 
 func init() {
