@@ -1291,40 +1291,46 @@ func genChains(s int) (image.Image, image.Rectangle, string) {
 		}
 	}
 
-	R, r, L := 12.0*float64(s), 5.0*float64(s), 24.0*float64(s)
+    margin := 24 * s
+    R, r, L := 6.0*float64(s), 3.0*float64(s), 12.0*float64(s)
 
-	for x := 24*s; x <= w-24*s; x += 48*s {
-		drawLinkMasked(x, 24*s, R, r, L, true, nil)
-		drawLinkMasked(x, h-24*s, R, r, L, true, nil)
-	}
+    // Pattern must repeat exactly across 48px to look seamless in tiling
+    // The links are spaced every 24px
 
-	for y := 24*s; y <= h-24*s; y += 48*s {
-		drawLinkMasked(24*s, y, R, r, L, false, func(vx,vy int) bool {
-			if y == 24*s && vy < 24*s { return false }
-			if y == h-24*s && vy > h-24*s { return false }
-			return vy > y
-		})
-		drawLinkMasked(w-24*s, y, R, r, L, false, func(vx,vy int) bool {
-			if y == 24*s && vy < 24*s { return false }
-			if y == h-24*s && vy > h-24*s { return false }
-			return vy <= y
-		})
-	}
+    // Pass 1: Bottom Layer
+    for x := margin; x <= w-margin; x += 24*s {
+		drawLinkMasked(x, margin, R, r, L, true, nil)
+		drawLinkMasked(x, h-margin, R, r, L, true, nil)
+    }
+    for y := margin; y <= h-margin; y += 24*s {
+		drawLinkMasked(margin, y, R, r, L, false, nil)
+		drawLinkMasked(w-margin, y, R, r, L, false, nil)
+    }
 
-	drawLinkMasked(24*s, 24*s, R, r, L, false, func(vx,vy int) bool {
-		return vy <= 24*s
-	})
-	drawLinkMasked(w-24*s, 24*s, R, r, L, false, func(vx,vy int) bool {
-		return vy <= 24*s
-	})
-	drawLinkMasked(24*s, h-24*s, R, r, L, false, func(vx,vy int) bool {
-		return vy > h-24*s
-	})
-	drawLinkMasked(w-24*s, h-24*s, R, r, L, false, func(vx,vy int) bool {
-		return vy > h-24*s
-	})
+    // Pass 2: Overlapping intersections to weave correctly!
+    for x := margin + 12*s; x < w-margin; x += 24*s {
+        // Horizontal middle link goes over left/right adjacent vertical links
+        drawLinkMasked(x, margin, R, r, L, false, func(vx,vy int) bool { return vx <= x })
+        drawLinkMasked(x, h-margin, R, r, L, false, func(vx,vy int) bool { return vx <= x })
+    }
+    for y := margin + 12*s; y < h-margin; y += 24*s {
+        // Vertical middle link goes over top/bottom adjacent horizontal links
+        drawLinkMasked(margin, y, R, r, L, true, func(vx,vy int) bool { return vy <= y })
+        drawLinkMasked(w-margin, y, R, r, L, true, func(vx,vy int) bool { return vy <= y })
+    }
 
-	return img, image.Rect(24*s, 24*s, w-24*s, h-24*s), "chains"
+    // Pass 3: Corner fixes
+    // We want corners to weave smoothly.
+    // Top-Left: Vertical goes over Horizontal left side
+    drawLinkMasked(margin, margin, R, r, L, false, func(vx,vy int) bool { return vx <= margin })
+    // Top-Right: Horizontal goes over Vertical right side
+    drawLinkMasked(w-margin, margin, R, r, L, true, func(vx,vy int) bool { return vx >= w-margin })
+    // Bottom-Left: Horizontal goes over Vertical bottom side
+    drawLinkMasked(margin, h-margin, R, r, L, true, func(vx,vy int) bool { return vy >= h-margin })
+    // Bottom-Right: Vertical goes over Horizontal bottom side
+    drawLinkMasked(w-margin, h-margin, R, r, L, false, func(vx,vy int) bool { return vy >= h-margin })
+
+	return img, image.Rect(margin + int(R+r+2), margin + int(R+r+2), w - margin - int(R+r+2), h - margin - int(R+r+2)), "chains"
 }
 
 func genRainbow(s int) (image.Image, image.Rectangle, string) {
