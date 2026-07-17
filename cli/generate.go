@@ -1191,134 +1191,140 @@ func genChains(s int) (image.Image, image.Rectangle, string) {
 				dy := float64(y - cy)
 
 				var dist float64
-				var px, py float64
 
 				if isH {
 					if dx > L/2 {
-						cx2, cy2 := float64(cx) + L/2, float64(cy)
-						dist = math.Sqrt((float64(x)-cx2)*(float64(x)-cx2) + dy*dy) - R
-						ang := math.Atan2(dy, float64(x)-cx2)
-						px = cx2 + R*math.Cos(ang)
-						py = cy2 + R*math.Sin(ang)
+						cx2 := L/2
+						dist = math.Sqrt((dx-cx2)*(dx-cx2) + dy*dy) - R
 					} else if dx < -L/2 {
-						cx2, cy2 := float64(cx) - L/2, float64(cy)
-						dist = math.Sqrt((float64(x)-cx2)*(float64(x)-cx2) + dy*dy) - R
-						ang := math.Atan2(dy, float64(x)-cx2)
-						px = cx2 + R*math.Cos(ang)
-						py = cy2 + R*math.Sin(ang)
+						cx2 := -L/2
+						dist = math.Sqrt((dx-cx2)*(dx-cx2) + dy*dy) - R
 					} else {
 						dist = math.Abs(dy) - R
-						px = float64(x)
-						if dy > 0 { py = float64(cy) + R } else { py = float64(cy) - R }
 					}
 				} else {
 					if dy > L/2 {
-						cx2, cy2 := float64(cx), float64(cy) + L/2
-						dist = math.Sqrt(dx*dx + (float64(y)-cy2)*(float64(y)-cy2)) - R
-						ang := math.Atan2(float64(y)-cy2, dx)
-						px = cx2 + R*math.Cos(ang)
-						py = cy2 + R*math.Sin(ang)
+						cy2 := L/2
+						dist = math.Sqrt(dx*dx + (dy-cy2)*(dy-cy2)) - R
 					} else if dy < -L/2 {
-						cx2, cy2 := float64(cx), float64(cy) - L/2
-						dist = math.Sqrt(dx*dx + (float64(y)-cy2)*(float64(y)-cy2)) - R
-						ang := math.Atan2(float64(y)-cy2, dx)
-						px = cx2 + R*math.Cos(ang)
-						py = cy2 + R*math.Sin(ang)
+						cy2 := -L/2
+						dist = math.Sqrt(dx*dx + (dy-cy2)*(dy-cy2)) - R
 					} else {
 						dist = math.Abs(dx) - R
-						py = float64(y)
-						if dx > 0 { px = float64(cx) + R } else { px = float64(cx) - R }
 					}
 				}
 
-				if math.Abs(dist) <= r {
-					z := math.Sqrt(r*r - dist*dist)
+                distToEdge := r - math.Abs(dist)
+				if distToEdge > 0 {
+                    outlineWidth := 1.0 * float64(s)
+                    if outlineWidth < 1.0 { outlineWidth = 1.0 }
 
-					nx := float64(x) - px
-					ny := float64(y) - py
-					nz := z
+                    var c color.RGBA
+                    if distToEdge < outlineWidth {
+                        c = color.RGBA{20, 20, 25, 255}
+                    } else {
+                        nz := math.Sqrt(r*r - dist*dist) / r
 
-					nl := math.Sqrt(nx*nx + ny*ny + nz*nz)
-					if nl > 0 { nx /= nl; ny /= nl; nz /= nl }
+                        nx, ny := 0.0, 0.0
+                        if isH {
+                            if dx > L/2 { nx = dx - L/2; ny = dy } else if dx < -L/2 { nx = dx + L/2; ny = dy } else { nx = 0; ny = dy }
+                        } else {
+                            if dy > L/2 { nx = dx; ny = dy - L/2 } else if dy < -L/2 { nx = dx; ny = dy + L/2 } else { nx = dx; ny = 0 }
+                        }
+                        nl := math.Sqrt(nx*nx + ny*ny)
+                        if nl > 0 { nx /= nl; ny /= nl }
+                        if dist < 0 { nx = -nx; ny = -ny }
 
-					lx, ly, lz := -0.5, -0.5, 1.0
-					ll := math.Sqrt(lx*lx + ly*ly + lz*lz)
-					lx /= ll; ly /= ll; lz /= ll
+                        lx, ly, lz := -0.5, -0.5, 1.0
+                        ll := math.Sqrt(lx*lx + ly*ly + lz*lz)
+                        lx /= ll; ly /= ll; lz /= lz
+                        dot := nx*lx + ny*ly + nz*lz
+                        if dot < 0 { dot = 0 }
 
-					dot := nx*lx + ny*ly + nz*lz
-					if dot < 0 { dot = 0 }
+                        spec := nx*lx + ny*ly + nz*lz
+                        spec = math.Pow(spec, 8)
+                        if spec < 0 { spec = 0 }
 
-					hx, hy, hz := lx, ly, lz + 1.0
-					hl := math.Sqrt(hx*hx + hy*hy + hz*hz)
-					hx /= hl; hy /= hl; hz /= hl
+                        baseC := float64(140) + 60*nz
+                        cr := baseC * (0.4 + 0.6*dot) + 255*spec*0.3
+                        cg := baseC * (0.4 + 0.6*dot) + 255*spec*0.3
+                        cb := (baseC + 5) * (0.4 + 0.6*dot) + 255*spec*0.3
 
-					spec := nx*hx + ny*hy + nz*hz
-					if spec < 0 { spec = 0 }
-					spec = math.Pow(spec, 20)
+                        if cr > 255 { cr = 255 }
+                        if cg > 255 { cg = 255 }
+                        if cb > 255 { cb = 255 }
 
-					ambient := 0.3
-					diffuse := 0.6 * dot
+                        c = color.RGBA{uint8(cr), uint8(cg), uint8(cb), 255}
+                    }
 
-					colorBase := color.RGBA{180, 180, 180, 255}
+                    if distToEdge < 0.5 {
+                        alpha := distToEdge / 0.5
+                        bgC := img.RGBAAt(x, y)
+                        c = color.RGBA{
+                            uint8(float64(c.R)*alpha + float64(bgC.R)*(1-alpha)),
+                            uint8(float64(c.G)*alpha + float64(bgC.G)*(1-alpha)),
+                            uint8(float64(c.B)*alpha + float64(bgC.B)*(1-alpha)),
+                            255,
+                        }
+                    }
 
-					cr := float64(colorBase.R) * (ambient + diffuse) + 255.0*spec*0.5
-					cg := float64(colorBase.G) * (ambient + diffuse) + 255.0*spec*0.5
-					cb := float64(colorBase.B) * (ambient + diffuse) + 255.0*spec*0.5
-
-					if cr > 255 { cr = 255 }
-					if cg > 255 { cg = 255 }
-					if cb > 255 { cb = 255 }
-
-					img.SetRGBA(x, y, color.RGBA{uint8(cr), uint8(cg), uint8(cb), 255})
+					img.SetRGBA(x, y, c)
 				}
 			}
 		}
 	}
 
-    margin := 24 * s
-    R, r, L := 6.0*float64(s), 3.0*float64(s), 12.0*float64(s)
+    margin := 12 * s
+    R, r, L := 2.5*float64(s), 2.5*float64(s), 14.0*float64(s)
 
-    // Bottom layer: Horizontal on X, Vertical on Y
-    // For x from 24 to 72, drawing at 24 and 48 and 72
-    for x := margin; x <= w-margin; x += 24*s {
-		drawLinkMasked(x, margin, R, r, L, true, nil)
-		drawLinkMasked(x, h-margin, R, r, L, true, nil)
-    }
-    for y := margin; y <= h-margin; y += 24*s {
-		drawLinkMasked(margin, y, R, r, L, false, nil)
-		drawLinkMasked(w-margin, y, R, r, L, false, nil)
+    type LinkInfo struct {
+        cx, cy int
+        isH bool
+        phase int
+        redrawMask func(x,y int) bool
     }
 
-    // Top layer (interlocking)
-    for x := margin + 12*s; x < w-margin; x += 24*s {
-        drawLinkMasked(x, margin, R, r, L, false, func(vx,vy int) bool { return vx <= x })
-        drawLinkMasked(x, h-margin, R, r, L, false, func(vx,vy int) bool { return vx <= x })
+    var links []LinkInfo
+
+    links = append(links, LinkInfo{12*s, 12*s, false, 1, func(vx,vy int) bool { return vy > 21*s }})
+    links = append(links, LinkInfo{30*s, 12*s, true, 0, func(vx,vy int) bool { return vx < 21*s }})
+    links = append(links, LinkInfo{48*s, 12*s, false, 1, func(vx,vy int) bool { return vx > 39*s }})
+    links = append(links, LinkInfo{66*s, 12*s, true, 0, func(vx,vy int) bool { return vx < 57*s }})
+    links = append(links, LinkInfo{84*s, 12*s, false, 1, func(vx,vy int) bool { return vx > 75*s }})
+
+    links = append(links, LinkInfo{84*s, 30*s, true, 0, func(vx,vy int) bool { return vy < 21*s }})
+    links = append(links, LinkInfo{84*s, 48*s, false, 1, func(vx,vy int) bool { return vy > 39*s }})
+    links = append(links, LinkInfo{84*s, 66*s, true, 0, func(vx,vy int) bool { return vy < 57*s }})
+    links = append(links, LinkInfo{84*s, 84*s, false, 1, func(vx,vy int) bool { return vy < 75*s }})
+
+    links = append(links, LinkInfo{66*s, 84*s, true, 0, func(vx,vy int) bool { return vx > 75*s }})
+    links = append(links, LinkInfo{48*s, 84*s, false, 1, func(vx,vy int) bool { return vx < 57*s }})
+    links = append(links, LinkInfo{30*s, 84*s, true, 0, func(vx,vy int) bool { return vx > 39*s }})
+    links = append(links, LinkInfo{12*s, 84*s, false, 1, func(vx,vy int) bool { return vx < 21*s }})
+
+    links = append(links, LinkInfo{12*s, 66*s, true, 0, func(vx,vy int) bool { return vy > 75*s }})
+    links = append(links, LinkInfo{12*s, 48*s, false, 1, func(vx,vy int) bool { return vy < 57*s }})
+    links = append(links, LinkInfo{12*s, 30*s, true, 0, func(vx,vy int) bool { return vy > 39*s }})
+
+    for _, link := range links {
+        if link.phase == 0 {
+            drawLinkMasked(link.cx, link.cy, R, r, L, link.isH, nil)
+        }
     }
-    for y := margin + 12*s; y < h-margin; y += 24*s {
-        drawLinkMasked(margin, y, R, r, L, true, func(vx,vy int) bool { return vy <= y })
-        drawLinkMasked(w-margin, y, R, r, L, true, func(vx,vy int) bool { return vy <= y })
+
+    for _, link := range links {
+        if link.phase == 1 {
+            drawLinkMasked(link.cx, link.cy, R, r, L, link.isH, nil)
+        }
     }
 
-    // Corner intersections need proper overlap so it connects in a continuous ring.
-    // The corners were previously fully masked which made them look cut.
-    // At margin,margin we have a horizontal link (bottom) and a vertical link (bottom).
-    // They are just overlapping arbitrarily.
-    // We want the vertical link to go over the horizontal one on the left, but under it on the right.
-    // We can do this by re-drawing the left half of the vertical link, AND the right half of the horizontal link over it!
+    for _, link := range links {
+        if link.phase == 0 {
+            drawLinkMasked(link.cx, link.cy, R, r, L, link.isH, link.redrawMask)
+        }
+    }
 
-    // Top-Left corner:
-    drawLinkMasked(margin, margin, R, r, L, false, func(vx,vy int) bool { return vx <= margin }) // Vertical left half on top
-
-    // Top-Right corner:
-    drawLinkMasked(w-margin, margin, R, r, L, false, func(vx,vy int) bool { return vx >= w-margin }) // Vertical right half on top
-
-    // Bottom-Left corner:
-    drawLinkMasked(margin, h-margin, R, r, L, false, func(vx,vy int) bool { return vx <= margin }) // Vertical left half on top
-
-    // Bottom-Right corner:
-    drawLinkMasked(w-margin, h-margin, R, r, L, false, func(vx,vy int) bool { return vx >= w-margin }) // Vertical right half on top
-
-	return img, image.Rect(margin + int(R+r+L/2.0), margin + int(R+r+L/2.0), w - margin - int(R+r+L/2.0), h - margin - int(R+r+L/2.0)), "chains"
+	return img, image.Rect(margin + int(R+r+1.0), margin + int(R+r+1.0), w - margin - int(R+r+1.0), h - margin - int(R+r+1.0)), "chains"
 }
 
 func genRainbow(s int) (image.Image, image.Rectangle, string) {
