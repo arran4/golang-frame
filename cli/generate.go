@@ -1275,7 +1275,9 @@ func genChains(s int) (image.Image, image.Rectangle, string) {
 	}
 
     margin := 12 * s
-    R, r, L := 2.5*float64(s), 2.5*float64(s), 14.0*float64(s)
+    R := 4.0 * float64(s)
+    r := 2.0 * float64(s)
+    L := 14.0 * float64(s) // slightly longer so they don't look completely squashed, overlap will be 7px
 
     type LinkInfo struct {
         cx, cy int
@@ -1286,25 +1288,33 @@ func genChains(s int) (image.Image, image.Rectangle, string) {
 
     var links []LinkInfo
 
-    links = append(links, LinkInfo{12*s, 12*s, false, 1, func(vx,vy int) bool { return vy > 21*s }})
-    links = append(links, LinkInfo{30*s, 12*s, true, 0, func(vx,vy int) bool { return vx < 21*s }})
-    links = append(links, LinkInfo{48*s, 12*s, false, 1, func(vx,vy int) bool { return vx > 39*s }})
-    links = append(links, LinkInfo{66*s, 12*s, true, 0, func(vx,vy int) bool { return vx < 57*s }})
-    links = append(links, LinkInfo{84*s, 12*s, false, 1, func(vx,vy int) bool { return vx > 75*s }})
+    links = append(links, LinkInfo{12*s, 12*s, false, 1, func(vx,vy int) bool { return vy > 18*s }}) // Corner
+    links = append(links, LinkInfo{24*s, 12*s, true, 0, func(vx,vy int) bool { return vx < 18*s }})
+    links = append(links, LinkInfo{36*s, 12*s, false, 1, func(vx,vy int) bool { return vx > 30*s }})
+    links = append(links, LinkInfo{48*s, 12*s, true, 0, func(vx,vy int) bool { return vx < 42*s }})
+    links = append(links, LinkInfo{60*s, 12*s, false, 1, func(vx,vy int) bool { return vx > 54*s }})
+    links = append(links, LinkInfo{72*s, 12*s, true, 0, func(vx,vy int) bool { return vx < 66*s }})
+    links = append(links, LinkInfo{84*s, 12*s, false, 1, func(vx,vy int) bool { return vx > 78*s }}) // Corner
 
-    links = append(links, LinkInfo{84*s, 30*s, true, 0, func(vx,vy int) bool { return vy < 21*s }})
-    links = append(links, LinkInfo{84*s, 48*s, false, 1, func(vx,vy int) bool { return vy > 39*s }})
-    links = append(links, LinkInfo{84*s, 66*s, true, 0, func(vx,vy int) bool { return vy < 57*s }})
-    links = append(links, LinkInfo{84*s, 84*s, false, 1, func(vx,vy int) bool { return vy < 75*s }})
+    links = append(links, LinkInfo{84*s, 24*s, true, 0, func(vx,vy int) bool { return vy < 18*s }})
+    links = append(links, LinkInfo{84*s, 36*s, false, 1, func(vx,vy int) bool { return vy > 30*s }})
+    links = append(links, LinkInfo{84*s, 48*s, true, 0, func(vx,vy int) bool { return vy < 42*s }})
+    links = append(links, LinkInfo{84*s, 60*s, false, 1, func(vx,vy int) bool { return vy > 54*s }})
+    links = append(links, LinkInfo{84*s, 72*s, true, 0, func(vx,vy int) bool { return vy < 66*s }})
+    links = append(links, LinkInfo{84*s, 84*s, false, 1, func(vx,vy int) bool { return vy < 78*s }}) // Corner
 
-    links = append(links, LinkInfo{66*s, 84*s, true, 0, func(vx,vy int) bool { return vx > 75*s }})
-    links = append(links, LinkInfo{48*s, 84*s, false, 1, func(vx,vy int) bool { return vx < 57*s }})
-    links = append(links, LinkInfo{30*s, 84*s, true, 0, func(vx,vy int) bool { return vx > 39*s }})
-    links = append(links, LinkInfo{12*s, 84*s, false, 1, func(vx,vy int) bool { return vx < 21*s }})
+    links = append(links, LinkInfo{72*s, 84*s, true, 0, func(vx,vy int) bool { return vx > 78*s }})
+    links = append(links, LinkInfo{60*s, 84*s, false, 1, func(vx,vy int) bool { return vx < 66*s }})
+    links = append(links, LinkInfo{48*s, 84*s, true, 0, func(vx,vy int) bool { return vx > 54*s }})
+    links = append(links, LinkInfo{36*s, 84*s, false, 1, func(vx,vy int) bool { return vx < 42*s }})
+    links = append(links, LinkInfo{24*s, 84*s, true, 0, func(vx,vy int) bool { return vx > 30*s }})
+    links = append(links, LinkInfo{12*s, 84*s, false, 1, func(vx,vy int) bool { return vx < 18*s }}) // Corner
 
-    links = append(links, LinkInfo{12*s, 66*s, true, 0, func(vx,vy int) bool { return vy > 75*s }})
-    links = append(links, LinkInfo{12*s, 48*s, false, 1, func(vx,vy int) bool { return vy < 57*s }})
-    links = append(links, LinkInfo{12*s, 30*s, true, 0, func(vx,vy int) bool { return vy > 39*s }})
+    links = append(links, LinkInfo{12*s, 72*s, true, 0, func(vx,vy int) bool { return vy > 78*s }})
+    links = append(links, LinkInfo{12*s, 60*s, false, 1, func(vx,vy int) bool { return vy < 66*s }})
+    links = append(links, LinkInfo{12*s, 48*s, true, 0, func(vx,vy int) bool { return vy > 54*s }})
+    links = append(links, LinkInfo{12*s, 36*s, false, 1, func(vx,vy int) bool { return vy < 42*s }})
+    links = append(links, LinkInfo{12*s, 24*s, true, 0, func(vx,vy int) bool { return vy > 30*s }})
 
     for _, link := range links {
         if link.phase == 0 {
