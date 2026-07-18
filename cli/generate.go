@@ -1277,7 +1277,7 @@ func genChains(s int) (image.Image, image.Rectangle, string) {
     margin := 12 * s
     R := 4.0 * float64(s)
     r := 2.0 * float64(s)
-    L := 14.0 * float64(s) // slightly longer so they don't look completely squashed, overlap will be 7px
+    L := 14.0 * float64(s)
 
     type LinkInfo struct {
         cx, cy int
@@ -1288,51 +1288,71 @@ func genChains(s int) (image.Image, image.Rectangle, string) {
 
     var links []LinkInfo
 
-    links = append(links, LinkInfo{12*s, 12*s, false, 1, func(vx,vy int) bool { return vy > 18*s }}) // Corner
-    links = append(links, LinkInfo{24*s, 12*s, true, 0, func(vx,vy int) bool { return vx < 18*s }})
-    links = append(links, LinkInfo{36*s, 12*s, false, 1, func(vx,vy int) bool { return vx > 30*s }})
-    links = append(links, LinkInfo{48*s, 12*s, true, 0, func(vx,vy int) bool { return vx < 42*s }})
-    links = append(links, LinkInfo{60*s, 12*s, false, 1, func(vx,vy int) bool { return vx > 54*s }})
-    links = append(links, LinkInfo{72*s, 12*s, true, 0, func(vx,vy int) bool { return vx < 66*s }})
-    links = append(links, LinkInfo{84*s, 12*s, false, 1, func(vx,vy int) bool { return vx > 78*s }}) // Corner
+    // Top edge: cx goes from 24 to 72
+    for x := margin + 12*s; x <= w-margin-12*s; x += 12*s {
+        mask := func(vx,vy int) bool { return vy > margin && vx > x }
+        links = append(links, LinkInfo{x, margin, true, 0, mask})
+    }
 
-    links = append(links, LinkInfo{84*s, 24*s, true, 0, func(vx,vy int) bool { return vy < 18*s }})
-    links = append(links, LinkInfo{84*s, 36*s, false, 1, func(vx,vy int) bool { return vy > 30*s }})
-    links = append(links, LinkInfo{84*s, 48*s, true, 0, func(vx,vy int) bool { return vy < 42*s }})
-    links = append(links, LinkInfo{84*s, 60*s, false, 1, func(vx,vy int) bool { return vy > 54*s }})
-    links = append(links, LinkInfo{84*s, 72*s, true, 0, func(vx,vy int) bool { return vy < 66*s }})
-    links = append(links, LinkInfo{84*s, 84*s, false, 1, func(vx,vy int) bool { return vy < 78*s }}) // Corner
+    // Right edge: cy goes from 24 to 72
+    for y := margin + 12*s; y <= h-margin-12*s; y += 12*s {
+        mask := func(vx,vy int) bool { return vx < w-margin && vy > y }
+        links = append(links, LinkInfo{w-margin, y, false, 0, mask})
+    }
 
-    links = append(links, LinkInfo{72*s, 84*s, true, 0, func(vx,vy int) bool { return vx > 78*s }})
-    links = append(links, LinkInfo{60*s, 84*s, false, 1, func(vx,vy int) bool { return vx < 66*s }})
-    links = append(links, LinkInfo{48*s, 84*s, true, 0, func(vx,vy int) bool { return vx > 54*s }})
-    links = append(links, LinkInfo{36*s, 84*s, false, 1, func(vx,vy int) bool { return vx < 42*s }})
-    links = append(links, LinkInfo{24*s, 84*s, true, 0, func(vx,vy int) bool { return vx > 30*s }})
-    links = append(links, LinkInfo{12*s, 84*s, false, 1, func(vx,vy int) bool { return vx < 18*s }}) // Corner
+    // Bottom edge: cx goes from 72 to 24
+    for x := w - margin - 12*s; x >= margin+12*s; x -= 12*s {
+        mask := func(vx,vy int) bool { return vy < h-margin && vx < x }
+        links = append(links, LinkInfo{x, h-margin, true, 0, mask})
+    }
 
-    links = append(links, LinkInfo{12*s, 72*s, true, 0, func(vx,vy int) bool { return vy > 78*s }})
-    links = append(links, LinkInfo{12*s, 60*s, false, 1, func(vx,vy int) bool { return vy < 66*s }})
-    links = append(links, LinkInfo{12*s, 48*s, true, 0, func(vx,vy int) bool { return vy > 54*s }})
-    links = append(links, LinkInfo{12*s, 36*s, false, 1, func(vx,vy int) bool { return vy < 42*s }})
-    links = append(links, LinkInfo{12*s, 24*s, true, 0, func(vx,vy int) bool { return vy > 30*s }})
+    // Left edge: cy goes from 72 to 24
+    for y := h - margin - 12*s; y >= margin+12*s; y -= 12*s {
+        mask := func(vx,vy int) bool { return vx > margin && vy < y }
+        links = append(links, LinkInfo{margin, y, false, 0, mask})
+    }
+
+    // Corner links: O-rings
+    links = append(links, LinkInfo{margin, margin, false, 2, nil})
+    links = append(links, LinkInfo{w-margin, margin, false, 2, nil})
+    links = append(links, LinkInfo{margin, h-margin, false, 2, nil})
+    links = append(links, LinkInfo{w-margin, h-margin, false, 2, nil})
+
+    // We draw corners first, then edge links, then edge redraw masks.
+
+    for _, link := range links {
+        if link.phase == 2 {
+            drawLinkMasked(link.cx, link.cy, R, r, 0, link.isH, nil)
+        }
+    }
 
     for _, link := range links {
         if link.phase == 0 {
             drawLinkMasked(link.cx, link.cy, R, r, L, link.isH, nil)
         }
     }
-
     for _, link := range links {
-        if link.phase == 1 {
-            drawLinkMasked(link.cx, link.cy, R, r, L, link.isH, nil)
-        }
-    }
-
-    for _, link := range links {
-        if link.phase == 0 {
+        if link.phase == 0 && link.redrawMask != nil {
             drawLinkMasked(link.cx, link.cy, R, r, L, link.isH, link.redrawMask)
         }
     }
+
+    // Interlock edges into corners
+    // Top-Left corner: Top edge starts at x=24.
+    drawLinkMasked(margin+12*s, margin, R, r, L, true, func(vx,vy int) bool { return vx < margin+12*s && vy > margin })
+    drawLinkMasked(margin, margin+12*s, R, r, L, false, func(vx,vy int) bool { return vy < margin+12*s && vx < margin })
+
+    // Top-Right corner
+    drawLinkMasked(w-margin-12*s, margin, R, r, L, true, func(vx,vy int) bool { return vx > w-margin-12*s && vy < margin })
+    drawLinkMasked(w-margin, margin+12*s, R, r, L, false, func(vx,vy int) bool { return vy < margin+12*s && vx > w-margin })
+
+    // Bottom-Left corner
+    drawLinkMasked(margin+12*s, h-margin, R, r, L, true, func(vx,vy int) bool { return vx < margin+12*s && vy < h-margin })
+    drawLinkMasked(margin, h-margin-12*s, R, r, L, false, func(vx,vy int) bool { return vy > h-margin-12*s && vx > margin })
+
+    // Bottom-Right corner
+    drawLinkMasked(w-margin-12*s, h-margin, R, r, L, true, func(vx,vy int) bool { return vx > w-margin-12*s && vy > h-margin })
+    drawLinkMasked(w-margin, h-margin-12*s, R, r, L, false, func(vx,vy int) bool { return vy > h-margin-12*s && vx < w-margin })
 
 	return img, image.Rect(margin + int(R+r+1.0), margin + int(R+r+1.0), w - margin - int(R+r+1.0), h - margin - int(R+r+1.0)), "chains"
 }
