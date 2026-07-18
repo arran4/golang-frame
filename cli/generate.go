@@ -1275,9 +1275,7 @@ func genChains(s int) (image.Image, image.Rectangle, string) {
 	}
 
     margin := 12 * s
-    R := 4.0 * float64(s)
-    r := 2.0 * float64(s)
-    L := 14.0 * float64(s)
+    R, r, L := 4.0*float64(s), 2.0*float64(s), 14.0*float64(s)
 
     type LinkInfo struct {
         cx, cy int
@@ -1288,31 +1286,31 @@ func genChains(s int) (image.Image, image.Rectangle, string) {
 
     var links []LinkInfo
 
-    // Top edge: cx goes from 24 to 72
+    // Top edge: cx goes from 12 to 84. ALL H.
     for x := margin + 12*s; x <= w-margin-12*s; x += 12*s {
-        mask := func(vx,vy int) bool { return vy > margin && vx > x }
+        mask := func(vx,vy int) bool { return vy > margin && vx > x } // bottom half, right side
         links = append(links, LinkInfo{x, margin, true, 0, mask})
     }
 
-    // Right edge: cy goes from 24 to 72
+    // Right edge: cy goes from 24 to 84. ALL V.
     for y := margin + 12*s; y <= h-margin-12*s; y += 12*s {
-        mask := func(vx,vy int) bool { return vx < w-margin && vy > y }
+        mask := func(vx,vy int) bool { return vx < w-margin && vy > y } // left half, bottom side
         links = append(links, LinkInfo{w-margin, y, false, 0, mask})
     }
 
-    // Bottom edge: cx goes from 72 to 24
+    // Bottom edge: cx goes from 72 to 12. ALL H.
     for x := w - margin - 12*s; x >= margin+12*s; x -= 12*s {
-        mask := func(vx,vy int) bool { return vy < h-margin && vx < x }
+        mask := func(vx,vy int) bool { return vy < h-margin && vx < x } // top half, left side
         links = append(links, LinkInfo{x, h-margin, true, 0, mask})
     }
 
-    // Left edge: cy goes from 72 to 24
+    // Left edge: cy goes from 72 to 24. ALL V.
     for y := h - margin - 12*s; y >= margin+12*s; y -= 12*s {
-        mask := func(vx,vy int) bool { return vx > margin && vy < y }
+        mask := func(vx,vy int) bool { return vx > margin && vy < y } // right half, top side
         links = append(links, LinkInfo{margin, y, false, 0, mask})
     }
 
-    // Corner links: O-rings
+    // Corner links: We used O-rings before, but the user didn't mention it. Let's stick with O-rings for corners.
     links = append(links, LinkInfo{margin, margin, false, 2, nil})
     links = append(links, LinkInfo{w-margin, margin, false, 2, nil})
     links = append(links, LinkInfo{margin, h-margin, false, 2, nil})
