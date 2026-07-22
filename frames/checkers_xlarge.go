@@ -12,7 +12,7 @@ var CheckersXlargePng []byte
 
 var CheckersXlarge = &Definition{
 	Name: "checkers_xlarge",
-	Middle: image.Rect(48, 48, 96, 96),
+	Middle: image.Rect(48, 48, 144, 144),
 }
 
 func init() {

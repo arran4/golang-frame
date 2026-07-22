@@ -570,7 +570,7 @@ func genCheckers(s int) (image.Image, image.Rectangle, string) {
 	black := color.RGBA{40, 40, 40, 255}
 	red := color.RGBA{200, 40, 40, 255}
 	lightRed := color.RGBA{255, 200, 200, 255}
-	middleRect := image.Rect(sq*2, sq*2, sq*4, sq*4)
+	middleRect := image.Rect(sq*2, sq*2, sq*6, sq*6)
 
 	for y := 0; y < h; y += sq {
 		for x := 0; x < w; x += sq {

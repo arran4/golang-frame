@@ -86,7 +86,10 @@ func Gallery() error {
 				if err != nil {
 					return err
 				}
-				png.Encode(fe, dstExtra)
+				if err := png.Encode(fe, dstExtra); err != nil {
+					fe.Close()
+					return err
+				}
 				fe.Close()
 			}
 		}
