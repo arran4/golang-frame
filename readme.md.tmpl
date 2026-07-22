@@ -190,6 +190,14 @@ There is a collection of included frames in the `frames` package. Each frame com
 ### {{.ExportedName}}
 
 ![](images/gallery_{{.Name}}.png)
+{{if .IsCheckers}}
+#### Additional sizes / aspect ratios for Checkers
+
+![](images/gallery_{{.Name}}_extra_0.png)
+![](images/gallery_{{.Name}}_extra_1.png)
+![](images/gallery_{{.Name}}_extra_2.png)
+![](images/gallery_{{.Name}}_extra_3.png)
+{{end}}
 
 ```go
 import "github.com/arran4/golang-frame/frames"

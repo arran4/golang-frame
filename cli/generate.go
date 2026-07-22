@@ -568,14 +568,35 @@ func genCheckers(s int) (image.Image, image.Rectangle, string) {
 	w, h := sq*8, sq*8
 	img := solid(w, h, color.White)
 	black := color.RGBA{40, 40, 40, 255}
+	red := color.RGBA{200, 40, 40, 255}
+	lightRed := color.RGBA{255, 200, 200, 255}
+	middleRect := image.Rect(sq*2, sq*2, sq*4, sq*4)
+
 	for y := 0; y < h; y += sq {
 		for x := 0; x < w; x += sq {
-			if (x/sq+y/sq)%2 == 1 {
-				rect(img, image.Rect(x, y, x+sq, y+sq), black)
+			isBlack := (x/sq+y/sq)%2 == 1
+			var c color.Color = color.White
+
+			inMiddle := x >= middleRect.Min.X && x < middleRect.Max.X && y >= middleRect.Min.Y && y < middleRect.Max.Y
+
+			if inMiddle {
+				if isBlack {
+					c = red
+				} else {
+					c = lightRed
+				}
+			} else {
+				if isBlack {
+					c = black
+				}
+			}
+
+			if c != color.White {
+				rect(img, image.Rect(x, y, x+sq, y+sq), c)
 			}
 		}
 	}
-	return img, image.Rect(sq*2, sq*2, sq*4, sq*4), "checkers"
+	return img, middleRect, "checkers"
 }
 
 func genDots(s int) (image.Image, image.Rectangle, string) {
