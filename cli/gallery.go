@@ -17,6 +17,7 @@ import (
 type FrameData struct {
 	Name         string
 	ExportedName string
+	IsCheckers   bool
 }
 
 // Gallery is a subcommand `frames gallery` Generates gallery images and readme
@@ -59,9 +60,44 @@ func Gallery() error {
 		f.Close()
 
 		exportedName := toExportedName(def.Name)
+
+		// If checkers, generate additional aspect ratio / size examples
+		if def.Name == "checkers" {
+			for idx, wh := range [][2]int{{300, 150}, {150, 300}, {183, 201}, {230, 230}} {
+				// Measure it properly!
+				wLow, _, hLow, _ := frame.MeasureFrame(def.Image, def.Middle, wh[0], wh[1])
+				w, h := wLow, hLow
+				dstExtra := image.NewRGBA(image.Rect(0, 0, w+60, h+60))
+				for y := 0; y < h+60; y++ {
+					for x := 0; x < w+60; x++ {
+						if (x/8+y/8)%2 == 0 {
+							dstExtra.Set(x, y, color.RGBA{240, 240, 240, 255})
+						} else {
+							dstExtra.Set(x, y, color.RGBA{255, 255, 255, 255})
+						}
+					}
+				}
+				rectExtra := image.Rect(30, 30, 30+w, 30+h)
+				frExtra := frame.NewFrame(rectExtra, def.Image, def.Middle)
+				draw.Draw(dstExtra, rectExtra, frExtra, rectExtra.Min, draw.Over)
+
+				extraFilename := fmt.Sprintf("gallery_%s_extra_%d.png", def.Name, idx)
+				fe, err := os.Create(filepath.Join(dstDir, extraFilename))
+				if err != nil {
+					return err
+				}
+				if err := png.Encode(fe, dstExtra); err != nil {
+					fe.Close()
+					return err
+				}
+				fe.Close()
+			}
+		}
+
 		frameDatas = append(frameDatas, FrameData{
 			Name:         def.Name,
 			ExportedName: exportedName,
+			IsCheckers:   def.Name == "checkers",
 		})
 	}
 
