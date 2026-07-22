@@ -1173,9 +1173,187 @@ func genWaves(s int) (image.Image, image.Rectangle, string) {
 }
 
 func genChains(s int) (image.Image, image.Rectangle, string) {
-	w, h := 64*s, 64*s
-	img := solid(w, h, color.White)
-	return img, image.Rect(8*s, 8*s, w-8*s, h-8*s), "chains"
+	w, h := 96*s, 96*s
+
+	bg := color.RGBA{40, 40, 40, 255}
+	img := solid(w, h, bg)
+
+	drawLinkMasked := func(cx, cy int, R, r, L float64, isH bool, maskFunc func(x,y int) bool) {
+		minX, maxX := cx - int(R+r+L), cx + int(R+r+L)
+		minY, maxY := cy - int(R+r+L), cy + int(R+r+L)
+
+		for y := minY; y <= maxY; y++ {
+			for x := minX; x <= maxX; x++ {
+				if x < 0 || x >= w || y < 0 || y >= h { continue }
+				if maskFunc != nil && !maskFunc(x, y) { continue }
+
+				dx := float64(x - cx)
+				dy := float64(y - cy)
+
+				var dist float64
+
+				if isH {
+					if dx > L/2 {
+						cx2 := L/2
+						dist = math.Sqrt((dx-cx2)*(dx-cx2) + dy*dy) - R
+					} else if dx < -L/2 {
+						cx2 := -L/2
+						dist = math.Sqrt((dx-cx2)*(dx-cx2) + dy*dy) - R
+					} else {
+						dist = math.Abs(dy) - R
+					}
+				} else {
+					if dy > L/2 {
+						cy2 := L/2
+						dist = math.Sqrt(dx*dx + (dy-cy2)*(dy-cy2)) - R
+					} else if dy < -L/2 {
+						cy2 := -L/2
+						dist = math.Sqrt(dx*dx + (dy-cy2)*(dy-cy2)) - R
+					} else {
+						dist = math.Abs(dx) - R
+					}
+				}
+
+                distToEdge := r - math.Abs(dist)
+				if distToEdge > 0 {
+                    outlineWidth := 1.0 * float64(s)
+                    if outlineWidth < 1.0 { outlineWidth = 1.0 }
+
+                    var c color.RGBA
+                    if distToEdge < outlineWidth {
+                        c = color.RGBA{20, 20, 25, 255}
+                    } else {
+                        nz := math.Sqrt(r*r - dist*dist) / r
+
+                        nx, ny := 0.0, 0.0
+                        if isH {
+                            if dx > L/2 { nx = dx - L/2; ny = dy } else if dx < -L/2 { nx = dx + L/2; ny = dy } else { nx = 0; ny = dy }
+                        } else {
+                            if dy > L/2 { nx = dx; ny = dy - L/2 } else if dy < -L/2 { nx = dx; ny = dy + L/2 } else { nx = dx; ny = 0 }
+                        }
+                        nl := math.Sqrt(nx*nx + ny*ny)
+                        if nl > 0 { nx /= nl; ny /= nl }
+                        if dist < 0 { nx = -nx; ny = -ny }
+
+                        lx, ly, lz := -0.5, -0.5, 1.0
+                        ll := math.Sqrt(lx*lx + ly*ly + lz*lz)
+                        lx /= ll; ly /= ll; lz /= lz
+                        dot := nx*lx + ny*ly + nz*lz
+                        if dot < 0 { dot = 0 }
+
+                        spec := nx*lx + ny*ly + nz*lz
+                        spec = math.Pow(spec, 8)
+                        if spec < 0 { spec = 0 }
+
+                        baseC := float64(140) + 60*nz
+                        cr := baseC * (0.4 + 0.6*dot) + 255*spec*0.3
+                        cg := baseC * (0.4 + 0.6*dot) + 255*spec*0.3
+                        cb := (baseC + 5) * (0.4 + 0.6*dot) + 255*spec*0.3
+
+                        if cr > 255 { cr = 255 }
+                        if cg > 255 { cg = 255 }
+                        if cb > 255 { cb = 255 }
+
+                        c = color.RGBA{uint8(cr), uint8(cg), uint8(cb), 255}
+                    }
+
+                    if distToEdge < 0.5 {
+                        alpha := distToEdge / 0.5
+                        bgC := img.RGBAAt(x, y)
+                        c = color.RGBA{
+                            uint8(float64(c.R)*alpha + float64(bgC.R)*(1-alpha)),
+                            uint8(float64(c.G)*alpha + float64(bgC.G)*(1-alpha)),
+                            uint8(float64(c.B)*alpha + float64(bgC.B)*(1-alpha)),
+                            255,
+                        }
+                    }
+
+					img.SetRGBA(x, y, c)
+				}
+			}
+		}
+	}
+
+    margin := 12 * s
+    R, r, L := 4.0*float64(s), 2.0*float64(s), 14.0*float64(s)
+
+    type LinkInfo struct {
+        cx, cy int
+        isH bool
+        phase int
+        redrawMask func(x,y int) bool
+    }
+
+    var links []LinkInfo
+
+    // Top edge: cx goes from 12 to 84. ALL H.
+    for x := margin + 12*s; x <= w-margin-12*s; x += 12*s {
+        mask := func(vx,vy int) bool { return vy > margin && vx > x } // bottom half, right side
+        links = append(links, LinkInfo{x, margin, true, 0, mask})
+    }
+
+    // Right edge: cy goes from 24 to 84. ALL V.
+    for y := margin + 12*s; y <= h-margin-12*s; y += 12*s {
+        mask := func(vx,vy int) bool { return vx < w-margin && vy > y } // left half, bottom side
+        links = append(links, LinkInfo{w-margin, y, false, 0, mask})
+    }
+
+    // Bottom edge: cx goes from 72 to 12. ALL H.
+    for x := w - margin - 12*s; x >= margin+12*s; x -= 12*s {
+        mask := func(vx,vy int) bool { return vy < h-margin && vx < x } // top half, left side
+        links = append(links, LinkInfo{x, h-margin, true, 0, mask})
+    }
+
+    // Left edge: cy goes from 72 to 24. ALL V.
+    for y := h - margin - 12*s; y >= margin+12*s; y -= 12*s {
+        mask := func(vx,vy int) bool { return vx > margin && vy < y } // right half, top side
+        links = append(links, LinkInfo{margin, y, false, 0, mask})
+    }
+
+    // Corner links: O-rings
+    links = append(links, LinkInfo{margin, margin, false, 2, nil})
+    links = append(links, LinkInfo{w-margin, margin, false, 2, nil})
+    links = append(links, LinkInfo{margin, h-margin, false, 2, nil})
+    links = append(links, LinkInfo{w-margin, h-margin, false, 2, nil})
+
+    // We draw corners first, then edge links, then edge redraw masks.
+
+    for _, link := range links {
+        if link.phase == 2 {
+            drawLinkMasked(link.cx, link.cy, R, r, 0, link.isH, nil)
+        }
+    }
+
+    for _, link := range links {
+        if link.phase == 0 {
+            drawLinkMasked(link.cx, link.cy, R, r, L, link.isH, nil)
+        }
+    }
+
+    for _, link := range links {
+        if link.phase == 0 && link.redrawMask != nil {
+            drawLinkMasked(link.cx, link.cy, R, r, L, link.isH, link.redrawMask)
+        }
+    }
+
+    // Interlock edges into corners
+    // Top-Left corner: Top edge starts at x=24.
+    drawLinkMasked(margin+12*s, margin, R, r, L, true, func(vx,vy int) bool { return vx < margin+12*s && vy > margin })
+    drawLinkMasked(margin, margin+12*s, R, r, L, false, func(vx,vy int) bool { return vy < margin+12*s && vx < margin })
+
+    // Top-Right corner
+    drawLinkMasked(w-margin-12*s, margin, R, r, L, true, func(vx,vy int) bool { return vx > w-margin-12*s && vy < margin })
+    drawLinkMasked(w-margin, margin+12*s, R, r, L, false, func(vx,vy int) bool { return vy < margin+12*s && vx > w-margin })
+
+    // Bottom-Left corner
+    drawLinkMasked(margin+12*s, h-margin, R, r, L, true, func(vx,vy int) bool { return vx < margin+12*s && vy < h-margin })
+    drawLinkMasked(margin, h-margin-12*s, R, r, L, false, func(vx,vy int) bool { return vy > h-margin-12*s && vx > margin })
+
+    // Bottom-Right corner
+    drawLinkMasked(w-margin-12*s, h-margin, R, r, L, true, func(vx,vy int) bool { return vx > w-margin-12*s && vy > h-margin })
+    drawLinkMasked(w-margin, h-margin-12*s, R, r, L, false, func(vx,vy int) bool { return vy > h-margin-12*s && vx < w-margin })
+
+	return img, image.Rect(margin + int(R+r+1.0), margin + int(R+r+1.0), w - margin - int(R+r+1.0), h - margin - int(R+r+1.0)), "chains"
 }
 
 func genRainbow(s int) (image.Image, image.Rectangle, string) {
