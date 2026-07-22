@@ -1310,7 +1310,7 @@ func genChains(s int) (image.Image, image.Rectangle, string) {
         links = append(links, LinkInfo{margin, y, false, 0, mask})
     }
 
-    // Corner links: We used O-rings before, but the user didn't mention it. Let's stick with O-rings for corners.
+    // Corner links: O-rings
     links = append(links, LinkInfo{margin, margin, false, 2, nil})
     links = append(links, LinkInfo{w-margin, margin, false, 2, nil})
     links = append(links, LinkInfo{margin, h-margin, false, 2, nil})
@@ -1329,6 +1329,7 @@ func genChains(s int) (image.Image, image.Rectangle, string) {
             drawLinkMasked(link.cx, link.cy, R, r, L, link.isH, nil)
         }
     }
+
     for _, link := range links {
         if link.phase == 0 && link.redrawMask != nil {
             drawLinkMasked(link.cx, link.cy, R, r, L, link.isH, link.redrawMask)
