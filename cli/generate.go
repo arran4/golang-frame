@@ -575,7 +575,7 @@ func genChinaPattern(s int) (image.Image, image.Rectangle, string) {
 					}
 				}
 
-				distToMedallion := math.Mod(ief-48.0, 32.0)
+				distToMedallion := math.Mod(ief, 32.0)
 				if distToMedallion > 16.0 { distToMedallion = 32.0 - distToMedallion }
 
 				distToEdgeCenter := math.Abs(jf - 24.0)
@@ -583,7 +583,7 @@ func genChinaPattern(s int) (image.Image, image.Rectangle, string) {
 
 				if distToCenter < 10.0 {
 					isBlue = false
-					dx := math.Mod(ief-48.0, 32.0)
+					dx := math.Mod(ief, 32.0)
 					if dx > 16.0 { dx -= 32.0 }
 					dy := jf - 24.0
 
