@@ -486,37 +486,118 @@ func genChinaPattern(s int) (image.Image, image.Rectangle, string) {
 	w, h := 128*s, 128*s
 	img := solid(w, h, color.White)
 	cobalt := color.RGBA{0, 71, 171, 255}
+
 	drawQuarter := func(offsetX, offsetY int, flipX, flipY bool) {
 		for y := 0; y < 48*s; y++ {
 			for x := 0; x < 48*s; x++ {
 				xf, yf := float64(x)/float64(s), float64(y)/float64(s)
-				val := math.Sin(xf*0.3)*math.Cos(yf*0.3)*10.0 + math.Sin(xf*yf*0.05)*5.0
-				cx, cy := x, y
-				if flipX {
-					cx = 48*s - 1 - x
-				}
-				if flipY {
-					cy = 48*s - 1 - y
-				}
-				if int(val)%7 == 0 && (x+y)%2 == 0 {
-					img.Set(offsetX+cx, offsetY+cy, cobalt)
-				}
+				isBlue := false
+
 				if x < 4*s || y < 4*s {
-					img.Set(offsetX+cx, offsetY+cy, cobalt)
+					if (x%(2*s) < s && y < 4*s) || (y%(2*s) < s && x < 4*s) {
+						isBlue = true
+					}
+					if x < 2*s || y < 2*s {
+						isBlue = true
+					}
 				}
-				if x > 44*s && x < 46*s || y > 44*s && y < 46*s {
+
+				if x >= 4*s && y >= 4*s && x <= 44*s && y <= 44*s {
+					gridX := math.Mod(xf, 8.0)
+					gridY := math.Mod(yf, 8.0)
+
+					if math.Abs(gridX + gridY - 8.0) < 1.0 || math.Abs(gridX - gridY) < 1.0 {
+						if int(xf+yf)%3 != 0 {
+							isBlue = true
+						}
+					}
+
+					distToCenter := math.Sqrt((xf-24.0)*(xf-24.0) + (yf-24.0)*(yf-24.0))
+					if distToCenter < 12.0 {
+						isBlue = false
+						angle := math.Atan2(yf-24.0, xf-24.0)
+						petals := math.Sin(angle * 8) * 3.0
+						if distToCenter < 8.0 + petals {
+							if distToCenter > 7.0 + petals - 1.5 { isBlue = true }
+							if distToCenter < 4.0 { isBlue = true }
+							if math.Abs(math.Mod(angle, math.Pi/4)) < 0.1 && distToCenter > 4.0 { isBlue = true }
+						}
+					}
+				}
+
+				if (x >= 44*s && x < 48*s) || (y >= 44*s && y < 48*s) {
+					if x >= 45*s && x < 46*s || y >= 45*s && y < 46*s { isBlue = true }
+					if x >= 47*s && x < 48*s || y >= 47*s && y < 48*s { isBlue = true }
+				}
+
+				if isBlue {
+					cx, cy := x, y
+					if flipX { cx = 48*s - 1 - x }
+					if flipY { cy = 48*s - 1 - y }
 					img.Set(offsetX+cx, offsetY+cy, cobalt)
 				}
 			}
 		}
 	}
+
 	drawQuarter(0, 0, false, false)
 	drawQuarter(w-48*s, 0, true, false)
 	drawQuarter(0, h-48*s, false, true)
 	drawQuarter(w-48*s, h-48*s, true, true)
+
 	for i := 48 * s; i < w-48*s; i++ {
-		if (i/s)%8 < 4 {
-			for j := 0; j < 4*s; j++ {
+		for j := 0; j < 48*s; j++ {
+			isBlue := false
+
+			if j < 4*s {
+				if j < 2*s {
+					isBlue = true
+				} else if i%(2*s) < s {
+					isBlue = true
+				}
+			}
+
+			if j >= 44*s {
+				if j >= 45*s && j < 46*s { isBlue = true }
+				if j >= 47*s && j < 48*s { isBlue = true }
+			}
+
+			if j >= 4*s && j < 44*s {
+				jf := float64(j) / float64(s)
+				ief := float64(i) / float64(s)
+
+				gridX := math.Mod(ief, 8.0)
+				gridY := math.Mod(jf, 8.0)
+
+				if math.Abs(gridX + gridY - 8.0) < 1.0 || math.Abs(gridX - gridY) < 1.0 {
+					if int(ief+jf)%3 != 0 {
+						isBlue = true
+					}
+				}
+
+				distToMedallion := math.Mod(ief-48.0, 32.0)
+				if distToMedallion > 16.0 { distToMedallion = 32.0 - distToMedallion }
+
+				distToEdgeCenter := math.Abs(jf - 24.0)
+				distToCenter := math.Sqrt(distToMedallion*distToMedallion + distToEdgeCenter*distToEdgeCenter)
+
+				if distToCenter < 10.0 {
+					isBlue = false
+					dx := math.Mod(ief-48.0, 32.0)
+					if dx > 16.0 { dx -= 32.0 }
+					dy := jf - 24.0
+
+					angle := math.Atan2(dy, dx)
+					petals := math.Sin(angle * 8) * 2.0
+
+					if distToCenter < 6.0 + petals {
+						if distToCenter > 5.0 + petals - 1.0 { isBlue = true }
+						if distToCenter < 3.0 { isBlue = true }
+					}
+				}
+			}
+
+			if isBlue {
 				img.Set(i, j, cobalt)
 				img.Set(i, h-1-j, cobalt)
 				img.Set(j, i, cobalt)
@@ -524,6 +605,7 @@ func genChinaPattern(s int) (image.Image, image.Rectangle, string) {
 			}
 		}
 	}
+
 	return img, image.Rect(48*s, 48*s, w-48*s, h-48*s), "china_pattern"
 }
 
