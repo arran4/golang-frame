@@ -682,22 +682,45 @@ func genCheckers(s int) (image.Image, image.Rectangle, string) {
 }
 
 func genDots(s int) (image.Image, image.Rectangle, string) {
-	grid := 16 * s
-	w, h := grid*4, grid*4
+	gridOuter := 16 * s
+	gridInner := 8 * s
+	w, h := gridOuter*4, gridOuter*4
 	img := solid(w, h, color.White)
-	blue := color.RGBA{0, 100, 255, 255}
-	for y := grid / 2; y < h; y += grid {
-		for x := grid / 2; x < w; x += grid {
-			for dy := -2 * s; dy <= 2*s; dy++ {
-				for dx := -2 * s; dx <= 2*s; dx++ {
-					if dx*dx+dy*dy <= 4*s*s {
-						img.Set(x+dx, y+dy, blue)
+	outerColor := color.RGBA{0, 100, 255, 255}
+	innerColor := color.RGBA{255, 100, 0, 255}
+	middleRect := image.Rect(gridOuter, gridOuter, w-gridOuter, h-gridOuter)
+
+	// Draw outer dots
+	for y := gridOuter / 2; y < h; y += gridOuter {
+		for x := gridOuter / 2; x < w; x += gridOuter {
+			inMiddle := x >= middleRect.Min.X && x < middleRect.Max.X && y >= middleRect.Min.Y && y < middleRect.Max.Y
+			if inMiddle {
+				continue
+			}
+			for dy := -3 * s; dy <= 3*s; dy++ {
+				for dx := -3 * s; dx <= 3*s; dx++ {
+					if dx*dx+dy*dy <= 9*s*s {
+						img.Set(x+dx, y+dy, outerColor)
 					}
 				}
 			}
 		}
 	}
-	return img, image.Rect(grid, grid, grid*2, grid*2), "dots"
+
+	// Draw inner dots
+	for y := middleRect.Min.Y + gridInner/2; y < middleRect.Max.Y; y += gridInner {
+		for x := middleRect.Min.X + gridInner/2; x < middleRect.Max.X; x += gridInner {
+			for dy := -2 * s; dy <= 2*s; dy++ {
+				for dx := -2 * s; dx <= 2*s; dx++ {
+					if dx*dx+dy*dy <= 4*s*s {
+						img.Set(x+dx, y+dy, innerColor)
+					}
+				}
+			}
+		}
+	}
+
+	return img, middleRect, "dots"
 }
 
 func genWin31(s int) (image.Image, image.Rectangle, string) {

@@ -12,7 +12,7 @@ var DotsPng []byte
 
 var Dots = &Definition{
 	Name: "dots",
-	Middle: image.Rect(16, 16, 32, 32),
+	Middle: image.Rect(16, 16, 48, 48),
 }
 
 func init() {
