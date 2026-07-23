@@ -12,7 +12,7 @@ var MacSystem9LikePng []byte
 
 var MacSystem9Like = &Definition{
 	Name: "mac_system_9_like",
-	Middle: image.Rect(3, 22, 48, 48),
+	Middle: image.Rect(3, 23, 47, 47),
 }
 
 func init() {

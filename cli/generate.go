@@ -923,7 +923,7 @@ func genMacSystem9(s int) (image.Image, image.Rectangle, string) {
 	// Close box on the left
 	cbSize := 12 * s
 	cbX := 5 * s
-	cbY := 4 * s
+	cbY := 3 * s
 
 	// clear space for close box
 	rect(img, image.Rect(cbX-2*s, 2*s, cbX+cbSize+2*s, titleBarH), bg)
@@ -941,7 +941,7 @@ func genMacSystem9(s int) (image.Image, image.Rectangle, string) {
 
 	// Collapse box on the right
 	colX := w - 17*s
-	colY := 4 * s
+	colY := 3 * s
 	rect(img, image.Rect(colX-2*s, 2*s, colX+cbSize+2*s, titleBarH), bg)
 
 	// Draw collapse box
@@ -963,11 +963,11 @@ func genMacSystem9(s int) (image.Image, image.Rectangle, string) {
 	// Scrollbar area
 	rect(img, image.Rect(w-16*s, titleBarH+s, w-s, h-16*s), color.RGBA{238, 238, 238, 255})
 	rect(img, image.Rect(w-16*s, titleBarH+s, w-15*s, h-16*s), frameDark) // scrollbar left border
-	rect(img, image.Rect(w-15*s, titleBarH+s, w-14*s, h-16*s), white) // scrollbar highlight
+	rect(img, image.Rect(w-15*s, titleBarH+s, w-13*s, h-16*s), white) // scrollbar highlight
 
 	rect(img, image.Rect(s, h-16*s, w-s, h-s), color.RGBA{238, 238, 238, 255})
 	rect(img, image.Rect(s, h-16*s, w-s, h-15*s), frameDark) // scrollbar top border
-	rect(img, image.Rect(s, h-15*s, w-15*s, h-14*s), white) // scrollbar highlight
+	rect(img, image.Rect(s, h-15*s, w-15*s, h-13*s), white) // scrollbar highlight
 
 	// Resize handle
 	rhX := w - 16*s
@@ -998,7 +998,7 @@ func genMacSystem9(s int) (image.Image, image.Rectangle, string) {
 	rect(img, image.Rect(2*s, titleBarH+s, w-16*s, titleBarH+2*s), black) // inner top shadow
 	rect(img, image.Rect(2*s, titleBarH+s, 3*s, h-16*s), black) // inner left shadow
 
-	return img, image.Rect(3*s, titleBarH+2*s, w-16*s, h-16*s), "mac_system_9_like"
+	return img, image.Rect(3*s, titleBarH+3*s, w-17*s, h-17*s), "mac_system_9_like"
 }
 
 func genMacOSX(s int) (image.Image, image.Rectangle, string) {

@@ -12,7 +12,7 @@ var MacSystem9LikeXlargePng []byte
 
 var MacSystem9LikeXlarge = &Definition{
 	Name: "mac_system_9_like_xlarge",
-	Middle: image.Rect(9, 66, 144, 144),
+	Middle: image.Rect(9, 69, 141, 141),
 }
 
 func init() {

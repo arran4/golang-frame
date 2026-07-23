@@ -206,6 +206,14 @@ There is a collection of included frames in the `frames` package. Each frame com
 ![](images/gallery_{{.Name}}_extra_2.png)
 ![](images/gallery_{{.Name}}_extra_3.png)
 {{end}}
+{{if .IsMacSystem9}}
+#### Additional sizes / aspect ratios for Mac System 9
+
+![](images/gallery_{{.Name}}_extra_0.png)
+![](images/gallery_{{.Name}}_extra_1.png)
+![](images/gallery_{{.Name}}_extra_2.png)
+![](images/gallery_{{.Name}}_extra_3.png)
+{{end}}
 
 ```go
 import "github.com/arran4/golang-frame/frames"
