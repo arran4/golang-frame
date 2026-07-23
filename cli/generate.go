@@ -18,7 +18,8 @@ var generators = []Generator{
 	// OS Like
 	genWin31,
 	genWin95,
-	genMacClassic,
+	genMacSystem3,
+	genMacSystem9,
 	genMacOSX,
 	genMWM,
 	genNeXT,
@@ -793,8 +794,8 @@ func genWin95(s int) (image.Image, image.Rectangle, string) {
 	return img, image.Rect(4*s, 4*s, w-4*s, h-4*s), "win95_like"
 }
 
-func genMacClassic(s int) (image.Image, image.Rectangle, string) {
-	w, h := 48*s, 48*s
+func genMacSystem3(s int) (image.Image, image.Rectangle, string) {
+	w, h := 64*s, 64*s
 	img := image.NewRGBA(image.Rect(0, 0, w, h))
 	white := color.RGBA{255, 255, 255, 255}
 	black := color.RGBA{0, 0, 0, 255}
@@ -807,27 +808,197 @@ func genMacClassic(s int) (image.Image, image.Rectangle, string) {
 	rect(img, image.Rect(0, 0, s, h), black)
 	rect(img, image.Rect(w-s, 0, w, h), black)
 
-	// Title bar
-	titleBarH := 21 * s
+	// Title bar outline
+	titleBarH := 19 * s
 	rect(img, image.Rect(0, titleBarH, w, titleBarH+s), black)
 
-	// Stripes
-	for y := 2 * s; y < titleBarH; y += 2 * s {
+	// Double line for title bar bottom
+	rect(img, image.Rect(0, titleBarH+2*s, w, titleBarH+3*s), black)
+
+	// Stripes in title bar
+	// Start from y = 2*s, spacing 2*s
+	for y := 2 * s; y < titleBarH-s; y += 2 * s {
 		rect(img, image.Rect(s, y, w-s, y+s), black)
 	}
 
-	// Close box
-	cbSize := 11 * s
+	// White out center for title
+	titleW := 24 * s
+	rect(img, image.Rect(w/2-titleW/2, s, w/2+titleW/2, titleBarH), white)
+
+	// Close box on the left
+	cbSize := 13 * s
 	cbX := 6 * s
-	cbY := 5 * s
+	cbY := 3 * s
 
+	// clear space for close box
+	rect(img, image.Rect(cbX-2*s, s, cbX+cbSize+2*s, titleBarH), white)
+
+	// Draw close box
 	rect(img, image.Rect(cbX, cbY, cbX+cbSize, cbY+cbSize), white)
-	rect(img, image.Rect(cbX, cbY, cbX+cbSize, cbY+s), black)
-	rect(img, image.Rect(cbX, cbY+cbSize-s, cbX+cbSize, cbY+cbSize), black)
-	rect(img, image.Rect(cbX, cbY, cbX+s, cbY+cbSize), black)
-	rect(img, image.Rect(cbX+cbSize-s, cbY, cbX+cbSize, cbY+cbSize), black)
+	rect(img, image.Rect(cbX, cbY, cbX+cbSize, cbY+s), black) // top
+	rect(img, image.Rect(cbX, cbY+cbSize-s, cbX+cbSize, cbY+cbSize), black) // bottom
+	rect(img, image.Rect(cbX, cbY, cbX+s, cbY+cbSize), black) // left
+	rect(img, image.Rect(cbX+cbSize-s, cbY, cbX+cbSize, cbY+cbSize), black) // right
 
-	return img, image.Rect(20*s, 22*s, w-4*s, h-4*s), "mac_classic_like"
+	// Inner square for close box
+	rect(img, image.Rect(cbX+3*s, cbY+3*s, cbX+cbSize-3*s, cbY+cbSize-3*s), black)
+	rect(img, image.Rect(cbX+4*s, cbY+4*s, cbX+cbSize-4*s, cbY+cbSize-4*s), white)
+
+	// Scrollbar area
+	sbW := 15 * s
+	rect(img, image.Rect(w-sbW-s, titleBarH+3*s, w-sbW, h-sbW-s), black) // vertical scrollbar left line
+	rect(img, image.Rect(s, h-sbW-s, w-sbW-s, h-sbW), black) // horizontal scrollbar top line
+
+	// Resize box at bottom right
+	rbSize := 15 * s
+	rbX := w - rbSize - s
+	rbY := h - rbSize - s
+
+	// clear area
+	rect(img, image.Rect(rbX, rbY, w-s, h-s), white)
+
+	// Draw lines to separate resize box
+	rect(img, image.Rect(rbX, rbY, w-s, rbY+s), black) // top line of resize box
+	rect(img, image.Rect(rbX, rbY, rbX+s, h-s), black) // left line of resize box
+
+	// overlapping squares icon
+	rect(img, image.Rect(rbX+3*s, rbY+3*s, rbX+10*s, rbY+10*s), black)
+	rect(img, image.Rect(rbX+4*s, rbY+4*s, rbX+9*s, rbY+9*s), white)
+	rect(img, image.Rect(rbX+5*s, rbY+5*s, rbX+12*s, rbY+12*s), white) // clear behind front square
+	rect(img, image.Rect(rbX+6*s, rbY+6*s, rbX+13*s, rbY+13*s), black)
+	rect(img, image.Rect(rbX+7*s, rbY+7*s, rbX+12*s, rbY+12*s), white)
+
+	return img, image.Rect(2*s, titleBarH+3*s, w-sbW-s, h-sbW-s), "mac_system_3_like"
+}
+
+func genMacSystem9(s int) (image.Image, image.Rectangle, string) {
+	w, h := 64*s, 64*s
+	img := image.NewRGBA(image.Rect(0, 0, w, h))
+
+	// Colors
+	bg := color.RGBA{204, 204, 204, 255} // Light gray background
+	frameDark := color.RGBA{85, 85, 85, 255}
+	frameLight := color.RGBA{255, 255, 255, 255}
+	titleBarTop := color.RGBA{221, 221, 221, 255}
+	titleBarBot := color.RGBA{170, 170, 170, 255}
+	black := color.RGBA{0, 0, 0, 255}
+	white := color.RGBA{255, 255, 255, 255}
+
+	draw.Draw(img, img.Bounds(), &image.Uniform{bg}, image.Point{}, draw.Src)
+
+	// Outline
+	rect(img, image.Rect(0, 0, w, s), frameDark) // top
+	rect(img, image.Rect(0, 0, s, h), frameDark) // left
+	rect(img, image.Rect(w-s, 0, w, h), frameDark) // right
+	rect(img, image.Rect(0, h-s, w, h), frameDark) // bottom
+
+	// Inner highlight
+	rect(img, image.Rect(s, s, w-s, 2*s), frameLight)
+	rect(img, image.Rect(s, s, 2*s, h-s), frameLight)
+
+	// Title bar
+	titleBarH := 20 * s
+
+	// gradient in title bar
+	for y := 2 * s; y < titleBarH; y++ {
+		c := color.RGBA{
+			R: uint8(float64(titleBarTop.R) + float64(titleBarBot.R-titleBarTop.R)*float64(y-2*s)/float64(titleBarH-2*s)),
+			G: uint8(float64(titleBarTop.G) + float64(titleBarBot.G-titleBarTop.G)*float64(y-2*s)/float64(titleBarH-2*s)),
+			B: uint8(float64(titleBarTop.B) + float64(titleBarBot.B-titleBarTop.B)*float64(y-2*s)/float64(titleBarH-2*s)),
+			A: 255,
+		}
+		rect(img, image.Rect(2*s, y, w-2*s, y+1), c)
+	}
+
+	// Title bar bottom line
+	rect(img, image.Rect(0, titleBarH, w, titleBarH+s), frameDark)
+	rect(img, image.Rect(0, titleBarH+s, w, titleBarH+2*s), black) // inner shadow for content area
+
+	// Stripes in title bar
+	for y := 5 * s; y < titleBarH-3*s; y += 2 * s {
+		rect(img, image.Rect(3*s, y, w-3*s, y+s), frameDark)
+		rect(img, image.Rect(3*s, y+s, w-3*s, y+2*s), frameLight)
+	}
+
+	// Close box on the left
+	cbSize := 12 * s
+	cbX := 5 * s
+	cbY := 4 * s
+
+	// clear space for close box
+	rect(img, image.Rect(cbX-2*s, 2*s, cbX+cbSize+2*s, titleBarH), bg)
+
+	// Draw close box
+	rect(img, image.Rect(cbX, cbY, cbX+cbSize, cbY+cbSize), bg)
+	rect(img, image.Rect(cbX, cbY, cbX+cbSize, cbY+s), frameDark) // top
+	rect(img, image.Rect(cbX, cbY+cbSize-s, cbX+cbSize, cbY+cbSize), frameDark) // bottom
+	rect(img, image.Rect(cbX, cbY, cbX+s, cbY+cbSize), frameDark) // left
+	rect(img, image.Rect(cbX+cbSize-s, cbY, cbX+cbSize, cbY+cbSize), frameDark) // right
+	rect(img, image.Rect(cbX+s, cbY+s, cbX+cbSize-s, cbY+2*s), frameLight) // inner top highlight
+	rect(img, image.Rect(cbX+s, cbY+s, cbX+2*s, cbY+cbSize-s), frameLight) // inner left highlight
+	rect(img, image.Rect(cbX+cbSize-2*s, cbY+2*s, cbX+cbSize-s, cbY+cbSize-s), color.RGBA{153,153,153,255}) // inner right shadow
+	rect(img, image.Rect(cbX+2*s, cbY+cbSize-2*s, cbX+cbSize-s, cbY+cbSize-s), color.RGBA{153,153,153,255}) // inner bottom shadow
+
+	// Collapse box on the right
+	colX := w - 17*s
+	colY := 4 * s
+	rect(img, image.Rect(colX-2*s, 2*s, colX+cbSize+2*s, titleBarH), bg)
+
+	// Draw collapse box
+	rect(img, image.Rect(colX, colY, colX+cbSize, colY+cbSize), bg)
+	rect(img, image.Rect(colX, colY, colX+cbSize, colY+s), frameDark)
+	rect(img, image.Rect(colX, colY+cbSize-s, colX+cbSize, colY+cbSize), frameDark)
+	rect(img, image.Rect(colX, colY, colX+s, colY+cbSize), frameDark)
+	rect(img, image.Rect(colX+cbSize-s, colY, colX+cbSize, colY+cbSize), frameDark)
+	rect(img, image.Rect(colX+s, colY+s, colX+cbSize-s, colY+2*s), frameLight)
+	rect(img, image.Rect(colX+s, colY+s, colX+2*s, colY+cbSize-s), frameLight)
+	rect(img, image.Rect(colX+cbSize-2*s, colY+2*s, colX+cbSize-s, colY+cbSize-s), color.RGBA{153,153,153,255}) // inner right shadow
+	rect(img, image.Rect(colX+2*s, colY+cbSize-2*s, colX+cbSize-s, colY+cbSize-s), color.RGBA{153,153,153,255}) // inner bottom shadow
+
+	// Inner line for collapse box
+	rect(img, image.Rect(colX+3*s, colY+5*s, colX+cbSize-3*s, colY+6*s), frameDark)
+	rect(img, image.Rect(colX+3*s, colY+6*s, colX+cbSize-3*s, colY+7*s), frameLight)
+
+
+	// Scrollbar area
+	rect(img, image.Rect(w-16*s, titleBarH+s, w-s, h-16*s), color.RGBA{238, 238, 238, 255})
+	rect(img, image.Rect(w-16*s, titleBarH+s, w-15*s, h-16*s), frameDark) // scrollbar left border
+	rect(img, image.Rect(w-15*s, titleBarH+s, w-14*s, h-16*s), white) // scrollbar highlight
+
+	rect(img, image.Rect(s, h-16*s, w-s, h-s), color.RGBA{238, 238, 238, 255})
+	rect(img, image.Rect(s, h-16*s, w-s, h-15*s), frameDark) // scrollbar top border
+	rect(img, image.Rect(s, h-15*s, w-15*s, h-14*s), white) // scrollbar highlight
+
+	// Resize handle
+	rhX := w - 16*s
+	rhY := h - 16*s
+
+	// Draw lines to separate resize box
+	rect(img, image.Rect(rhX, rhY, w-s, h-s), bg)
+	rect(img, image.Rect(rhX, rhY, w-s, rhY+s), frameDark) // top line of resize box
+	rect(img, image.Rect(rhX, rhY, rhX+s, h-s), frameDark) // left line of resize box
+	rect(img, image.Rect(rhX+s, rhY+s, w-s, rhY+2*s), frameLight) // top line of resize box
+	rect(img, image.Rect(rhX+s, rhY+s, rhX+2*s, h-s), frameLight) // left line of resize box
+
+	// diagonal lines for resize
+	for i := 0; i < 3; i++ {
+		offset := (4 + i*4) * s
+		for j := 0; j < 15*s-offset; j++ {
+			x := rhX + offset + j
+			y := h - s - j
+			if x < w-s && y > rhY+s {
+				rect(img, image.Rect(x, y, x+s, y+s), frameDark)
+				rect(img, image.Rect(x+s, y, x+2*s, y+s), frameLight)
+			}
+		}
+	}
+
+	// Content area
+	rect(img, image.Rect(2*s, titleBarH+s, w-16*s, h-16*s), white)
+	rect(img, image.Rect(2*s, titleBarH+s, w-16*s, titleBarH+2*s), black) // inner top shadow
+	rect(img, image.Rect(2*s, titleBarH+s, 3*s, h-16*s), black) // inner left shadow
+
+	return img, image.Rect(3*s, titleBarH+2*s, w-16*s, h-16*s), "mac_system_9_like"
 }
 
 func genMacOSX(s int) (image.Image, image.Rectangle, string) {

@@ -591,9 +591,9 @@ import "github.com/arran4/golang-frame/frames"
 fr := frame.NewFrame(destRect, frames.HeartsXlarge.Image, frames.HeartsXlarge.Middle)
 ```
 
-### MacClassicLike
+### MacSystem3Like
 
-![](images/gallery_mac_classic_like.png)
+![](images/gallery_mac_system_3_like.png)
 
 
 
@@ -601,12 +601,12 @@ fr := frame.NewFrame(destRect, frames.HeartsXlarge.Image, frames.HeartsXlarge.Mi
 import "github.com/arran4/golang-frame/frames"
 
 // Use it directly
-fr := frame.NewFrame(destRect, frames.MacClassicLike.Image, frames.MacClassicLike.Middle)
+fr := frame.NewFrame(destRect, frames.MacSystem3Like.Image, frames.MacSystem3Like.Middle)
 ```
 
-### MacClassicLikeLarge
+### MacSystem3LikeLarge
 
-![](images/gallery_mac_classic_like_large.png)
+![](images/gallery_mac_system_3_like_large.png)
 
 
 
@@ -614,12 +614,12 @@ fr := frame.NewFrame(destRect, frames.MacClassicLike.Image, frames.MacClassicLik
 import "github.com/arran4/golang-frame/frames"
 
 // Use it directly
-fr := frame.NewFrame(destRect, frames.MacClassicLikeLarge.Image, frames.MacClassicLikeLarge.Middle)
+fr := frame.NewFrame(destRect, frames.MacSystem3LikeLarge.Image, frames.MacSystem3LikeLarge.Middle)
 ```
 
-### MacClassicLikeXlarge
+### MacSystem3LikeXlarge
 
-![](images/gallery_mac_classic_like_xlarge.png)
+![](images/gallery_mac_system_3_like_xlarge.png)
 
 
 
@@ -627,7 +627,46 @@ fr := frame.NewFrame(destRect, frames.MacClassicLikeLarge.Image, frames.MacClass
 import "github.com/arran4/golang-frame/frames"
 
 // Use it directly
-fr := frame.NewFrame(destRect, frames.MacClassicLikeXlarge.Image, frames.MacClassicLikeXlarge.Middle)
+fr := frame.NewFrame(destRect, frames.MacSystem3LikeXlarge.Image, frames.MacSystem3LikeXlarge.Middle)
+```
+
+### MacSystem9Like
+
+![](images/gallery_mac_system_9_like.png)
+
+
+
+```go
+import "github.com/arran4/golang-frame/frames"
+
+// Use it directly
+fr := frame.NewFrame(destRect, frames.MacSystem9Like.Image, frames.MacSystem9Like.Middle)
+```
+
+### MacSystem9LikeLarge
+
+![](images/gallery_mac_system_9_like_large.png)
+
+
+
+```go
+import "github.com/arran4/golang-frame/frames"
+
+// Use it directly
+fr := frame.NewFrame(destRect, frames.MacSystem9LikeLarge.Image, frames.MacSystem9LikeLarge.Middle)
+```
+
+### MacSystem9LikeXlarge
+
+![](images/gallery_mac_system_9_like_xlarge.png)
+
+
+
+```go
+import "github.com/arran4/golang-frame/frames"
+
+// Use it directly
+fr := frame.NewFrame(destRect, frames.MacSystem9LikeXlarge.Image, frames.MacSystem9LikeXlarge.Middle)
 ```
 
 ### MacosxLike
