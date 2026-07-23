@@ -12,7 +12,7 @@ var DotsLargePng []byte
 
 var DotsLarge = &Definition{
 	Name: "dots_large",
-	Middle: image.Rect(32, 32, 64, 64),
+	Middle: image.Rect(32, 32, 96, 96),
 }
 
 func init() {
