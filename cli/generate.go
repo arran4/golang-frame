@@ -1550,33 +1550,34 @@ func genFantasyStone(s int) (image.Image, image.Rectangle, string) {
 			ny += bump
 
 			isCrack := false
+			crackThresh := 1.5 * float64(s)
 			// 45-degree corner cracks
-			if math.Abs(float64(x-y)) <= 1.5 && x < bw { isCrack = true }
-			if math.Abs(float64(x-(w-1-y))) <= 1.5 && x >= w-bw { isCrack = true }
-			if math.Abs(float64((w-1-x)-y)) <= 1.5 && x >= w-bw { isCrack = true }
-			if math.Abs(float64((w-1-x)-(h-1-y))) <= 1.5 && x < bw { isCrack = true }
+			if math.Abs(float64(x-y)) <= crackThresh && x < bw { isCrack = true }
+			if math.Abs(float64((w-1-x)-y)) <= crackThresh && x >= w-bw { isCrack = true }
+			if math.Abs(float64(x-(h-1-y))) <= crackThresh && x < bw { isCrack = true }
+			if math.Abs(float64((w-1-x)-(h-1-y))) <= crackThresh && x >= w-bw { isCrack = true }
 
 			// Intersecting block cracks along the edges
-			if (x == w/2 || x == w/2-1 || x == w/2+1) && (y < bw || y >= h-bw) { isCrack = true }
-			if (y == h/2 || y == h/2-1 || y == h/2+1) && (x < bw || x >= w-bw) { isCrack = true }
+			if x >= w/2-s && x <= w/2+s && (y < bw || y >= h-bw) { isCrack = true }
+			if y >= h/2-s && y <= h/2+s && (x < bw || x >= w-bw) { isCrack = true }
 
 			// Make the joints look like mortar/cracks by modifying normals
 			if isCrack {
 				// Cracks slope inwards
-				if math.Abs(float64(x-y)) <= 1.5 && x < bw {
+				if math.Abs(float64(x-y)) <= crackThresh && x < bw {
 					if x > y { nx = -1.0; ny = 1.0 } else { nx = 1.0; ny = -1.0 }
-				} else if math.Abs(float64(x-(w-1-y))) <= 1.5 && x >= w-bw {
+				} else if math.Abs(float64((w-1-x)-y)) <= crackThresh && x >= w-bw {
 					if w-1-x > y { nx = 1.0; ny = 1.0 } else { nx = -1.0; ny = -1.0 }
-				} else if math.Abs(float64((w-1-x)-(h-1-y))) <= 1.5 && x < bw {
+				} else if math.Abs(float64(x-(h-1-y))) <= crackThresh && x < bw {
 					if x > h-1-y { nx = -1.0; ny = -1.0 } else { nx = 1.0; ny = 1.0 }
-				} else if math.Abs(float64((w-1-x)-y)) <= 1.5 && x >= w-bw {
+				} else if math.Abs(float64((w-1-x)-(h-1-y))) <= crackThresh && x >= w-bw {
 					if w-1-x > h-1-y { nx = 1.0; ny = -1.0 } else { nx = -1.0; ny = 1.0 }
 				}
 
-				if (x == w/2 || x == w/2-1 || x == w/2+1) && (y < bw || y >= h-bw) {
+				if x >= w/2-s && x <= w/2+s && (y < bw || y >= h-bw) {
 					if x < w/2 { nx = 1.0; ny = 0 } else { nx = -1.0; ny = 0 }
 				}
-				if (y == h/2 || y == h/2-1 || y == h/2+1) && (x < bw || x >= w-bw) {
+				if y >= h/2-s && y <= h/2+s && (x < bw || x >= w-bw) {
 					if y < h/2 { nx = 0; ny = 1.0 } else { nx = 0; ny = -1.0 }
 				}
 
