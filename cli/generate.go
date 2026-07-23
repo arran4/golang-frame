@@ -1519,9 +1519,6 @@ func genFantasyStone(s int) (image.Image, image.Rectangle, string) {
 			if y >= h-bw && (dIn == -1 || y - (h - bw) < dIn) { dIn = y - (h - bw) }
 			if dIn < 0 { dIn = 0 }
 
-			edgeDist := dOut
-			if dIn < edgeDist { edgeDist = dIn }
-
 			bevelWidth := 8 * float64(s)
 
 			getZ := func(px, py int) float64 {
@@ -1586,7 +1583,7 @@ func genFantasyStone(s int) (image.Image, image.Rectangle, string) {
 				} else if math.Abs(float64((w-1-x)-(h-1-y))) <= 1.5 && x < bw {
 					if x > h-1-y { nx = -1.0; ny = -1.0 } else { nx = 1.0; ny = 1.0 }
 				} else if math.Abs(float64((w-1-x)-y)) <= 1.5 && x >= w-bw {
-					// Top right
+					if w-1-x > h-1-y { nx = 1.0; ny = -1.0 } else { nx = -1.0; ny = 1.0 }
 				}
 
 				if (x == w/2 || x == w/2-1 || x == w/2+1) && (y < bw || y >= h-bw) {
