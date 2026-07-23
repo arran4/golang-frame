@@ -279,17 +279,18 @@ func genWood(s int) (image.Image, image.Rectangle, string) {
 }
 
 func genFloral(s int) (image.Image, image.Rectangle, string) {
-	w, h := 64*s, 64*s
+	w, h := 96*s, 96*s
 	img := solid(w, h, color.RGBA{255, 250, 240, 255})
 	pink := color.RGBA{255, 105, 180, 255}
 	green := color.RGBA{34, 139, 34, 255}
+
 	drawFlower := func(cx, cy, size int) {
 		for i := 0; i < 5; i++ {
 			angle := float64(i) * 2 * math.Pi / 5
 			px := cx + int(math.Cos(angle)*float64(size))
 			py := cy + int(math.Sin(angle)*float64(size))
-			for dy := -size / 2; dy <= size/2; dy++ {
-				for dx := -size / 2; dx <= size/2; dx++ {
+			for dy := -size; dy <= size; dy++ {
+				for dx := -size; dx <= size; dx++ {
 					if dx*dx+dy*dy <= (size/2)*(size/2) {
 						img.Set(px+dx, py+dy, pink)
 					}
@@ -298,6 +299,9 @@ func genFloral(s int) (image.Image, image.Rectangle, string) {
 		}
 		yellow := color.RGBA{255, 255, 0, 255}
 		rad := size / 3
+		if rad < 1 {
+			rad = 1
+		}
 		for dy := -rad; dy <= rad; dy++ {
 			for dx := -rad; dx <= rad; dx++ {
 				if dx*dx+dy*dy <= rad*rad {
@@ -306,22 +310,57 @@ func genFloral(s int) (image.Image, image.Rectangle, string) {
 			}
 		}
 	}
+
 	for y := 0; y < h; y++ {
 		for x := 0; x < w; x++ {
-			if x >= 16*s && x < w-16*s && y >= 16*s && y < h-16*s {
+			if x >= 32*s && x < w-32*s && y >= 32*s && y < h-32*s {
 				continue
 			}
 			xf, yf := float64(x), float64(y)
-			if math.Abs(math.Sin(xf/float64(8*s))*float64(4*s)+float64(h/2)-yf) < float64(s) {
+
+			isVine := false
+
+			if y < 32*s {
+				vy := float64(16*s) - float64(6*s)*math.Sin((xf-float64(16*s))*2*math.Pi/float64(32*s))
+				if math.Abs(yf - vy) <= float64(s)*1.2 {
+					isVine = true
+				}
+			}
+			if y >= h-32*s {
+				vy := float64(h-16*s) - float64(6*s)*math.Sin((xf-float64(16*s))*2*math.Pi/float64(32*s))
+				if math.Abs(yf - vy) <= float64(s)*1.2 {
+					isVine = true
+				}
+			}
+			if x < 32*s {
+				vx := float64(16*s) - float64(6*s)*math.Sin((yf-float64(16*s))*2*math.Pi/float64(32*s))
+				if math.Abs(xf - vx) <= float64(s)*1.2 {
+					isVine = true
+				}
+			}
+			if x >= w-32*s {
+				vx := float64(w-16*s) - float64(6*s)*math.Sin((yf-float64(16*s))*2*math.Pi/float64(32*s))
+				if math.Abs(xf - vx) <= float64(s)*1.2 {
+					isVine = true
+				}
+			}
+
+			if isVine {
 				img.Set(x, y, green)
 			}
 		}
 	}
-	drawFlower(8*s, 8*s, 4*s)
-	drawFlower(w-8*s, 8*s, 4*s)
-	drawFlower(8*s, h-8*s, 4*s)
-	drawFlower(w-8*s, h-8*s, 4*s)
-	return img, image.Rect(16*s, 16*s, w-16*s, h-16*s), "floral"
+
+	for i := 16*s; i <= w-16*s; i += 32*s {
+		drawFlower(i, 16*s, 5*s)
+		drawFlower(i, h-16*s, 5*s)
+	}
+	for i := 16*s + 32*s; i <= h-32*s; i += 32*s {
+		drawFlower(16*s, i, 5*s)
+		drawFlower(w-16*s, i, 5*s)
+	}
+
+	return img, image.Rect(32*s, 32*s, w-32*s, h-32*s), "floral"
 }
 
 

@@ -12,7 +12,7 @@ var FloralXlargePng []byte
 
 var FloralXlarge = &Definition{
 	Name: "floral_xlarge",
-	Middle: image.Rect(48, 48, 144, 144),
+	Middle: image.Rect(96, 96, 192, 192),
 }
 
 func init() {
