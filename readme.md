@@ -192,6 +192,7 @@ There is a collection of included frames in the `frames` package. Each frame com
 ![](images/gallery_amiga_like.png)
 
 
+
 ```go
 import "github.com/arran4/golang-frame/frames"
 
@@ -202,6 +203,7 @@ fr := frame.NewFrame(destRect, frames.AmigaLike.Image, frames.AmigaLike.Middle)
 ### AmigaLikeLarge
 
 ![](images/gallery_amiga_like_large.png)
+
 
 
 ```go
@@ -216,6 +218,7 @@ fr := frame.NewFrame(destRect, frames.AmigaLikeLarge.Image, frames.AmigaLikeLarg
 ![](images/gallery_amiga_like_xlarge.png)
 
 
+
 ```go
 import "github.com/arran4/golang-frame/frames"
 
@@ -226,6 +229,7 @@ fr := frame.NewFrame(destRect, frames.AmigaLikeXlarge.Image, frames.AmigaLikeXla
 ### BeosLike
 
 ![](images/gallery_beos_like.png)
+
 
 
 ```go
@@ -240,6 +244,7 @@ fr := frame.NewFrame(destRect, frames.BeosLike.Image, frames.BeosLike.Middle)
 ![](images/gallery_beos_like_large.png)
 
 
+
 ```go
 import "github.com/arran4/golang-frame/frames"
 
@@ -250,6 +255,7 @@ fr := frame.NewFrame(destRect, frames.BeosLikeLarge.Image, frames.BeosLikeLarge.
 ### BeosLikeXlarge
 
 ![](images/gallery_beos_like_xlarge.png)
+
 
 
 ```go
@@ -264,6 +270,7 @@ fr := frame.NewFrame(destRect, frames.BeosLikeXlarge.Image, frames.BeosLikeXlarg
 ![](images/gallery_chains.png)
 
 
+
 ```go
 import "github.com/arran4/golang-frame/frames"
 
@@ -276,6 +283,7 @@ fr := frame.NewFrame(destRect, frames.Chains.Image, frames.Chains.Middle)
 ![](images/gallery_chains_large.png)
 
 
+
 ```go
 import "github.com/arran4/golang-frame/frames"
 
@@ -286,6 +294,7 @@ fr := frame.NewFrame(destRect, frames.ChainsLarge.Image, frames.ChainsLarge.Midd
 ### ChainsXlarge
 
 ![](images/gallery_chains_xlarge.png)
+
 
 
 ```go
@@ -307,6 +316,7 @@ fr := frame.NewFrame(destRect, frames.ChainsXlarge.Image, frames.ChainsXlarge.Mi
 ![](images/gallery_checkers_extra_3.png)
 
 
+
 ```go
 import "github.com/arran4/golang-frame/frames"
 
@@ -317,6 +327,7 @@ fr := frame.NewFrame(destRect, frames.Checkers.Image, frames.Checkers.Middle)
 ### CheckersLarge
 
 ![](images/gallery_checkers_large.png)
+
 
 
 ```go
@@ -331,6 +342,7 @@ fr := frame.NewFrame(destRect, frames.CheckersLarge.Image, frames.CheckersLarge.
 ![](images/gallery_checkers_xlarge.png)
 
 
+
 ```go
 import "github.com/arran4/golang-frame/frames"
 
@@ -341,6 +353,7 @@ fr := frame.NewFrame(destRect, frames.CheckersXlarge.Image, frames.CheckersXlarg
 ### ChinaPattern
 
 ![](images/gallery_china_pattern.png)
+
 
 
 ```go
@@ -355,6 +368,7 @@ fr := frame.NewFrame(destRect, frames.ChinaPattern.Image, frames.ChinaPattern.Mi
 ![](images/gallery_china_pattern_large.png)
 
 
+
 ```go
 import "github.com/arran4/golang-frame/frames"
 
@@ -365,6 +379,7 @@ fr := frame.NewFrame(destRect, frames.ChinaPatternLarge.Image, frames.ChinaPatte
 ### ChinaPatternXlarge
 
 ![](images/gallery_china_pattern_xlarge.png)
+
 
 
 ```go
@@ -379,6 +394,7 @@ fr := frame.NewFrame(destRect, frames.ChinaPatternXlarge.Image, frames.ChinaPatt
 ![](images/gallery_dots.png)
 
 
+
 ```go
 import "github.com/arran4/golang-frame/frames"
 
@@ -389,6 +405,7 @@ fr := frame.NewFrame(destRect, frames.Dots.Image, frames.Dots.Middle)
 ### DotsLarge
 
 ![](images/gallery_dots_large.png)
+
 
 
 ```go
@@ -403,6 +420,7 @@ fr := frame.NewFrame(destRect, frames.DotsLarge.Image, frames.DotsLarge.Middle)
 ![](images/gallery_dots_xlarge.png)
 
 
+
 ```go
 import "github.com/arran4/golang-frame/frames"
 
@@ -413,6 +431,7 @@ fr := frame.NewFrame(destRect, frames.DotsXlarge.Image, frames.DotsXlarge.Middle
 ### FantasyStone
 
 ![](images/gallery_fantasy_stone.png)
+
 
 
 ```go
@@ -427,6 +446,7 @@ fr := frame.NewFrame(destRect, frames.FantasyStone.Image, frames.FantasyStone.Mi
 ![](images/gallery_fantasy_stone_large.png)
 
 
+
 ```go
 import "github.com/arran4/golang-frame/frames"
 
@@ -437,6 +457,7 @@ fr := frame.NewFrame(destRect, frames.FantasyStoneLarge.Image, frames.FantasySto
 ### FantasyStoneXlarge
 
 ![](images/gallery_fantasy_stone_xlarge.png)
+
 
 
 ```go
@@ -451,6 +472,14 @@ fr := frame.NewFrame(destRect, frames.FantasyStoneXlarge.Image, frames.FantasySt
 ![](images/gallery_floral.png)
 
 
+#### Additional sizes / aspect ratios for Floral
+
+![](images/gallery_floral_extra_0.png)
+![](images/gallery_floral_extra_1.png)
+![](images/gallery_floral_extra_2.png)
+![](images/gallery_floral_extra_3.png)
+
+
 ```go
 import "github.com/arran4/golang-frame/frames"
 
@@ -461,6 +490,7 @@ fr := frame.NewFrame(destRect, frames.Floral.Image, frames.Floral.Middle)
 ### FloralLarge
 
 ![](images/gallery_floral_large.png)
+
 
 
 ```go
@@ -475,6 +505,7 @@ fr := frame.NewFrame(destRect, frames.FloralLarge.Image, frames.FloralLarge.Midd
 ![](images/gallery_floral_xlarge.png)
 
 
+
 ```go
 import "github.com/arran4/golang-frame/frames"
 
@@ -485,6 +516,7 @@ fr := frame.NewFrame(destRect, frames.FloralXlarge.Image, frames.FloralXlarge.Mi
 ### Gold
 
 ![](images/gallery_gold.png)
+
 
 
 ```go
@@ -499,6 +531,7 @@ fr := frame.NewFrame(destRect, frames.Gold.Image, frames.Gold.Middle)
 ![](images/gallery_gold_large.png)
 
 
+
 ```go
 import "github.com/arran4/golang-frame/frames"
 
@@ -509,6 +542,7 @@ fr := frame.NewFrame(destRect, frames.GoldLarge.Image, frames.GoldLarge.Middle)
 ### GoldXlarge
 
 ![](images/gallery_gold_xlarge.png)
+
 
 
 ```go
@@ -523,6 +557,7 @@ fr := frame.NewFrame(destRect, frames.GoldXlarge.Image, frames.GoldXlarge.Middle
 ![](images/gallery_hearts.png)
 
 
+
 ```go
 import "github.com/arran4/golang-frame/frames"
 
@@ -533,6 +568,7 @@ fr := frame.NewFrame(destRect, frames.Hearts.Image, frames.Hearts.Middle)
 ### HeartsLarge
 
 ![](images/gallery_hearts_large.png)
+
 
 
 ```go
@@ -547,6 +583,7 @@ fr := frame.NewFrame(destRect, frames.HeartsLarge.Image, frames.HeartsLarge.Midd
 ![](images/gallery_hearts_xlarge.png)
 
 
+
 ```go
 import "github.com/arran4/golang-frame/frames"
 
@@ -557,6 +594,7 @@ fr := frame.NewFrame(destRect, frames.HeartsXlarge.Image, frames.HeartsXlarge.Mi
 ### MacClassicLike
 
 ![](images/gallery_mac_classic_like.png)
+
 
 
 ```go
@@ -571,6 +609,7 @@ fr := frame.NewFrame(destRect, frames.MacClassicLike.Image, frames.MacClassicLik
 ![](images/gallery_mac_classic_like_large.png)
 
 
+
 ```go
 import "github.com/arran4/golang-frame/frames"
 
@@ -581,6 +620,7 @@ fr := frame.NewFrame(destRect, frames.MacClassicLikeLarge.Image, frames.MacClass
 ### MacClassicLikeXlarge
 
 ![](images/gallery_mac_classic_like_xlarge.png)
+
 
 
 ```go
@@ -595,6 +635,7 @@ fr := frame.NewFrame(destRect, frames.MacClassicLikeXlarge.Image, frames.MacClas
 ![](images/gallery_macosx_like.png)
 
 
+
 ```go
 import "github.com/arran4/golang-frame/frames"
 
@@ -605,6 +646,7 @@ fr := frame.NewFrame(destRect, frames.MacosxLike.Image, frames.MacosxLike.Middle
 ### MacosxLikeLarge
 
 ![](images/gallery_macosx_like_large.png)
+
 
 
 ```go
@@ -619,6 +661,7 @@ fr := frame.NewFrame(destRect, frames.MacosxLikeLarge.Image, frames.MacosxLikeLa
 ![](images/gallery_macosx_like_xlarge.png)
 
 
+
 ```go
 import "github.com/arran4/golang-frame/frames"
 
@@ -629,6 +672,7 @@ fr := frame.NewFrame(destRect, frames.MacosxLikeXlarge.Image, frames.MacosxLikeX
 ### Metal
 
 ![](images/gallery_metal.png)
+
 
 
 ```go
@@ -643,6 +687,7 @@ fr := frame.NewFrame(destRect, frames.Metal.Image, frames.Metal.Middle)
 ![](images/gallery_metal_large.png)
 
 
+
 ```go
 import "github.com/arran4/golang-frame/frames"
 
@@ -653,6 +698,7 @@ fr := frame.NewFrame(destRect, frames.MetalLarge.Image, frames.MetalLarge.Middle
 ### MetalXlarge
 
 ![](images/gallery_metal_xlarge.png)
+
 
 
 ```go
@@ -667,6 +713,7 @@ fr := frame.NewFrame(destRect, frames.MetalXlarge.Image, frames.MetalXlarge.Midd
 ![](images/gallery_mwm_like.png)
 
 
+
 ```go
 import "github.com/arran4/golang-frame/frames"
 
@@ -677,6 +724,7 @@ fr := frame.NewFrame(destRect, frames.MwmLike.Image, frames.MwmLike.Middle)
 ### MwmLikeLarge
 
 ![](images/gallery_mwm_like_large.png)
+
 
 
 ```go
@@ -691,6 +739,7 @@ fr := frame.NewFrame(destRect, frames.MwmLikeLarge.Image, frames.MwmLikeLarge.Mi
 ![](images/gallery_mwm_like_xlarge.png)
 
 
+
 ```go
 import "github.com/arran4/golang-frame/frames"
 
@@ -701,6 +750,7 @@ fr := frame.NewFrame(destRect, frames.MwmLikeXlarge.Image, frames.MwmLikeXlarge.
 ### NextLike
 
 ![](images/gallery_next_like.png)
+
 
 
 ```go
@@ -715,6 +765,7 @@ fr := frame.NewFrame(destRect, frames.NextLike.Image, frames.NextLike.Middle)
 ![](images/gallery_next_like_large.png)
 
 
+
 ```go
 import "github.com/arran4/golang-frame/frames"
 
@@ -725,6 +776,7 @@ fr := frame.NewFrame(destRect, frames.NextLikeLarge.Image, frames.NextLikeLarge.
 ### NextLikeXlarge
 
 ![](images/gallery_next_like_xlarge.png)
+
 
 
 ```go
@@ -739,6 +791,7 @@ fr := frame.NewFrame(destRect, frames.NextLikeXlarge.Image, frames.NextLikeXlarg
 ![](images/gallery_rainbow.png)
 
 
+
 ```go
 import "github.com/arran4/golang-frame/frames"
 
@@ -749,6 +802,7 @@ fr := frame.NewFrame(destRect, frames.Rainbow.Image, frames.Rainbow.Middle)
 ### RainbowLarge
 
 ![](images/gallery_rainbow_large.png)
+
 
 
 ```go
@@ -763,6 +817,7 @@ fr := frame.NewFrame(destRect, frames.RainbowLarge.Image, frames.RainbowLarge.Mi
 ![](images/gallery_rainbow_xlarge.png)
 
 
+
 ```go
 import "github.com/arran4/golang-frame/frames"
 
@@ -773,6 +828,7 @@ fr := frame.NewFrame(destRect, frames.RainbowXlarge.Image, frames.RainbowXlarge.
 ### Ridge
 
 ![](images/gallery_ridge.png)
+
 
 
 ```go
@@ -787,6 +843,7 @@ fr := frame.NewFrame(destRect, frames.Ridge.Image, frames.Ridge.Middle)
 ![](images/gallery_ridge_large.png)
 
 
+
 ```go
 import "github.com/arran4/golang-frame/frames"
 
@@ -797,6 +854,7 @@ fr := frame.NewFrame(destRect, frames.RidgeLarge.Image, frames.RidgeLarge.Middle
 ### RidgeXlarge
 
 ![](images/gallery_ridge_xlarge.png)
+
 
 
 ```go
@@ -811,6 +869,7 @@ fr := frame.NewFrame(destRect, frames.RidgeXlarge.Image, frames.RidgeXlarge.Midd
 ![](images/gallery_scifi_tech.png)
 
 
+
 ```go
 import "github.com/arran4/golang-frame/frames"
 
@@ -821,6 +880,7 @@ fr := frame.NewFrame(destRect, frames.ScifiTech.Image, frames.ScifiTech.Middle)
 ### ScifiTechLarge
 
 ![](images/gallery_scifi_tech_large.png)
+
 
 
 ```go
@@ -835,6 +895,7 @@ fr := frame.NewFrame(destRect, frames.ScifiTechLarge.Image, frames.ScifiTechLarg
 ![](images/gallery_scifi_tech_xlarge.png)
 
 
+
 ```go
 import "github.com/arran4/golang-frame/frames"
 
@@ -845,6 +906,7 @@ fr := frame.NewFrame(destRect, frames.ScifiTechXlarge.Image, frames.ScifiTechXla
 ### SignConstruction
 
 ![](images/gallery_sign_construction.png)
+
 
 
 ```go
@@ -859,6 +921,7 @@ fr := frame.NewFrame(destRect, frames.SignConstruction.Image, frames.SignConstru
 ![](images/gallery_sign_construction_large.png)
 
 
+
 ```go
 import "github.com/arran4/golang-frame/frames"
 
@@ -869,6 +932,7 @@ fr := frame.NewFrame(destRect, frames.SignConstructionLarge.Image, frames.SignCo
 ### SignConstructionXlarge
 
 ![](images/gallery_sign_construction_xlarge.png)
+
 
 
 ```go
@@ -883,6 +947,7 @@ fr := frame.NewFrame(destRect, frames.SignConstructionXlarge.Image, frames.SignC
 ![](images/gallery_sign_street.png)
 
 
+
 ```go
 import "github.com/arran4/golang-frame/frames"
 
@@ -893,6 +958,7 @@ fr := frame.NewFrame(destRect, frames.SignStreet.Image, frames.SignStreet.Middle
 ### SignStreetLarge
 
 ![](images/gallery_sign_street_large.png)
+
 
 
 ```go
@@ -907,6 +973,7 @@ fr := frame.NewFrame(destRect, frames.SignStreetLarge.Image, frames.SignStreetLa
 ![](images/gallery_sign_street_xlarge.png)
 
 
+
 ```go
 import "github.com/arran4/golang-frame/frames"
 
@@ -917,6 +984,7 @@ fr := frame.NewFrame(destRect, frames.SignStreetXlarge.Image, frames.SignStreetX
 ### SignWarning
 
 ![](images/gallery_sign_warning.png)
+
 
 
 ```go
@@ -931,6 +999,7 @@ fr := frame.NewFrame(destRect, frames.SignWarning.Image, frames.SignWarning.Midd
 ![](images/gallery_sign_warning_large.png)
 
 
+
 ```go
 import "github.com/arran4/golang-frame/frames"
 
@@ -941,6 +1010,7 @@ fr := frame.NewFrame(destRect, frames.SignWarningLarge.Image, frames.SignWarning
 ### SignWarningXlarge
 
 ![](images/gallery_sign_warning_xlarge.png)
+
 
 
 ```go
@@ -955,6 +1025,7 @@ fr := frame.NewFrame(destRect, frames.SignWarningXlarge.Image, frames.SignWarnin
 ![](images/gallery_waves.png)
 
 
+
 ```go
 import "github.com/arran4/golang-frame/frames"
 
@@ -965,6 +1036,7 @@ fr := frame.NewFrame(destRect, frames.Waves.Image, frames.Waves.Middle)
 ### WavesLarge
 
 ![](images/gallery_waves_large.png)
+
 
 
 ```go
@@ -979,6 +1051,7 @@ fr := frame.NewFrame(destRect, frames.WavesLarge.Image, frames.WavesLarge.Middle
 ![](images/gallery_waves_xlarge.png)
 
 
+
 ```go
 import "github.com/arran4/golang-frame/frames"
 
@@ -989,6 +1062,7 @@ fr := frame.NewFrame(destRect, frames.WavesXlarge.Image, frames.WavesXlarge.Midd
 ### Win31Like
 
 ![](images/gallery_win31_like.png)
+
 
 
 ```go
@@ -1003,6 +1077,7 @@ fr := frame.NewFrame(destRect, frames.Win31Like.Image, frames.Win31Like.Middle)
 ![](images/gallery_win31_like_large.png)
 
 
+
 ```go
 import "github.com/arran4/golang-frame/frames"
 
@@ -1013,6 +1088,7 @@ fr := frame.NewFrame(destRect, frames.Win31LikeLarge.Image, frames.Win31LikeLarg
 ### Win31LikeXlarge
 
 ![](images/gallery_win31_like_xlarge.png)
+
 
 
 ```go
@@ -1027,6 +1103,7 @@ fr := frame.NewFrame(destRect, frames.Win31LikeXlarge.Image, frames.Win31LikeXla
 ![](images/gallery_win95_like.png)
 
 
+
 ```go
 import "github.com/arran4/golang-frame/frames"
 
@@ -1037,6 +1114,7 @@ fr := frame.NewFrame(destRect, frames.Win95Like.Image, frames.Win95Like.Middle)
 ### Win95LikeLarge
 
 ![](images/gallery_win95_like_large.png)
+
 
 
 ```go
@@ -1051,6 +1129,7 @@ fr := frame.NewFrame(destRect, frames.Win95LikeLarge.Image, frames.Win95LikeLarg
 ![](images/gallery_win95_like_xlarge.png)
 
 
+
 ```go
 import "github.com/arran4/golang-frame/frames"
 
@@ -1061,6 +1140,7 @@ fr := frame.NewFrame(destRect, frames.Win95LikeXlarge.Image, frames.Win95LikeXla
 ### WindowFuture
 
 ![](images/gallery_window_future.png)
+
 
 
 ```go
@@ -1075,6 +1155,7 @@ fr := frame.NewFrame(destRect, frames.WindowFuture.Image, frames.WindowFuture.Mi
 ![](images/gallery_window_future_large.png)
 
 
+
 ```go
 import "github.com/arran4/golang-frame/frames"
 
@@ -1085,6 +1166,7 @@ fr := frame.NewFrame(destRect, frames.WindowFutureLarge.Image, frames.WindowFutu
 ### WindowFutureXlarge
 
 ![](images/gallery_window_future_xlarge.png)
+
 
 
 ```go
@@ -1099,6 +1181,7 @@ fr := frame.NewFrame(destRect, frames.WindowFutureXlarge.Image, frames.WindowFut
 ![](images/gallery_window_glass.png)
 
 
+
 ```go
 import "github.com/arran4/golang-frame/frames"
 
@@ -1109,6 +1192,7 @@ fr := frame.NewFrame(destRect, frames.WindowGlass.Image, frames.WindowGlass.Midd
 ### WindowGlassLarge
 
 ![](images/gallery_window_glass_large.png)
+
 
 
 ```go
@@ -1123,6 +1207,7 @@ fr := frame.NewFrame(destRect, frames.WindowGlassLarge.Image, frames.WindowGlass
 ![](images/gallery_window_glass_xlarge.png)
 
 
+
 ```go
 import "github.com/arran4/golang-frame/frames"
 
@@ -1133,6 +1218,7 @@ fr := frame.NewFrame(destRect, frames.WindowGlassXlarge.Image, frames.WindowGlas
 ### WindowPaper
 
 ![](images/gallery_window_paper.png)
+
 
 
 ```go
@@ -1147,6 +1233,7 @@ fr := frame.NewFrame(destRect, frames.WindowPaper.Image, frames.WindowPaper.Midd
 ![](images/gallery_window_paper_large.png)
 
 
+
 ```go
 import "github.com/arran4/golang-frame/frames"
 
@@ -1157,6 +1244,7 @@ fr := frame.NewFrame(destRect, frames.WindowPaperLarge.Image, frames.WindowPaper
 ### WindowPaperXlarge
 
 ![](images/gallery_window_paper_xlarge.png)
+
 
 
 ```go
@@ -1171,6 +1259,7 @@ fr := frame.NewFrame(destRect, frames.WindowPaperXlarge.Image, frames.WindowPape
 ![](images/gallery_window_retro.png)
 
 
+
 ```go
 import "github.com/arran4/golang-frame/frames"
 
@@ -1181,6 +1270,7 @@ fr := frame.NewFrame(destRect, frames.WindowRetro.Image, frames.WindowRetro.Midd
 ### WindowRetroLarge
 
 ![](images/gallery_window_retro_large.png)
+
 
 
 ```go
@@ -1195,6 +1285,7 @@ fr := frame.NewFrame(destRect, frames.WindowRetroLarge.Image, frames.WindowRetro
 ![](images/gallery_window_retro_xlarge.png)
 
 
+
 ```go
 import "github.com/arran4/golang-frame/frames"
 
@@ -1205,6 +1296,7 @@ fr := frame.NewFrame(destRect, frames.WindowRetroXlarge.Image, frames.WindowRetr
 ### Wood
 
 ![](images/gallery_wood.png)
+
 
 
 ```go
@@ -1219,6 +1311,7 @@ fr := frame.NewFrame(destRect, frames.Wood.Image, frames.Wood.Middle)
 ![](images/gallery_wood_large.png)
 
 
+
 ```go
 import "github.com/arran4/golang-frame/frames"
 
@@ -1229,6 +1322,7 @@ fr := frame.NewFrame(destRect, frames.WoodLarge.Image, frames.WoodLarge.Middle)
 ### WoodXlarge
 
 ![](images/gallery_wood_xlarge.png)
+
 
 
 ```go

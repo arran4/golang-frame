@@ -18,6 +18,7 @@ type FrameData struct {
 	Name         string
 	ExportedName string
 	IsCheckers   bool
+	IsFloral     bool
 }
 
 // Gallery is a subcommand `frames gallery` Generates gallery images and readme
@@ -61,8 +62,8 @@ func Gallery() error {
 
 		exportedName := toExportedName(def.Name)
 
-		// If checkers, generate additional aspect ratio / size examples
-		if def.Name == "checkers" {
+		// If checkers or floral, generate additional aspect ratio / size examples
+		if def.Name == "checkers" || def.Name == "floral" {
 			for idx, wh := range [][2]int{{300, 150}, {150, 300}, {183, 201}, {230, 230}} {
 				// Measure it properly!
 				wLow, _, hLow, _ := frame.MeasureFrame(def.Image, def.Middle, wh[0], wh[1])
@@ -98,6 +99,7 @@ func Gallery() error {
 			Name:         def.Name,
 			ExportedName: exportedName,
 			IsCheckers:   def.Name == "checkers",
+			IsFloral:     def.Name == "floral",
 		})
 	}
 

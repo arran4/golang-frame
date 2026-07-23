@@ -198,6 +198,14 @@ There is a collection of included frames in the `frames` package. Each frame com
 ![](images/gallery_{{.Name}}_extra_2.png)
 ![](images/gallery_{{.Name}}_extra_3.png)
 {{end}}
+{{if .IsFloral}}
+#### Additional sizes / aspect ratios for Floral
+
+![](images/gallery_{{.Name}}_extra_0.png)
+![](images/gallery_{{.Name}}_extra_1.png)
+![](images/gallery_{{.Name}}_extra_2.png)
+![](images/gallery_{{.Name}}_extra_3.png)
+{{end}}
 
 ```go
 import "github.com/arran4/golang-frame/frames"
