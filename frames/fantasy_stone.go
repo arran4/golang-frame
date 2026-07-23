@@ -12,7 +12,7 @@ var FantasyStonePng []byte
 
 var FantasyStone = &Definition{
 	Name: "fantasy_stone",
-	Middle: image.Rect(20, 20, 76, 76),
+	Middle: image.Rect(24, 24, 72, 72),
 }
 
 func init() {

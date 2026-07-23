@@ -1490,8 +1490,177 @@ func genRainbow(s int) (image.Image, image.Rectangle, string) {
 
 func genFantasyStone(s int) (image.Image, image.Rectangle, string) {
 	w, h := 96*s, 96*s
-	img := solid(w, h, color.RGBA{80, 80, 80, 255})
-	return img, image.Rect(20*s, 20*s, w-20*s, h-20*s), "fantasy_stone"
+	img := image.NewRGBA(image.Rect(0, 0, w, h))
+	bw := 24 * s
+
+	baseColor := color.RGBA{110, 115, 120, 255}
+
+	lx, ly, lz := -1.0, -1.0, 1.5
+	ln := math.Sqrt(lx*lx + ly*ly + lz*lz)
+	lx, ly, lz = lx/ln, ly/ln, lz/ln
+
+	for y := 0; y < h; y++ {
+		for x := 0; x < w; x++ {
+			isBorder := x < bw || x >= w-bw || y < bw || y >= h-bw
+			if !isBorder {
+				continue // Transparent middle
+			}
+
+			// Distance to nearest outer edge
+			dOut := x
+			if w-1-x < dOut { dOut = w - 1 - x }
+			if y < dOut { dOut = y }
+			if h-1-y < dOut { dOut = h - 1 - y }
+
+			// Distance to nearest inner edge
+			dIn := -1
+			if x < bw { dIn = bw - 1 - x } else if x >= w-bw { dIn = x - (w - bw) }
+			if y < bw && (dIn == -1 || bw - 1 - y < dIn) { dIn = bw - 1 - y }
+			if y >= h-bw && (dIn == -1 || y - (h - bw) < dIn) { dIn = y - (h - bw) }
+			if dIn < 0 { dIn = 0 }
+
+			edgeDist := dOut
+			if dIn < edgeDist { edgeDist = dIn }
+
+			bevelWidth := 8 * float64(s)
+
+			getZ := func(px, py int) float64 {
+				if px >= bw && px < w-bw && py >= bw && py < h-bw { return 0 } // inner empty area
+				do := px
+				if w-1-px < do { do = w - 1 - px }
+				if py < do { do = py }
+				if h-1-py < do { do = h - 1 - py }
+
+				di := -1
+				if px < bw { di = bw - 1 - px } else if px >= w-bw { di = px - (w - bw) }
+				if py < bw && (di == -1 || bw - 1 - py < di) { di = bw - 1 - py }
+				if py >= h-bw && (di == -1 || py - (h - bw) < di) { di = py - (h - bw) }
+				if di < 0 { di = 0 }
+
+				ed := do
+				if di < ed { ed = di }
+
+				pz := float64(ed) / bevelWidth
+				if pz > 1.0 { pz = 1.0 }
+
+				// Add large-scale structure / unevenness to the blocks
+				blockNoise := turbulence(float64(px)*0.01, float64(py)*0.01) * 0.3
+				pz += blockNoise
+
+				// Add base height noise for stone
+				pz += turbulence(float64(px)*0.05, float64(py)*0.05) * 0.1
+				return pz
+			}
+
+			z0 := getZ(x, y)
+			zx := getZ(x+1, y)
+			zy := getZ(x, y+1)
+
+			nx := z0 - zx
+			ny := z0 - zy
+			nz := 0.3 // depth scalar
+
+			// Add high frequency bump map
+			bump := turbulence(float64(x)*0.4, float64(y)*0.4) * 0.15
+			nx += bump
+			ny += bump
+
+			isCrack := false
+			// 45-degree corner cracks
+			if math.Abs(float64(x-y)) <= 1.5 && x < bw { isCrack = true }
+			if math.Abs(float64(x-(w-1-y))) <= 1.5 && x >= w-bw { isCrack = true }
+			if math.Abs(float64((w-1-x)-y)) <= 1.5 && x >= w-bw { isCrack = true }
+			if math.Abs(float64((w-1-x)-(h-1-y))) <= 1.5 && x < bw { isCrack = true }
+
+			// Intersecting block cracks along the edges
+			if (x == w/2 || x == w/2-1 || x == w/2+1) && (y < bw || y >= h-bw) { isCrack = true }
+			if (y == h/2 || y == h/2-1 || y == h/2+1) && (x < bw || x >= w-bw) { isCrack = true }
+
+			// Make the joints look like mortar/cracks by modifying normals
+			if isCrack {
+				// Cracks slope inwards
+				if math.Abs(float64(x-y)) <= 1.5 && x < bw {
+					if x > y { nx = -1.0; ny = 1.0 } else { nx = 1.0; ny = -1.0 }
+				} else if math.Abs(float64(x-(w-1-y))) <= 1.5 && x >= w-bw {
+					if w-1-x > y { nx = 1.0; ny = 1.0 } else { nx = -1.0; ny = -1.0 }
+				} else if math.Abs(float64((w-1-x)-(h-1-y))) <= 1.5 && x < bw {
+					if x > h-1-y { nx = -1.0; ny = -1.0 } else { nx = 1.0; ny = 1.0 }
+				} else if math.Abs(float64((w-1-x)-y)) <= 1.5 && x >= w-bw {
+					// Top right
+				}
+
+				if (x == w/2 || x == w/2-1 || x == w/2+1) && (y < bw || y >= h-bw) {
+					if x < w/2 { nx = 1.0; ny = 0 } else { nx = -1.0; ny = 0 }
+				}
+				if (y == h/2 || y == h/2-1 || y == h/2+1) && (x < bw || x >= w-bw) {
+					if y < h/2 { nx = 0; ny = 1.0 } else { nx = 0; ny = -1.0 }
+				}
+
+				nz = 0.5
+			}
+
+			nn := math.Sqrt(nx*nx + ny*ny + nz*nz)
+			nx, ny, nz = nx/nn, ny/nn, nz/nn
+
+			dot := nx*lx + ny*ly + nz*lz
+			if dot < 0 { dot = 0 }
+
+			// Color calculation
+			r := float64(baseColor.R) * (0.3 + 0.7*dot)
+			g := float64(baseColor.G) * (0.3 + 0.7*dot)
+			b := float64(baseColor.B) * (0.3 + 0.7*dot)
+
+			// Darken deeper parts slightly
+			r *= (0.6 + 0.4*z0)
+			g *= (0.6 + 0.4*z0)
+			b *= (0.6 + 0.4*z0)
+
+			if isCrack {
+				r *= 0.3; g *= 0.3; b *= 0.3
+			}
+
+			// Random surface cracks
+			crack := turbulence(float64(x)*0.03, float64(y)*0.03)
+			if crack > 0.45 && crack < 0.47 {
+				r *= 0.3; g *= 0.3; b *= 0.3
+			}
+
+			// Adding some variation to stone color
+			nval := turbulence(float64(x)*0.02, float64(y)*0.02)
+			r += nval * 30
+			g += nval * 30
+			b += nval * 30
+
+			if r > 255 { r = 255 }
+			if g > 255 { g = 255 }
+			if b > 255 { b = 255 }
+			if r < 0 { r = 0 }
+			if g < 0 { g = 0 }
+			if b < 0 { b = 0 }
+
+			img.Set(x, y, color.RGBA{uint8(r), uint8(g), uint8(b), 255})
+		}
+	}
+
+	// Add an outer border line
+	for x := 0; x < w; x++ {
+		img.Set(x, 0, color.RGBA{30, 35, 40, 255})
+		img.Set(x, h-1, color.RGBA{30, 35, 40, 255})
+		if x >= bw && x < w-bw {
+			img.Set(x, bw-1, color.RGBA{30, 35, 40, 255})
+			img.Set(x, h-bw, color.RGBA{30, 35, 40, 255})
+		}
+	}
+	for y := 0; y < h; y++ {
+		img.Set(0, y, color.RGBA{30, 35, 40, 255})
+		img.Set(w-1, y, color.RGBA{30, 35, 40, 255})
+		if y >= bw && y < h-bw {
+			img.Set(bw-1, y, color.RGBA{30, 35, 40, 255})
+			img.Set(w-bw, y, color.RGBA{30, 35, 40, 255})
+		}
+	}
+
+	return img, image.Rect(bw, bw, w-bw, h-bw), "fantasy_stone"
 }
 
 func genSciFiTech(s int) (image.Image, image.Rectangle, string) {
