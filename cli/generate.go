@@ -1696,7 +1696,123 @@ func genMetal(s int) (image.Image, image.Rectangle, string) {
 
 func genRidge(s int) (image.Image, image.Rectangle, string) {
 	w, h := 48*s, 48*s
-	img := solid(w, h, color.RGBA{200, 200, 200, 255})
+	img := image.NewRGBA(image.Rect(0, 0, w, h))
+	bw := 8 * s
+
+	baseColor := color.RGBA{190, 192, 195, 255}
+
+	getProfile := func(t float64) float64 {
+		if t < 0.0 {
+			return 0.0
+		}
+		if t > 1.0 {
+			return 0.0
+		}
+		// A triangle profile with a flat top
+		// 0 - 0.4: up
+		// 0.4 - 0.6: flat
+		// 0.6 - 1.0: down
+		if t < 0.4 {
+			return t * 2.5
+		}
+		if t > 0.6 {
+			return (1.0 - t) * 2.5
+		}
+		return 1.0
+	}
+
+	lx, ly, lz := -1.0, -1.0, 1.5
+	ln := math.Sqrt(lx*lx + ly*ly + lz*lz)
+	lx, ly, lz = lx/ln, ly/ln, lz/ln
+
+	for y := 0; y < h; y++ {
+		for x := 0; x < w; x++ {
+			dx := x
+			if w-1-x < dx {
+				dx = w - 1 - x
+			}
+			dy := y
+			if h-1-y < dy {
+				dy = h - 1 - y
+			}
+
+			if dx >= bw && dy >= bw {
+				continue
+			}
+
+			d := dx
+			if dy < d {
+				d = dy
+			}
+
+			t := float64(d) / float64(bw)
+
+			// Numerical gradient of t (distance to outer edge)
+			d_px := x + 1
+			if w-1-(x+1) < d_px {
+				d_px = w - 1 - (x + 1)
+			}
+			d_px_y := dy
+			d1 := d_px
+			if d_px_y < d1 {
+				d1 = d_px_y
+			}
+			tx := float64(d1) / float64(bw)
+
+			d_py := y + 1
+			if h-1-(y+1) < d_py {
+				d_py = h - 1 - (y + 1)
+			}
+			d_py_x := dx
+			d2 := d_py_x
+			if d_py < d2 {
+				d2 = d_py
+			}
+			ty := float64(d2) / float64(bw)
+
+			z0 := getProfile(t)
+			zx := getProfile(tx)
+			zy := getProfile(ty)
+
+			nx := z0 - zx
+			ny := z0 - zy
+			nz := 0.2 // depth scalar
+
+			nn := math.Sqrt(nx*nx + ny*ny + nz*nz)
+			if nn > 0 {
+				nx, ny, nz = nx/nn, ny/nn, nz/nn
+			}
+
+			dot := nx*lx + ny*ly + nz*lz
+			if dot < 0 {
+				dot = 0
+			}
+
+			spec := 0.0
+			refZ := 2*dot*nz - lz
+			if refZ > 0 {
+				spec = math.Pow(refZ, 15)
+			}
+
+			r := float64(baseColor.R) * 0.4
+			g := float64(baseColor.G) * 0.4
+			b := float64(baseColor.B) * 0.4
+
+			r += float64(baseColor.R) * 0.6 * dot
+			g += float64(baseColor.G) * 0.6 * dot
+			b += float64(baseColor.B) * 0.6 * dot
+
+			r += 255.0 * spec * 0.3
+			g += 255.0 * spec * 0.3
+			b += 255.0 * spec * 0.3
+
+			if r > 255 { r = 255 }
+			if g > 255 { g = 255 }
+			if b > 255 { b = 255 }
+
+			img.Set(x, y, color.RGBA{uint8(r), uint8(g), uint8(b), 255})
+		}
+	}
 	return img, image.Rect(8*s, 8*s, w-8*s, h-8*s), "ridge"
 }
 
