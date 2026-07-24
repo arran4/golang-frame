@@ -2021,9 +2021,115 @@ func genChains(s int) (image.Image, image.Rectangle, string) {
 }
 
 func genRainbow(s int) (image.Image, image.Rectangle, string) {
-	w, h := 64*s, 64*s
-	img := solid(w, h, color.White)
-	return img, image.Rect(8*s, 16*s, w-8*s, h-8*s), "rainbow"
+	w, h := 96*s, 96*s
+	bw := 28 * s
+
+	img := image.NewRGBA(image.Rect(0, 0, w, h))
+
+	colors := []color.RGBA{
+		{255, 0, 0, 255},       // Red
+		{255, 127, 0, 255},     // Orange
+		{255, 255, 0, 255},     // Yellow
+		{0, 255, 0, 255},       // Green
+		{0, 0, 255, 255},       // Blue
+		{75, 0, 130, 255},      // Indigo
+		{148, 0, 211, 255},     // Violet
+	}
+
+	lx, ly, lz := -1.0, -1.0, 1.5
+	ln := math.Sqrt(lx*lx + ly*ly + lz*lz)
+	lx, ly, lz = lx/ln, ly/ln, lz/ln
+
+	getZ := func(px, py int) float64 {
+		if px >= bw && px < w-bw && py >= bw && py < h-bw {
+			return 0
+		}
+
+		dx := px
+		if w-1-px < dx { dx = w-1-px }
+		dy := py
+		if h-1-py < dy { dy = h-1-py }
+
+		d := dx
+		if dy < d { d = dy }
+
+		if d >= bw { return 0 }
+		if d < 0 { return 0 }
+
+		u := float64(d) / float64(bw)
+
+		bands := 7.0
+		uBand := u * bands
+		uBandLocal := uBand - math.Floor(uBand)
+
+		v := uBandLocal*2.0 - 1.0
+		bump := math.Sqrt(math.Max(0, 1 - v*v))
+
+		uOverall := u*2.0 - 1.0
+		overall := math.Sqrt(math.Max(0, 1 - uOverall*uOverall))
+
+		return (bump*0.2 + overall*0.8) * float64(bw) / 2.0
+	}
+
+	for y := 0; y < h; y++ {
+		for x := 0; x < w; x++ {
+			if x >= bw && x < w-bw && y >= bw && y < h-bw {
+				continue
+			}
+
+			dx := x
+			if w-1-x < dx { dx = w-1-x }
+			dy := y
+			if h-1-y < dy { dy = h-1-y }
+
+			d := dx
+			if dy < d { d = dy }
+
+			bandWidth := float64(bw) / 7.0
+			idx := int(math.Floor(float64(d) / bandWidth))
+			if idx > 6 { idx = 6 }
+			c := colors[idx]
+
+			zx0 := getZ(x-1, y)
+			zx1 := getZ(x+1, y)
+			zy0 := getZ(x, y-1)
+			zy1 := getZ(x, y+1)
+
+			nx := zx0 - zx1
+			ny := zy0 - zy1
+			nz := 2.0
+			nn := math.Sqrt(nx*nx + ny*ny + nz*nz)
+			nx, ny, nz = nx/nn, ny/nn, nz/nn
+
+			dot := nx*lx + ny*ly + nz*lz
+			if dot < 0 { dot = 0 }
+
+			ambient := 0.4
+			diffuse := 0.6 * dot
+			light := ambient + diffuse
+
+			rc := float64(c.R) * light
+			gc := float64(c.G) * light
+			bc := float64(c.B) * light
+
+			rz := 2*dot*nz - lz
+			spec := rz
+			if spec < 0 { spec = 0 }
+			spec = math.Pow(spec, 30) * 0.3 * 255.0
+
+			rc += spec
+			gc += spec
+			bc += spec
+
+			if rc > 255 { rc = 255 }
+			if gc > 255 { gc = 255 }
+			if bc > 255 { bc = 255 }
+
+			img.SetRGBA(x, y, color.RGBA{uint8(rc), uint8(gc), uint8(bc), 255})
+		}
+	}
+
+	return img, image.Rect(bw, bw, w-bw, h-bw), "rainbow"
 }
 
 func genFantasyStone(s int) (image.Image, image.Rectangle, string) {
