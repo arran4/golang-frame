@@ -1105,7 +1105,7 @@ func genMacOSX(s int) (image.Image, image.Rectangle, string) {
 }
 
 func genMWM(s int) (image.Image, image.Rectangle, string) {
-	w, h := 48*s, 48*s
+	w, h := 96*s, 64*s
 	bg := color.RGBA{180, 180, 180, 255}
 	img := solid(w, h, bg)
 	white := color.White
@@ -1199,12 +1199,12 @@ func genMWM(s int) (image.Image, image.Rectangle, string) {
 	rect(img, image.Rect(bx3+bw/2-s, by+bh/2+s, bx3+bw/2+s, by+bh/2+2*s), white)
 	rect(img, image.Rect(bx3+bw/2+s, by+bh/2-s, bx3+bw/2+2*s, by+bh/2+2*s), white)
 
-	mid := image.Rect(fw+6*s, fw+th+6*s, w-fw-6*s, h-fw-6*s)
+	mid := image.Rect(26*s, fw+th+6*s, w-36*s, h-fw-6*s)
 	return img, mid, "mwm_like"
 }
 
 func genNeXT(s int) (image.Image, image.Rectangle, string) {
-	w, h := 48*s, 48*s
+	w, h := 64*s, 64*s
 
 	black := color.RGBA{0, 0, 0, 255}
 	darkGray := color.RGBA{85, 85, 85, 255}
@@ -1226,10 +1226,10 @@ func genNeXT(s int) (image.Image, image.Rectangle, string) {
 	titleHeight := 14 * s
 	rect(img, image.Rect(2*s, 2*s, w-2*s, 2*s+titleHeight), black)
 
-	marginLeft := 4 * s
-	marginRight := 4 * s
-	marginBottom := 4 * s
-	marginTop := 2*s + titleHeight + 2*s
+	marginLeft := 6 * s
+	marginRight := 6 * s
+	marginBottom := 6 * s
+	marginTop := 2*s + titleHeight + 4*s
 
 	rect(img, image.Rect(marginLeft, marginTop, w-marginRight, marginTop+s), darkGray)
 	rect(img, image.Rect(marginLeft, marginTop, marginLeft+s, h-marginBottom), darkGray)
@@ -1280,7 +1280,7 @@ func genNeXT(s int) (image.Image, image.Rectangle, string) {
 	rect(img, image.Rect(miniX+3*s, btnMarginY+btnSize-3*s-s, miniX+btnSize-3*s, btnMarginY+btnSize-3*s), white)
 	rect(img, image.Rect(miniX+4*s, btnMarginY+4*s, miniX+btnSize-4*s, btnMarginY+btnSize-4*s), white)
 
-	return img, image.Rect(marginLeft+2*s, marginTop+2*s, w-marginRight-2*s, h-marginBottom-2*s), "next_like"
+	return img, image.Rect(18*s, marginTop+2*s, w-18*s, h-marginBottom-2*s), "next_like"
 }
 
 func genBeOS(s int) (image.Image, image.Rectangle, string) {

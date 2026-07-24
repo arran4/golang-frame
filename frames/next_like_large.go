@@ -12,7 +12,7 @@ var NextLikeLargePng []byte
 
 var NextLikeLarge = &Definition{
 	Name: "next_like_large",
-	Middle: image.Rect(12, 40, 84, 84),
+	Middle: image.Rect(36, 44, 92, 112),
 }
 
 func init() {
