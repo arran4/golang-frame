@@ -12,7 +12,7 @@ var RainbowLargePng []byte
 
 var RainbowLarge = &Definition{
 	Name: "rainbow_large",
-	Middle: image.Rect(16, 32, 112, 112),
+	Middle: image.Rect(56, 56, 136, 136),
 }
 
 func init() {
