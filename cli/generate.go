@@ -1105,80 +1105,182 @@ func genMacOSX(s int) (image.Image, image.Rectangle, string) {
 }
 
 func genMWM(s int) (image.Image, image.Rectangle, string) {
-	w, h := 48*s, 48*s
+	w, h := 96*s, 64*s
 	bg := color.RGBA{180, 180, 180, 255}
 	img := solid(w, h, bg)
 	white := color.White
 	black := color.Black
+	darkGray := color.RGBA{85, 85, 85, 255}
 
-	// Outer bevel
+	fw := 5 * s
+
 	rect(img, image.Rect(0, 0, w, s), white)
 	rect(img, image.Rect(0, 0, s, h), white)
 	rect(img, image.Rect(w-s, 0, w, h), black)
 	rect(img, image.Rect(0, h-s, w, h), black)
+	rect(img, image.Rect(w-2*s, s, w-s, h-s), darkGray)
+	rect(img, image.Rect(s, h-2*s, w-s, h-s), darkGray)
 
-	// Title area separator
-	top := 18 * s
-	rect(img, image.Rect(0, top-2*s, w, top-s), black)
-	rect(img, image.Rect(0, top-s, w, top), white)
+	rect(img, image.Rect(fw-s, fw-s, w-fw+s, fw), darkGray)
+	rect(img, image.Rect(fw-s, fw-s, fw, h-fw+s), darkGray)
+	rect(img, image.Rect(fw-s, fw-s, w-fw, fw), black)
+	rect(img, image.Rect(fw-s, fw-s, fw, h-fw), black)
 
-	// Inner bevel around content
-	rect(img, image.Rect(12*s, top, w-12*s, top+s), black)
-	rect(img, image.Rect(12*s, top, 12*s+s, h-12*s), black)
-	rect(img, image.Rect(w-12*s-s, top, w-12*s, h-12*s), white)
-	rect(img, image.Rect(12*s, h-12*s-s, w-12*s, h-12*s), white)
+	rect(img, image.Rect(w-fw, fw-s, w-fw+s, h-fw+s), white)
+	rect(img, image.Rect(fw-s, h-fw, w-fw+s, h-fw+s), white)
 
-	return img, image.Rect(12*s+s, top+s, w-12*s-s, h-12*s-s), "mwm_like"
+	rect(img, image.Rect(fw-s, 0, fw, fw-s), black)
+	rect(img, image.Rect(fw, s, fw+s, fw-s), white)
+	rect(img, image.Rect(0, fw-s, fw-s, fw), black)
+	rect(img, image.Rect(s, fw, fw-s, fw+s), white)
+
+	rect(img, image.Rect(w-fw, 0, w-fw+s, fw-s), black)
+	rect(img, image.Rect(w-fw+s, s, w-fw+2*s, fw-s), white)
+	rect(img, image.Rect(w-fw+s, fw-s, w, fw), black)
+	rect(img, image.Rect(w-fw+s, fw, w-s, fw+s), white)
+
+	rect(img, image.Rect(0, h-fw, fw-s, h-fw+s), black)
+	rect(img, image.Rect(s, h-fw+s, fw-s, h-fw+2*s), white)
+	rect(img, image.Rect(fw-s, h-fw+s, fw, h), black)
+	rect(img, image.Rect(fw, h-fw+s, fw+s, h-s), white)
+
+	rect(img, image.Rect(w-fw+s, h-fw, w, h-fw+s), black)
+	rect(img, image.Rect(w-fw+s, h-fw+s, w-s, h-fw+2*s), white)
+	rect(img, image.Rect(w-fw, h-fw+s, w-fw+s, h), black)
+	rect(img, image.Rect(w-fw+s, h-fw+s, w-fw+2*s, h-s), white)
+
+	th := 18 * s
+
+	rect(img, image.Rect(fw, fw+th-2*s, w-fw, fw+th-s), darkGray)
+	rect(img, image.Rect(fw, fw+th-2*s, w-fw, fw+th-s), black)
+	rect(img, image.Rect(fw, fw+th-s, w-fw, fw+th), white)
+
+	bh := th - 6*s
+	bw := bh + 2*s
+
+	bx := fw + 2*s
+	by := fw + 2*s
+	rect(img, image.Rect(bx, by, bx+bw, by+bh), bg)
+	rect(img, image.Rect(bx, by, bx+bw, by+s), white)
+	rect(img, image.Rect(bx, by, bx+s, by+bh), white)
+	rect(img, image.Rect(bx+bw-s, by, bx+bw, by+bh), black)
+	rect(img, image.Rect(bx, by+bh-s, bx+bw, by+bh), black)
+	rect(img, image.Rect(bx+bw-2*s, by+s, bx+bw-s, by+bh-s), darkGray)
+	rect(img, image.Rect(bx+s, by+bh-2*s, bx+bw-s, by+bh-s), darkGray)
+
+	rect(img, image.Rect(bx+3*s, by+bh/2-s, bx+bw-3*s, by+bh/2+s), darkGray)
+	rect(img, image.Rect(bx+3*s, by+bh/2-s, bx+bw-3*s, by+bh/2+s), black)
+	rect(img, image.Rect(bx+3*s, by+bh/2+s, bx+bw-3*s, by+bh/2+2*s), white)
+
+	bx2 := w - fw - 2*s - bw
+	rect(img, image.Rect(bx2, by, bx2+bw, by+bh), bg)
+	rect(img, image.Rect(bx2, by, bx2+bw, by+s), white)
+	rect(img, image.Rect(bx2, by, bx2+s, by+bh), white)
+	rect(img, image.Rect(bx2+bw-s, by, bx2+bw, by+bh), black)
+	rect(img, image.Rect(bx2, by+bh-s, bx2+bw, by+bh), black)
+	rect(img, image.Rect(bx2+bw-2*s, by+s, bx2+bw-s, by+bh-s), darkGray)
+	rect(img, image.Rect(bx2+s, by+bh-2*s, bx2+bw-s, by+bh-s), darkGray)
+
+	rect(img, image.Rect(bx2+3*s, by+3*s, bx2+bw-3*s, by+bh-3*s), black)
+	rect(img, image.Rect(bx2+3*s, by+bh-3*s, bx2+bw-3*s, by+bh-2*s), white)
+	rect(img, image.Rect(bx2+bw-3*s, by+3*s, bx2+bw-2*s, by+bh-2*s), white)
+	rect(img, image.Rect(bx2+4*s, by+4*s, bx2+bw-4*s, by+bh-4*s), bg)
+
+	bx3 := bx2 - bw + s
+	rect(img, image.Rect(bx3, by, bx3+bw, by+bh), bg)
+	rect(img, image.Rect(bx3, by, bx3+bw, by+s), white)
+	rect(img, image.Rect(bx3, by, bx3+s, by+bh), white)
+	rect(img, image.Rect(bx3+bw-s, by, bx3+bw, by+bh), black)
+	rect(img, image.Rect(bx3, by+bh-s, bx3+bw, by+bh), black)
+	rect(img, image.Rect(bx3+bw-2*s, by+s, bx3+bw-s, by+bh-s), darkGray)
+	rect(img, image.Rect(bx3+s, by+bh-2*s, bx3+bw-s, by+bh-s), darkGray)
+
+	rect(img, image.Rect(bx3+bw/2-s, by+bh/2-s, bx3+bw/2+s, by+bh/2+s), black)
+	rect(img, image.Rect(bx3+bw/2-s, by+bh/2+s, bx3+bw/2+s, by+bh/2+2*s), white)
+	rect(img, image.Rect(bx3+bw/2+s, by+bh/2-s, bx3+bw/2+2*s, by+bh/2+2*s), white)
+
+	mid := image.Rect(26*s, fw+th+6*s, w-36*s, h-fw-6*s)
+	return img, mid, "mwm_like"
 }
 
 func genNeXT(s int) (image.Image, image.Rectangle, string) {
-	w, h := 48*s, 48*s
-	// Colors
+	w, h := 64*s, 64*s
+
 	black := color.RGBA{0, 0, 0, 255}
 	darkGray := color.RGBA{85, 85, 85, 255}
-	lightGray := color.RGBA{179, 179, 179, 255}
+	lightGray := color.RGBA{170, 170, 170, 255}
 	white := color.RGBA{255, 255, 255, 255}
 
 	img := solid(w, h, lightGray)
 
-	// Outer border
 	rect(img, image.Rect(0, 0, w, s), black)   // Top
 	rect(img, image.Rect(0, 0, s, h), black)   // Left
 	rect(img, image.Rect(w-s, 0, w, h), black) // Right
 	rect(img, image.Rect(0, h-s, w, h), black) // Bottom
 
-	// Title bar
+	rect(img, image.Rect(s, s, w-s, 2*s), white)
+	rect(img, image.Rect(s, s, 2*s, h-s), white)
+	rect(img, image.Rect(w-2*s, s, w-s, h-s), darkGray)
+	rect(img, image.Rect(s, h-2*s, w-s, h-s), darkGray)
+
 	titleHeight := 14 * s
-	rect(img, image.Rect(s, s, w-s, s+titleHeight), black)
+	rect(img, image.Rect(2*s, 2*s, w-2*s, 2*s+titleHeight), black)
 
-	// Content Well (Sunken)
-	// Margins
-	marginLeft := 4 * s
-	marginRight := 4 * s
-	marginBottom := 4 * s
-	// Top margin includes title bar and a small gap
-	marginTop := s + titleHeight + 2*s
+	marginLeft := 6 * s
+	marginRight := 6 * s
+	marginBottom := 6 * s
+	marginTop := 2*s + titleHeight + 4*s
 
-	// Draw the "Sunken" bezel for the content
-	// Outer bounds of the well
-	wellX1 := marginLeft
-	wellY1 := marginTop
-	wellX2 := w - marginRight
-	wellY2 := h - marginBottom
+	rect(img, image.Rect(marginLeft, marginTop, w-marginRight, marginTop+s), darkGray)
+	rect(img, image.Rect(marginLeft, marginTop, marginLeft+s, h-marginBottom), darkGray)
+	rect(img, image.Rect(w-marginRight-s, marginTop, w-marginRight, h-marginBottom), white)
+	rect(img, image.Rect(marginLeft, h-marginBottom-s, w-marginRight, h-marginBottom), white)
 
-	// Top Shadow
-	rect(img, image.Rect(wellX1, wellY1, wellX2, wellY1+s), darkGray)
-	// Left Shadow
-	rect(img, image.Rect(wellX1, wellY1, wellX1+s, wellY2), darkGray)
-	// Right Highlight
-	rect(img, image.Rect(wellX2-s, wellY1, wellX2, wellY2), white)
-	// Bottom Highlight
-	rect(img, image.Rect(wellX1, wellY2-s, wellX2, wellY2), white)
+	rect(img, image.Rect(marginLeft+s, marginTop+s, w-marginRight-s, marginTop+2*s), black)
+	rect(img, image.Rect(marginLeft+s, marginTop+s, marginLeft+2*s, h-marginBottom-s), black)
+	rect(img, image.Rect(w-marginRight-2*s, marginTop+s, w-marginRight-s, h-marginBottom-s), black)
+	rect(img, image.Rect(marginLeft+s, h-marginBottom-2*s, w-marginRight-s, h-marginBottom-s), black)
 
-	// Middle is the area inside the well bezel
-	middle := image.Rect(wellX1+s, wellY1+s, wellX2-s, wellY2-s)
+	btnSize := 12 * s
+	btnMarginY := 2*s + (titleHeight - btnSize) / 2
 
-	return img, middle, "next_like"
+	closeX := 2*s + 2*s
+	rect(img, image.Rect(closeX, btnMarginY, closeX+btnSize, btnMarginY+btnSize), lightGray)
+	rect(img, image.Rect(closeX, btnMarginY, closeX+btnSize, btnMarginY+s), white)
+	rect(img, image.Rect(closeX, btnMarginY, closeX+s, btnMarginY+btnSize), white)
+	rect(img, image.Rect(closeX+btnSize-s, btnMarginY, closeX+btnSize, btnMarginY+btnSize), darkGray)
+	rect(img, image.Rect(closeX, btnMarginY+btnSize-s, closeX+btnSize, btnMarginY+btnSize), darkGray)
+
+	rect(img, image.Rect(closeX+btnSize-2*s, btnMarginY+s, closeX+btnSize-s, btnMarginY+btnSize-s), black)
+	rect(img, image.Rect(closeX+s, btnMarginY+btnSize-2*s, closeX+btnSize-s, btnMarginY+btnSize-s), black)
+
+	ixSize := 6 * s
+	ixX := closeX + (btnSize - ixSize)/2
+	ixY := btnMarginY + (btnSize - ixSize)/2
+
+	for i := 0; i < ixSize; i++ {
+		rect(img, image.Rect(ixX+i, ixY+i, ixX+i+s, ixY+i+s), black)
+		rect(img, image.Rect(ixX+ixSize-s-i, ixY+i, ixX+ixSize-i, ixY+i+s), black)
+	}
+
+	miniX := w - 2*s - 2*s - btnSize
+	rect(img, image.Rect(miniX, btnMarginY, miniX+btnSize, btnMarginY+btnSize), lightGray)
+	rect(img, image.Rect(miniX, btnMarginY, miniX+btnSize, btnMarginY+s), white)
+	rect(img, image.Rect(miniX, btnMarginY, miniX+s, btnMarginY+btnSize), white)
+	rect(img, image.Rect(miniX+btnSize-s, btnMarginY, miniX+btnSize, btnMarginY+btnSize), darkGray)
+	rect(img, image.Rect(miniX, btnMarginY+btnSize-s, miniX+btnSize, btnMarginY+btnSize), darkGray)
+
+	rect(img, image.Rect(miniX+btnSize-2*s, btnMarginY+s, miniX+btnSize-s, btnMarginY+btnSize-s), black)
+	rect(img, image.Rect(miniX+s, btnMarginY+btnSize-2*s, miniX+btnSize-s, btnMarginY+btnSize-s), black)
+
+	rect(img, image.Rect(miniX+3*s, btnMarginY+3*s, miniX+btnSize-3*s, btnMarginY+btnSize-3*s), darkGray)
+	rect(img, image.Rect(miniX+3*s, btnMarginY+3*s, miniX+btnSize-3*s, btnMarginY+3*s+s), black)
+	rect(img, image.Rect(miniX+3*s, btnMarginY+3*s, miniX+3*s+s, btnMarginY+btnSize-3*s), black)
+	rect(img, image.Rect(miniX+btnSize-3*s-s, btnMarginY+3*s, miniX+btnSize-3*s, btnMarginY+btnSize-3*s), white)
+	rect(img, image.Rect(miniX+3*s, btnMarginY+btnSize-3*s-s, miniX+btnSize-3*s, btnMarginY+btnSize-3*s), white)
+	rect(img, image.Rect(miniX+4*s, btnMarginY+4*s, miniX+btnSize-4*s, btnMarginY+btnSize-4*s), white)
+
+	return img, image.Rect(18*s, marginTop+2*s, w-18*s, h-marginBottom-2*s), "next_like"
 }
 
 func genBeOS(s int) (image.Image, image.Rectangle, string) {
