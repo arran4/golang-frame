@@ -12,7 +12,7 @@ var ScifiTechPng []byte
 
 var ScifiTech = &Definition{
 	Name: "scifi_tech",
-	Middle: image.Rect(16, 16, 80, 80),
+	Middle: image.Rect(24, 24, 72, 72),
 }
 
 func init() {

@@ -12,7 +12,7 @@ var ScifiTechXlargePng []byte
 
 var ScifiTechXlarge = &Definition{
 	Name: "scifi_tech_xlarge",
-	Middle: image.Rect(48, 48, 240, 240),
+	Middle: image.Rect(72, 72, 216, 216),
 }
 
 func init() {
