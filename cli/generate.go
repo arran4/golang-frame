@@ -323,25 +323,25 @@ func genFloral(s int) (image.Image, image.Rectangle, string) {
 
 			if y < 32*s {
 				vy := float64(16*s) - float64(6*s)*math.Sin((xf-float64(16*s))*2*math.Pi/float64(32*s))
-				if math.Abs(yf - vy) <= float64(s)*1.2 {
+				if math.Abs(yf-vy) <= float64(s)*1.2 {
 					isVine = true
 				}
 			}
 			if y >= h-32*s {
 				vy := float64(h-16*s) - float64(6*s)*math.Sin((xf-float64(16*s))*2*math.Pi/float64(32*s))
-				if math.Abs(yf - vy) <= float64(s)*1.2 {
+				if math.Abs(yf-vy) <= float64(s)*1.2 {
 					isVine = true
 				}
 			}
 			if x < 32*s {
 				vx := float64(16*s) - float64(6*s)*math.Sin((yf-float64(16*s))*2*math.Pi/float64(32*s))
-				if math.Abs(xf - vx) <= float64(s)*1.2 {
+				if math.Abs(xf-vx) <= float64(s)*1.2 {
 					isVine = true
 				}
 			}
 			if x >= w-32*s {
 				vx := float64(w-16*s) - float64(6*s)*math.Sin((yf-float64(16*s))*2*math.Pi/float64(32*s))
-				if math.Abs(xf - vx) <= float64(s)*1.2 {
+				if math.Abs(xf-vx) <= float64(s)*1.2 {
 					isVine = true
 				}
 			}
@@ -352,18 +352,17 @@ func genFloral(s int) (image.Image, image.Rectangle, string) {
 		}
 	}
 
-	for i := 16*s; i <= w-16*s; i += 32*s {
+	for i := 16 * s; i <= w-16*s; i += 32 * s {
 		drawFlower(i, 16*s, 5*s)
 		drawFlower(i, h-16*s, 5*s)
 	}
-	for i := 16*s + 32*s; i <= h-32*s; i += 32*s {
+	for i := 16*s + 32*s; i <= h-32*s; i += 32 * s {
 		drawFlower(16*s, i, 5*s)
 		drawFlower(w-16*s, i, 5*s)
 	}
 
 	return img, image.Rect(32*s, 32*s, w-32*s, h-32*s), "floral"
 }
-
 
 func genGold(s int) (image.Image, image.Rectangle, string) {
 	w, h := 96*s, 96*s
@@ -546,7 +545,7 @@ func genChinaPattern(s int) (image.Image, image.Rectangle, string) {
 					gridX := math.Mod(xf, 8.0)
 					gridY := math.Mod(yf, 8.0)
 
-					if math.Abs(gridX + gridY - 8.0) < 1.0 || math.Abs(gridX - gridY) < 1.0 {
+					if math.Abs(gridX+gridY-8.0) < 1.0 || math.Abs(gridX-gridY) < 1.0 {
 						if int(xf+yf)%3 != 0 {
 							isBlue = true
 						}
@@ -556,24 +555,38 @@ func genChinaPattern(s int) (image.Image, image.Rectangle, string) {
 					if distToCenter < 12.0 {
 						isBlue = false
 						angle := math.Atan2(yf-24.0, xf-24.0)
-						petals := math.Sin(angle * 8) * 3.0
-						if distToCenter < 8.0 + petals {
-							if distToCenter > 7.0 + petals - 1.5 { isBlue = true }
-							if distToCenter < 4.0 { isBlue = true }
-							if math.Abs(math.Mod(angle, math.Pi/4)) < 0.1 && distToCenter > 4.0 { isBlue = true }
+						petals := math.Sin(angle*8) * 3.0
+						if distToCenter < 8.0+petals {
+							if distToCenter > 7.0+petals-1.5 {
+								isBlue = true
+							}
+							if distToCenter < 4.0 {
+								isBlue = true
+							}
+							if math.Abs(math.Mod(angle, math.Pi/4)) < 0.1 && distToCenter > 4.0 {
+								isBlue = true
+							}
 						}
 					}
 				}
 
 				if (x >= 44*s && x < 48*s) || (y >= 44*s && y < 48*s) {
-					if x >= 45*s && x < 46*s || y >= 45*s && y < 46*s { isBlue = true }
-					if x >= 47*s && x < 48*s || y >= 47*s && y < 48*s { isBlue = true }
+					if x >= 45*s && x < 46*s || y >= 45*s && y < 46*s {
+						isBlue = true
+					}
+					if x >= 47*s && x < 48*s || y >= 47*s && y < 48*s {
+						isBlue = true
+					}
 				}
 
 				if isBlue {
 					cx, cy := x, y
-					if flipX { cx = 48*s - 1 - x }
-					if flipY { cy = 48*s - 1 - y }
+					if flipX {
+						cx = 48*s - 1 - x
+					}
+					if flipY {
+						cy = 48*s - 1 - y
+					}
 					img.Set(offsetX+cx, offsetY+cy, cobalt)
 				}
 			}
@@ -598,8 +611,12 @@ func genChinaPattern(s int) (image.Image, image.Rectangle, string) {
 			}
 
 			if j >= 44*s {
-				if j >= 45*s && j < 46*s { isBlue = true }
-				if j >= 47*s && j < 48*s { isBlue = true }
+				if j >= 45*s && j < 46*s {
+					isBlue = true
+				}
+				if j >= 47*s && j < 48*s {
+					isBlue = true
+				}
 			}
 
 			if j >= 4*s && j < 44*s {
@@ -609,14 +626,16 @@ func genChinaPattern(s int) (image.Image, image.Rectangle, string) {
 				gridX := math.Mod(ief, 8.0)
 				gridY := math.Mod(jf, 8.0)
 
-				if math.Abs(gridX + gridY - 8.0) < 1.0 || math.Abs(gridX - gridY) < 1.0 {
+				if math.Abs(gridX+gridY-8.0) < 1.0 || math.Abs(gridX-gridY) < 1.0 {
 					if int(ief+jf)%3 != 0 {
 						isBlue = true
 					}
 				}
 
 				distToMedallion := math.Mod(ief, 32.0)
-				if distToMedallion > 16.0 { distToMedallion = 32.0 - distToMedallion }
+				if distToMedallion > 16.0 {
+					distToMedallion = 32.0 - distToMedallion
+				}
 
 				distToEdgeCenter := math.Abs(jf - 24.0)
 				distToCenter := math.Sqrt(distToMedallion*distToMedallion + distToEdgeCenter*distToEdgeCenter)
@@ -624,15 +643,21 @@ func genChinaPattern(s int) (image.Image, image.Rectangle, string) {
 				if distToCenter < 10.0 {
 					isBlue = false
 					dx := math.Mod(ief, 32.0)
-					if dx > 16.0 { dx -= 32.0 }
+					if dx > 16.0 {
+						dx -= 32.0
+					}
 					dy := jf - 24.0
 
 					angle := math.Atan2(dy, dx)
-					petals := math.Sin(angle * 8) * 2.0
+					petals := math.Sin(angle*8) * 2.0
 
-					if distToCenter < 6.0 + petals {
-						if distToCenter > 5.0 + petals - 1.0 { isBlue = true }
-						if distToCenter < 3.0 { isBlue = true }
+					if distToCenter < 6.0+petals {
+						if distToCenter > 5.0+petals-1.0 {
+							isBlue = true
+						}
+						if distToCenter < 3.0 {
+							isBlue = true
+						}
 					}
 				}
 			}
@@ -835,9 +860,9 @@ func genMacSystem3(s int) (image.Image, image.Rectangle, string) {
 
 	// Draw close box
 	rect(img, image.Rect(cbX, cbY, cbX+cbSize, cbY+cbSize), white)
-	rect(img, image.Rect(cbX, cbY, cbX+cbSize, cbY+s), black) // top
+	rect(img, image.Rect(cbX, cbY, cbX+cbSize, cbY+s), black)               // top
 	rect(img, image.Rect(cbX, cbY+cbSize-s, cbX+cbSize, cbY+cbSize), black) // bottom
-	rect(img, image.Rect(cbX, cbY, cbX+s, cbY+cbSize), black) // left
+	rect(img, image.Rect(cbX, cbY, cbX+s, cbY+cbSize), black)               // left
 	rect(img, image.Rect(cbX+cbSize-s, cbY, cbX+cbSize, cbY+cbSize), black) // right
 
 	// Inner square for close box
@@ -847,7 +872,7 @@ func genMacSystem3(s int) (image.Image, image.Rectangle, string) {
 	// Scrollbar area
 	sbW := 15 * s
 	rect(img, image.Rect(w-sbW-s, titleBarH+3*s, w-sbW, h-sbW-s), black) // vertical scrollbar left line
-	rect(img, image.Rect(s, h-sbW-s, w-sbW-s, h-sbW), black) // horizontal scrollbar top line
+	rect(img, image.Rect(s, h-sbW-s, w-sbW-s, h-sbW), black)             // horizontal scrollbar top line
 
 	// Resize box at bottom right
 	rbSize := 15 * s
@@ -887,8 +912,8 @@ func genMacSystem9(s int) (image.Image, image.Rectangle, string) {
 	draw.Draw(img, img.Bounds(), &image.Uniform{bg}, image.Point{}, draw.Src)
 
 	// Outline
-	rect(img, image.Rect(0, 0, w, s), frameDark) // top
-	rect(img, image.Rect(0, 0, s, h), frameDark) // left
+	rect(img, image.Rect(0, 0, w, s), frameDark)   // top
+	rect(img, image.Rect(0, 0, s, h), frameDark)   // left
 	rect(img, image.Rect(w-s, 0, w, h), frameDark) // right
 	rect(img, image.Rect(0, h-s, w, h), frameDark) // bottom
 
@@ -930,14 +955,14 @@ func genMacSystem9(s int) (image.Image, image.Rectangle, string) {
 
 	// Draw close box
 	rect(img, image.Rect(cbX, cbY, cbX+cbSize, cbY+cbSize), bg)
-	rect(img, image.Rect(cbX, cbY, cbX+cbSize, cbY+s), frameDark) // top
-	rect(img, image.Rect(cbX, cbY+cbSize-s, cbX+cbSize, cbY+cbSize), frameDark) // bottom
-	rect(img, image.Rect(cbX, cbY, cbX+s, cbY+cbSize), frameDark) // left
-	rect(img, image.Rect(cbX+cbSize-s, cbY, cbX+cbSize, cbY+cbSize), frameDark) // right
-	rect(img, image.Rect(cbX+s, cbY+s, cbX+cbSize-s, cbY+2*s), frameLight) // inner top highlight
-	rect(img, image.Rect(cbX+s, cbY+s, cbX+2*s, cbY+cbSize-s), frameLight) // inner left highlight
-	rect(img, image.Rect(cbX+cbSize-2*s, cbY+2*s, cbX+cbSize-s, cbY+cbSize-s), color.RGBA{153,153,153,255}) // inner right shadow
-	rect(img, image.Rect(cbX+2*s, cbY+cbSize-2*s, cbX+cbSize-s, cbY+cbSize-s), color.RGBA{153,153,153,255}) // inner bottom shadow
+	rect(img, image.Rect(cbX, cbY, cbX+cbSize, cbY+s), frameDark)                                              // top
+	rect(img, image.Rect(cbX, cbY+cbSize-s, cbX+cbSize, cbY+cbSize), frameDark)                                // bottom
+	rect(img, image.Rect(cbX, cbY, cbX+s, cbY+cbSize), frameDark)                                              // left
+	rect(img, image.Rect(cbX+cbSize-s, cbY, cbX+cbSize, cbY+cbSize), frameDark)                                // right
+	rect(img, image.Rect(cbX+s, cbY+s, cbX+cbSize-s, cbY+2*s), frameLight)                                     // inner top highlight
+	rect(img, image.Rect(cbX+s, cbY+s, cbX+2*s, cbY+cbSize-s), frameLight)                                     // inner left highlight
+	rect(img, image.Rect(cbX+cbSize-2*s, cbY+2*s, cbX+cbSize-s, cbY+cbSize-s), color.RGBA{153, 153, 153, 255}) // inner right shadow
+	rect(img, image.Rect(cbX+2*s, cbY+cbSize-2*s, cbX+cbSize-s, cbY+cbSize-s), color.RGBA{153, 153, 153, 255}) // inner bottom shadow
 
 	// Collapse box on the right
 	colX := w - 17*s
@@ -952,22 +977,21 @@ func genMacSystem9(s int) (image.Image, image.Rectangle, string) {
 	rect(img, image.Rect(colX+cbSize-s, colY, colX+cbSize, colY+cbSize), frameDark)
 	rect(img, image.Rect(colX+s, colY+s, colX+cbSize-s, colY+2*s), frameLight)
 	rect(img, image.Rect(colX+s, colY+s, colX+2*s, colY+cbSize-s), frameLight)
-	rect(img, image.Rect(colX+cbSize-2*s, colY+2*s, colX+cbSize-s, colY+cbSize-s), color.RGBA{153,153,153,255}) // inner right shadow
-	rect(img, image.Rect(colX+2*s, colY+cbSize-2*s, colX+cbSize-s, colY+cbSize-s), color.RGBA{153,153,153,255}) // inner bottom shadow
+	rect(img, image.Rect(colX+cbSize-2*s, colY+2*s, colX+cbSize-s, colY+cbSize-s), color.RGBA{153, 153, 153, 255}) // inner right shadow
+	rect(img, image.Rect(colX+2*s, colY+cbSize-2*s, colX+cbSize-s, colY+cbSize-s), color.RGBA{153, 153, 153, 255}) // inner bottom shadow
 
 	// Inner line for collapse box
 	rect(img, image.Rect(colX+3*s, colY+5*s, colX+cbSize-3*s, colY+6*s), frameDark)
 	rect(img, image.Rect(colX+3*s, colY+6*s, colX+cbSize-3*s, colY+7*s), frameLight)
 
-
 	// Scrollbar area
 	rect(img, image.Rect(w-16*s, titleBarH+s, w-s, h-16*s), color.RGBA{238, 238, 238, 255})
 	rect(img, image.Rect(w-16*s, titleBarH+s, w-15*s, h-16*s), frameDark) // scrollbar left border
-	rect(img, image.Rect(w-15*s, titleBarH+s, w-13*s, h-16*s), white) // scrollbar highlight
+	rect(img, image.Rect(w-15*s, titleBarH+s, w-13*s, h-16*s), white)     // scrollbar highlight
 
 	rect(img, image.Rect(s, h-16*s, w-s, h-s), color.RGBA{238, 238, 238, 255})
 	rect(img, image.Rect(s, h-16*s, w-s, h-15*s), frameDark) // scrollbar top border
-	rect(img, image.Rect(s, h-15*s, w-15*s, h-13*s), white) // scrollbar highlight
+	rect(img, image.Rect(s, h-15*s, w-15*s, h-13*s), white)  // scrollbar highlight
 
 	// Resize handle
 	rhX := w - 16*s
@@ -975,8 +999,8 @@ func genMacSystem9(s int) (image.Image, image.Rectangle, string) {
 
 	// Draw lines to separate resize box
 	rect(img, image.Rect(rhX, rhY, w-s, h-s), bg)
-	rect(img, image.Rect(rhX, rhY, w-s, rhY+s), frameDark) // top line of resize box
-	rect(img, image.Rect(rhX, rhY, rhX+s, h-s), frameDark) // left line of resize box
+	rect(img, image.Rect(rhX, rhY, w-s, rhY+s), frameDark)        // top line of resize box
+	rect(img, image.Rect(rhX, rhY, rhX+s, h-s), frameDark)        // left line of resize box
 	rect(img, image.Rect(rhX+s, rhY+s, w-s, rhY+2*s), frameLight) // top line of resize box
 	rect(img, image.Rect(rhX+s, rhY+s, rhX+2*s, h-s), frameLight) // left line of resize box
 
@@ -996,7 +1020,7 @@ func genMacSystem9(s int) (image.Image, image.Rectangle, string) {
 	// Content area
 	rect(img, image.Rect(2*s, titleBarH+s, w-16*s, h-16*s), white)
 	rect(img, image.Rect(2*s, titleBarH+s, w-16*s, titleBarH+2*s), black) // inner top shadow
-	rect(img, image.Rect(2*s, titleBarH+s, 3*s, h-16*s), black) // inner left shadow
+	rect(img, image.Rect(2*s, titleBarH+s, 3*s, h-16*s), black)           // inner left shadow
 
 	return img, image.Rect(3*s, titleBarH+3*s, w-17*s, h-17*s), "mac_system_9_like"
 }
@@ -1172,13 +1196,13 @@ func genBeOS(s int) (image.Image, image.Rectangle, string) {
 	black := color.RGBA{0, 0, 0, 255}
 
 	topH := 21 * s // Title bar height
-	botH := 12 * s  // Bottom border
+	botH := 12 * s // Bottom border
 
 	// BeOS Tab (Title Bar)
 	tabW := 45 * s
 
 	leftW := tabW + 5*s // 50 * s - The left non-stretching margin contains the whole tab.
-	rightW := 15 * s // Right border needs to hold the resize handle safely.
+	rightW := 15 * s    // Right border needs to hold the resize handle safely.
 
 	borderW := 5 * s // Actual window border width
 
@@ -1219,8 +1243,8 @@ func genBeOS(s int) (image.Image, image.Rectangle, string) {
 	rect(img, image.Rect(tabW-1*s, 0, tabW, topH), black)
 
 	// Tab 3D
-	rect(img, image.Rect(1*s, 1*s, tabW-1*s, 2*s), lightYellow) // Top highlight
-	rect(img, image.Rect(1*s, 1*s, 2*s, topH), lightYellow) // Left highlight
+	rect(img, image.Rect(1*s, 1*s, tabW-1*s, 2*s), lightYellow)      // Top highlight
+	rect(img, image.Rect(1*s, 1*s, 2*s, topH), lightYellow)          // Left highlight
 	rect(img, image.Rect(tabW-2*s, 1*s, tabW-1*s, topH), darkYellow) // Right shadow
 
 	// Close button (Left side of tab)
@@ -1403,9 +1427,169 @@ func genGlassWindow(s int) (image.Image, image.Rectangle, string) {
 }
 
 func genMetal(s int) (image.Image, image.Rectangle, string) {
-	w, h := 48*s, 48*s
-	img := solid(w, h, color.RGBA{180, 180, 190, 255})
-	return img, image.Rect(8*s, 8*s, w-8*s, h-8*s), "metal"
+	w, h := 96*s, 96*s
+	img := image.NewRGBA(image.Rect(0, 0, w, h))
+	bw := 16 * s
+
+	baseColor := color.RGBA{190, 192, 195, 255} // Aluminum/Silver
+
+	// Profile function: a simple angled bevel with a flat top
+	getProfile := func(t float64) float64 {
+		if t < 0.0 {
+			return 0.0
+		}
+		if t > 1.0 {
+			return 0.0
+		}
+		// 0.0 - 0.2: outer bevel
+		if t < 0.2 {
+			return t * 2.0
+		}
+		// 0.2 - 0.8: flat top
+		if t < 0.8 {
+			return 0.4
+		}
+		// 0.8 - 1.0: inner bevel
+		return (1.0 - t) * 2.0
+	}
+
+	lx, ly, lz := -1.0, -1.0, 1.0
+	ln := math.Sqrt(lx*lx + ly*ly + lz*lz)
+	lx, ly, lz = lx/ln, ly/ln, lz/ln
+
+	for y := 0; y < h; y++ {
+		for x := 0; x < w; x++ {
+			// Calculate distance to edge and gradient of distance
+			d := x
+			gx, gy := 1.0, 0.0
+			if w-1-x < d {
+				d = w - 1 - x
+				gx, gy = -1.0, 0.0
+			}
+			if y < d {
+				d = y
+				gx, gy = 0.0, 1.0
+			}
+			if h-1-y < d {
+				d = h - 1 - y
+				gx, gy = 0.0, -1.0
+			}
+
+			if d >= bw {
+				// Draw Picture inside the frame (Middle)
+				// Normalized coordinates inside the picture
+				nx := float64(x-bw) / float64(w-2*bw)
+				ny := float64(y-bw) / float64(h-2*bw)
+
+				var c color.RGBA
+				if ny > 0.6 {
+					// Grass
+					c = color.RGBA{34, 139, 34, 255}
+				} else {
+					// Sky
+					// Gradient from light blue to dark blue
+					c = color.RGBA{
+						uint8(135 + 120*ny),
+						uint8(206 + 49*ny),
+						uint8(235 + 20*ny),
+						255,
+					}
+
+					// Sun
+					dx := nx - 0.8
+					dy := ny - 0.2
+					if math.Sqrt(dx*dx+dy*dy) < 0.15 {
+						c = color.RGBA{255, 215, 0, 255}
+					}
+
+					// Mountains
+					// Simple sine wave mountains
+					mount1 := 0.45 + 0.1*math.Sin(nx*math.Pi*2)
+					mount2 := 0.5 + 0.15*math.Sin(nx*math.Pi*3+1.0)
+
+					if ny > mount1 && ny <= 0.6 {
+						c = color.RGBA{105, 105, 105, 255} // Dark gray mountain
+					}
+					if ny > mount2 && ny < mount1 && ny <= 0.6 {
+						c = color.RGBA{128, 128, 128, 255} // Lighter gray mountain
+					}
+				}
+				img.Set(x, y, c)
+				continue
+			}
+
+			t := float64(d) / float64(bw)
+
+			// Numerical derivative
+			z1 := getProfile(t)
+			z2 := getProfile(t + 0.01)
+			slope := (z2 - z1) / 0.01
+
+			// Normal calc
+			heightScale := float64(bw) * 0.3
+			realSlope := slope * heightScale / float64(bw)
+
+			nx := -realSlope * gx
+			ny := -realSlope * gy
+			nz := 1.0
+
+			// Brushed metal texture (noise along the frame direction)
+			// If gx != 0, it's a vertical border, so we want horizontal brushing (or parallel to edge)
+			noise := 0.0
+			if gx != 0 {
+				noise = math.Sin(float64(y)*0.8) * math.Cos(float64(y)*0.3)
+			} else {
+				noise = math.Sin(float64(x)*0.8) * math.Cos(float64(x)*0.3)
+			}
+			// Add a bit of random noise
+			noise += (float64((x*123+y*321)%100)/100.0 - 0.5) * 0.5
+
+			nx += noise * 0.1
+			ny += noise * 0.1
+
+			nn := math.Sqrt(nx*nx + ny*ny + nz*nz)
+			nx, ny, nz = nx/nn, ny/nn, nz/nn
+
+			// Diffuse
+			dot := nx*lx + ny*ly + nz*lz
+			if dot < 0 {
+				dot = 0
+			}
+
+			// Specular
+			spec := 0.0
+			refZ := 2*dot*nz - lz
+			if refZ > 0 {
+				spec = math.Pow(refZ, 10) // shininess
+			}
+
+			// Composite color
+			r := float64(baseColor.R) * 0.3
+			g := float64(baseColor.G) * 0.3
+			b := float64(baseColor.B) * 0.3
+
+			r += float64(baseColor.R) * 0.7 * dot
+			g += float64(baseColor.G) * 0.7 * dot
+			b += float64(baseColor.B) * 0.7 * dot
+
+			r += 255.0 * spec * 0.5
+			g += 255.0 * spec * 0.5
+			b += 255.0 * spec * 0.5
+
+			if r > 255 {
+				r = 255
+			}
+			if g > 255 {
+				g = 255
+			}
+			if b > 255 {
+				b = 255
+			}
+
+			img.Set(x, y, color.RGBA{uint8(r), uint8(g), uint8(b), 255})
+		}
+	}
+	return img, image.Rect(bw, bw, w-bw, h-bw), "metal"
 }
 
 func genRidge(s int) (image.Image, image.Rectangle, string) {
@@ -1514,14 +1698,18 @@ func genChains(s int) (image.Image, image.Rectangle, string) {
 	bg := color.RGBA{40, 40, 40, 255}
 	img := solid(w, h, bg)
 
-	drawLinkMasked := func(cx, cy int, R, r, L float64, isH bool, maskFunc func(x,y int) bool) {
-		minX, maxX := cx - int(R+r+L), cx + int(R+r+L)
-		minY, maxY := cy - int(R+r+L), cy + int(R+r+L)
+	drawLinkMasked := func(cx, cy int, R, r, L float64, isH bool, maskFunc func(x, y int) bool) {
+		minX, maxX := cx-int(R+r+L), cx+int(R+r+L)
+		minY, maxY := cy-int(R+r+L), cy+int(R+r+L)
 
 		for y := minY; y <= maxY; y++ {
 			for x := minX; x <= maxX; x++ {
-				if x < 0 || x >= w || y < 0 || y >= h { continue }
-				if maskFunc != nil && !maskFunc(x, y) { continue }
+				if x < 0 || x >= w || y < 0 || y >= h {
+					continue
+				}
+				if maskFunc != nil && !maskFunc(x, y) {
+					continue
+				}
 
 				dx := float64(x - cx)
 				dy := float64(y - cy)
@@ -1530,79 +1718,117 @@ func genChains(s int) (image.Image, image.Rectangle, string) {
 
 				if isH {
 					if dx > L/2 {
-						cx2 := L/2
-						dist = math.Sqrt((dx-cx2)*(dx-cx2) + dy*dy) - R
+						cx2 := L / 2
+						dist = math.Sqrt((dx-cx2)*(dx-cx2)+dy*dy) - R
 					} else if dx < -L/2 {
-						cx2 := -L/2
-						dist = math.Sqrt((dx-cx2)*(dx-cx2) + dy*dy) - R
+						cx2 := -L / 2
+						dist = math.Sqrt((dx-cx2)*(dx-cx2)+dy*dy) - R
 					} else {
 						dist = math.Abs(dy) - R
 					}
 				} else {
 					if dy > L/2 {
-						cy2 := L/2
-						dist = math.Sqrt(dx*dx + (dy-cy2)*(dy-cy2)) - R
+						cy2 := L / 2
+						dist = math.Sqrt(dx*dx+(dy-cy2)*(dy-cy2)) - R
 					} else if dy < -L/2 {
-						cy2 := -L/2
-						dist = math.Sqrt(dx*dx + (dy-cy2)*(dy-cy2)) - R
+						cy2 := -L / 2
+						dist = math.Sqrt(dx*dx+(dy-cy2)*(dy-cy2)) - R
 					} else {
 						dist = math.Abs(dx) - R
 					}
 				}
 
-                distToEdge := r - math.Abs(dist)
+				distToEdge := r - math.Abs(dist)
 				if distToEdge > 0 {
-                    outlineWidth := 1.0 * float64(s)
-                    if outlineWidth < 1.0 { outlineWidth = 1.0 }
+					outlineWidth := 1.0 * float64(s)
+					if outlineWidth < 1.0 {
+						outlineWidth = 1.0
+					}
 
-                    var c color.RGBA
-                    if distToEdge < outlineWidth {
-                        c = color.RGBA{20, 20, 25, 255}
-                    } else {
-                        nz := math.Sqrt(r*r - dist*dist) / r
+					var c color.RGBA
+					if distToEdge < outlineWidth {
+						c = color.RGBA{20, 20, 25, 255}
+					} else {
+						nz := math.Sqrt(r*r-dist*dist) / r
 
-                        nx, ny := 0.0, 0.0
-                        if isH {
-                            if dx > L/2 { nx = dx - L/2; ny = dy } else if dx < -L/2 { nx = dx + L/2; ny = dy } else { nx = 0; ny = dy }
-                        } else {
-                            if dy > L/2 { nx = dx; ny = dy - L/2 } else if dy < -L/2 { nx = dx; ny = dy + L/2 } else { nx = dx; ny = 0 }
-                        }
-                        nl := math.Sqrt(nx*nx + ny*ny)
-                        if nl > 0 { nx /= nl; ny /= nl }
-                        if dist < 0 { nx = -nx; ny = -ny }
+						nx, ny := 0.0, 0.0
+						if isH {
+							if dx > L/2 {
+								nx = dx - L/2
+								ny = dy
+							} else if dx < -L/2 {
+								nx = dx + L/2
+								ny = dy
+							} else {
+								nx = 0
+								ny = dy
+							}
+						} else {
+							if dy > L/2 {
+								nx = dx
+								ny = dy - L/2
+							} else if dy < -L/2 {
+								nx = dx
+								ny = dy + L/2
+							} else {
+								nx = dx
+								ny = 0
+							}
+						}
+						nl := math.Sqrt(nx*nx + ny*ny)
+						if nl > 0 {
+							nx /= nl
+							ny /= nl
+						}
+						if dist < 0 {
+							nx = -nx
+							ny = -ny
+						}
 
-                        lx, ly, lz := -0.5, -0.5, 1.0
-                        ll := math.Sqrt(lx*lx + ly*ly + lz*lz)
-                        lx /= ll; ly /= ll; lz /= lz
-                        dot := nx*lx + ny*ly + nz*lz
-                        if dot < 0 { dot = 0 }
+						lx, ly, lz := -0.5, -0.5, 1.0
+						ll := math.Sqrt(lx*lx + ly*ly + lz*lz)
+						lx /= ll
+						ly /= ll
+						lz /= lz
+						dot := nx*lx + ny*ly + nz*lz
+						if dot < 0 {
+							dot = 0
+						}
 
-                        spec := nx*lx + ny*ly + nz*lz
-                        spec = math.Pow(spec, 8)
-                        if spec < 0 { spec = 0 }
+						spec := nx*lx + ny*ly + nz*lz
+						spec = math.Pow(spec, 8)
+						if spec < 0 {
+							spec = 0
+						}
 
-                        baseC := float64(140) + 60*nz
-                        cr := baseC * (0.4 + 0.6*dot) + 255*spec*0.3
-                        cg := baseC * (0.4 + 0.6*dot) + 255*spec*0.3
-                        cb := (baseC + 5) * (0.4 + 0.6*dot) + 255*spec*0.3
+						baseC := float64(140) + 60*nz
+						cr := baseC*(0.4+0.6*dot) + 255*spec*0.3
+						cg := baseC*(0.4+0.6*dot) + 255*spec*0.3
+						cb := (baseC+5)*(0.4+0.6*dot) + 255*spec*0.3
 
-                        if cr > 255 { cr = 255 }
-                        if cg > 255 { cg = 255 }
-                        if cb > 255 { cb = 255 }
+						if cr > 255 {
+							cr = 255
+						}
+						if cg > 255 {
+							cg = 255
+						}
+						if cb > 255 {
+							cb = 255
+						}
 
-                        c = color.RGBA{uint8(cr), uint8(cg), uint8(cb), 255}
-                    }
+						c = color.RGBA{uint8(cr), uint8(cg), uint8(cb), 255}
+					}
 
-                    if distToEdge < 0.5 {
-                        alpha := distToEdge / 0.5
-                        bgC := img.RGBAAt(x, y)
-                        c = color.RGBA{
-                            uint8(float64(c.R)*alpha + float64(bgC.R)*(1-alpha)),
-                            uint8(float64(c.G)*alpha + float64(bgC.G)*(1-alpha)),
-                            uint8(float64(c.B)*alpha + float64(bgC.B)*(1-alpha)),
-                            255,
-                        }
-                    }
+					if distToEdge < 0.5 {
+						alpha := distToEdge / 0.5
+						bgC := img.RGBAAt(x, y)
+						c = color.RGBA{
+							uint8(float64(c.R)*alpha + float64(bgC.R)*(1-alpha)),
+							uint8(float64(c.G)*alpha + float64(bgC.G)*(1-alpha)),
+							uint8(float64(c.B)*alpha + float64(bgC.B)*(1-alpha)),
+							255,
+						}
+					}
 
 					img.SetRGBA(x, y, c)
 				}
@@ -1610,86 +1836,86 @@ func genChains(s int) (image.Image, image.Rectangle, string) {
 		}
 	}
 
-    margin := 12 * s
-    R, r, L := 4.0*float64(s), 2.0*float64(s), 14.0*float64(s)
+	margin := 12 * s
+	R, r, L := 4.0*float64(s), 2.0*float64(s), 14.0*float64(s)
 
-    type LinkInfo struct {
-        cx, cy int
-        isH bool
-        phase int
-        redrawMask func(x,y int) bool
-    }
+	type LinkInfo struct {
+		cx, cy     int
+		isH        bool
+		phase      int
+		redrawMask func(x, y int) bool
+	}
 
-    var links []LinkInfo
+	var links []LinkInfo
 
-    // Top edge: cx goes from 12 to 84. ALL H.
-    for x := margin + 12*s; x <= w-margin-12*s; x += 12*s {
-        mask := func(vx,vy int) bool { return vy > margin && vx > x } // bottom half, right side
-        links = append(links, LinkInfo{x, margin, true, 0, mask})
-    }
+	// Top edge: cx goes from 12 to 84. ALL H.
+	for x := margin + 12*s; x <= w-margin-12*s; x += 12 * s {
+		mask := func(vx, vy int) bool { return vy > margin && vx > x } // bottom half, right side
+		links = append(links, LinkInfo{x, margin, true, 0, mask})
+	}
 
-    // Right edge: cy goes from 24 to 84. ALL V.
-    for y := margin + 12*s; y <= h-margin-12*s; y += 12*s {
-        mask := func(vx,vy int) bool { return vx < w-margin && vy > y } // left half, bottom side
-        links = append(links, LinkInfo{w-margin, y, false, 0, mask})
-    }
+	// Right edge: cy goes from 24 to 84. ALL V.
+	for y := margin + 12*s; y <= h-margin-12*s; y += 12 * s {
+		mask := func(vx, vy int) bool { return vx < w-margin && vy > y } // left half, bottom side
+		links = append(links, LinkInfo{w - margin, y, false, 0, mask})
+	}
 
-    // Bottom edge: cx goes from 72 to 12. ALL H.
-    for x := w - margin - 12*s; x >= margin+12*s; x -= 12*s {
-        mask := func(vx,vy int) bool { return vy < h-margin && vx < x } // top half, left side
-        links = append(links, LinkInfo{x, h-margin, true, 0, mask})
-    }
+	// Bottom edge: cx goes from 72 to 12. ALL H.
+	for x := w - margin - 12*s; x >= margin+12*s; x -= 12 * s {
+		mask := func(vx, vy int) bool { return vy < h-margin && vx < x } // top half, left side
+		links = append(links, LinkInfo{x, h - margin, true, 0, mask})
+	}
 
-    // Left edge: cy goes from 72 to 24. ALL V.
-    for y := h - margin - 12*s; y >= margin+12*s; y -= 12*s {
-        mask := func(vx,vy int) bool { return vx > margin && vy < y } // right half, top side
-        links = append(links, LinkInfo{margin, y, false, 0, mask})
-    }
+	// Left edge: cy goes from 72 to 24. ALL V.
+	for y := h - margin - 12*s; y >= margin+12*s; y -= 12 * s {
+		mask := func(vx, vy int) bool { return vx > margin && vy < y } // right half, top side
+		links = append(links, LinkInfo{margin, y, false, 0, mask})
+	}
 
-    // Corner links: O-rings
-    links = append(links, LinkInfo{margin, margin, false, 2, nil})
-    links = append(links, LinkInfo{w-margin, margin, false, 2, nil})
-    links = append(links, LinkInfo{margin, h-margin, false, 2, nil})
-    links = append(links, LinkInfo{w-margin, h-margin, false, 2, nil})
+	// Corner links: O-rings
+	links = append(links, LinkInfo{margin, margin, false, 2, nil})
+	links = append(links, LinkInfo{w - margin, margin, false, 2, nil})
+	links = append(links, LinkInfo{margin, h - margin, false, 2, nil})
+	links = append(links, LinkInfo{w - margin, h - margin, false, 2, nil})
 
-    // We draw corners first, then edge links, then edge redraw masks.
+	// We draw corners first, then edge links, then edge redraw masks.
 
-    for _, link := range links {
-        if link.phase == 2 {
-            drawLinkMasked(link.cx, link.cy, R, r, 0, link.isH, nil)
-        }
-    }
+	for _, link := range links {
+		if link.phase == 2 {
+			drawLinkMasked(link.cx, link.cy, R, r, 0, link.isH, nil)
+		}
+	}
 
-    for _, link := range links {
-        if link.phase == 0 {
-            drawLinkMasked(link.cx, link.cy, R, r, L, link.isH, nil)
-        }
-    }
+	for _, link := range links {
+		if link.phase == 0 {
+			drawLinkMasked(link.cx, link.cy, R, r, L, link.isH, nil)
+		}
+	}
 
-    for _, link := range links {
-        if link.phase == 0 && link.redrawMask != nil {
-            drawLinkMasked(link.cx, link.cy, R, r, L, link.isH, link.redrawMask)
-        }
-    }
+	for _, link := range links {
+		if link.phase == 0 && link.redrawMask != nil {
+			drawLinkMasked(link.cx, link.cy, R, r, L, link.isH, link.redrawMask)
+		}
+	}
 
-    // Interlock edges into corners
-    // Top-Left corner: Top edge starts at x=24.
-    drawLinkMasked(margin+12*s, margin, R, r, L, true, func(vx,vy int) bool { return vx < margin+12*s && vy > margin })
-    drawLinkMasked(margin, margin+12*s, R, r, L, false, func(vx,vy int) bool { return vy < margin+12*s && vx < margin })
+	// Interlock edges into corners
+	// Top-Left corner: Top edge starts at x=24.
+	drawLinkMasked(margin+12*s, margin, R, r, L, true, func(vx, vy int) bool { return vx < margin+12*s && vy > margin })
+	drawLinkMasked(margin, margin+12*s, R, r, L, false, func(vx, vy int) bool { return vy < margin+12*s && vx < margin })
 
-    // Top-Right corner
-    drawLinkMasked(w-margin-12*s, margin, R, r, L, true, func(vx,vy int) bool { return vx > w-margin-12*s && vy < margin })
-    drawLinkMasked(w-margin, margin+12*s, R, r, L, false, func(vx,vy int) bool { return vy < margin+12*s && vx > w-margin })
+	// Top-Right corner
+	drawLinkMasked(w-margin-12*s, margin, R, r, L, true, func(vx, vy int) bool { return vx > w-margin-12*s && vy < margin })
+	drawLinkMasked(w-margin, margin+12*s, R, r, L, false, func(vx, vy int) bool { return vy < margin+12*s && vx > w-margin })
 
-    // Bottom-Left corner
-    drawLinkMasked(margin+12*s, h-margin, R, r, L, true, func(vx,vy int) bool { return vx < margin+12*s && vy < h-margin })
-    drawLinkMasked(margin, h-margin-12*s, R, r, L, false, func(vx,vy int) bool { return vy > h-margin-12*s && vx > margin })
+	// Bottom-Left corner
+	drawLinkMasked(margin+12*s, h-margin, R, r, L, true, func(vx, vy int) bool { return vx < margin+12*s && vy < h-margin })
+	drawLinkMasked(margin, h-margin-12*s, R, r, L, false, func(vx, vy int) bool { return vy > h-margin-12*s && vx > margin })
 
-    // Bottom-Right corner
-    drawLinkMasked(w-margin-12*s, h-margin, R, r, L, true, func(vx,vy int) bool { return vx > w-margin-12*s && vy > h-margin })
-    drawLinkMasked(w-margin, h-margin-12*s, R, r, L, false, func(vx,vy int) bool { return vy > h-margin-12*s && vx < w-margin })
+	// Bottom-Right corner
+	drawLinkMasked(w-margin-12*s, h-margin, R, r, L, true, func(vx, vy int) bool { return vx > w-margin-12*s && vy > h-margin })
+	drawLinkMasked(w-margin, h-margin-12*s, R, r, L, false, func(vx, vy int) bool { return vy > h-margin-12*s && vx < w-margin })
 
-	return img, image.Rect(margin + int(R+r+1.0), margin + int(R+r+1.0), w - margin - int(R+r+1.0), h - margin - int(R+r+1.0)), "chains"
+	return img, image.Rect(margin+int(R+r+1.0), margin+int(R+r+1.0), w-margin-int(R+r+1.0), h-margin-int(R+r+1.0)), "chains"
 }
 
 func genRainbow(s int) (image.Image, image.Rectangle, string) {
@@ -1719,23 +1945,45 @@ func genFantasyStone(s int) (image.Image, image.Rectangle, string) {
 			bevelWidth := 8 * float64(s)
 
 			getZ := func(px, py int) float64 {
-				if px >= bw && px < w-bw && py >= bw && py < h-bw { return 0 } // inner empty area
+				if px >= bw && px < w-bw && py >= bw && py < h-bw {
+					return 0
+				} // inner empty area
 				do := px
-				if w-1-px < do { do = w - 1 - px }
-				if py < do { do = py }
-				if h-1-py < do { do = h - 1 - py }
+				if w-1-px < do {
+					do = w - 1 - px
+				}
+				if py < do {
+					do = py
+				}
+				if h-1-py < do {
+					do = h - 1 - py
+				}
 
 				di := -1
-				if px < bw { di = bw - 1 - px } else if px >= w-bw { di = px - (w - bw) }
-				if py < bw && (di == -1 || bw - 1 - py < di) { di = bw - 1 - py }
-				if py >= h-bw && (di == -1 || py - (h - bw) < di) { di = py - (h - bw) }
-				if di < 0 { di = 0 }
+				if px < bw {
+					di = bw - 1 - px
+				} else if px >= w-bw {
+					di = px - (w - bw)
+				}
+				if py < bw && (di == -1 || bw-1-py < di) {
+					di = bw - 1 - py
+				}
+				if py >= h-bw && (di == -1 || py-(h-bw) < di) {
+					di = py - (h - bw)
+				}
+				if di < 0 {
+					di = 0
+				}
 
 				ed := do
-				if di < ed { ed = di }
+				if di < ed {
+					ed = di
+				}
 
 				pz := float64(ed) / bevelWidth
-				if pz > 1.0 { pz = 1.0 }
+				if pz > 1.0 {
+					pz = 1.0
+				}
 
 				// Add large-scale structure / unevenness to the blocks
 				blockNoise := turbulence(float64(px)*0.01, float64(py)*0.01) * 0.3
@@ -1762,33 +2010,81 @@ func genFantasyStone(s int) (image.Image, image.Rectangle, string) {
 			isCrack := false
 			crackThresh := 1.5 * float64(s)
 			// 45-degree corner cracks
-			if math.Abs(float64(x-y)) <= crackThresh && x < bw { isCrack = true }
-			if math.Abs(float64((w-1-x)-y)) <= crackThresh && x >= w-bw { isCrack = true }
-			if math.Abs(float64(x-(h-1-y))) <= crackThresh && x < bw { isCrack = true }
-			if math.Abs(float64((w-1-x)-(h-1-y))) <= crackThresh && x >= w-bw { isCrack = true }
+			if math.Abs(float64(x-y)) <= crackThresh && x < bw {
+				isCrack = true
+			}
+			if math.Abs(float64((w-1-x)-y)) <= crackThresh && x >= w-bw {
+				isCrack = true
+			}
+			if math.Abs(float64(x-(h-1-y))) <= crackThresh && x < bw {
+				isCrack = true
+			}
+			if math.Abs(float64((w-1-x)-(h-1-y))) <= crackThresh && x >= w-bw {
+				isCrack = true
+			}
 
 			// Intersecting block cracks along the edges
-			if x >= w/2-s && x <= w/2+s && (y < bw || y >= h-bw) { isCrack = true }
-			if y >= h/2-s && y <= h/2+s && (x < bw || x >= w-bw) { isCrack = true }
+			if x >= w/2-s && x <= w/2+s && (y < bw || y >= h-bw) {
+				isCrack = true
+			}
+			if y >= h/2-s && y <= h/2+s && (x < bw || x >= w-bw) {
+				isCrack = true
+			}
 
 			// Make the joints look like mortar/cracks by modifying normals
 			if isCrack {
 				// Cracks slope inwards
 				if math.Abs(float64(x-y)) <= crackThresh && x < bw {
-					if x > y { nx = -1.0; ny = 1.0 } else { nx = 1.0; ny = -1.0 }
+					if x > y {
+						nx = -1.0
+						ny = 1.0
+					} else {
+						nx = 1.0
+						ny = -1.0
+					}
 				} else if math.Abs(float64((w-1-x)-y)) <= crackThresh && x >= w-bw {
-					if w-1-x > y { nx = 1.0; ny = 1.0 } else { nx = -1.0; ny = -1.0 }
+					if w-1-x > y {
+						nx = 1.0
+						ny = 1.0
+					} else {
+						nx = -1.0
+						ny = -1.0
+					}
 				} else if math.Abs(float64(x-(h-1-y))) <= crackThresh && x < bw {
-					if x > h-1-y { nx = -1.0; ny = -1.0 } else { nx = 1.0; ny = 1.0 }
+					if x > h-1-y {
+						nx = -1.0
+						ny = -1.0
+					} else {
+						nx = 1.0
+						ny = 1.0
+					}
 				} else if math.Abs(float64((w-1-x)-(h-1-y))) <= crackThresh && x >= w-bw {
-					if w-1-x > h-1-y { nx = 1.0; ny = -1.0 } else { nx = -1.0; ny = 1.0 }
+					if w-1-x > h-1-y {
+						nx = 1.0
+						ny = -1.0
+					} else {
+						nx = -1.0
+						ny = 1.0
+					}
 				}
 
 				if x >= w/2-s && x <= w/2+s && (y < bw || y >= h-bw) {
-					if x < w/2 { nx = 1.0; ny = 0 } else { nx = -1.0; ny = 0 }
+					if x < w/2 {
+						nx = 1.0
+						ny = 0
+					} else {
+						nx = -1.0
+						ny = 0
+					}
 				}
 				if y >= h/2-s && y <= h/2+s && (x < bw || x >= w-bw) {
-					if y < h/2 { nx = 0; ny = 1.0 } else { nx = 0; ny = -1.0 }
+					if y < h/2 {
+						nx = 0
+						ny = 1.0
+					} else {
+						nx = 0
+						ny = -1.0
+					}
 				}
 
 				nz = 0.5
@@ -1798,7 +2094,9 @@ func genFantasyStone(s int) (image.Image, image.Rectangle, string) {
 			nx, ny, nz = nx/nn, ny/nn, nz/nn
 
 			dot := nx*lx + ny*ly + nz*lz
-			if dot < 0 { dot = 0 }
+			if dot < 0 {
+				dot = 0
+			}
 
 			// Color calculation
 			r := float64(baseColor.R) * (0.3 + 0.7*dot)
@@ -1811,13 +2109,17 @@ func genFantasyStone(s int) (image.Image, image.Rectangle, string) {
 			b *= (0.6 + 0.4*z0)
 
 			if isCrack {
-				r *= 0.3; g *= 0.3; b *= 0.3
+				r *= 0.3
+				g *= 0.3
+				b *= 0.3
 			}
 
 			// Random surface cracks
 			crack := turbulence(float64(x)*0.03, float64(y)*0.03)
 			if crack > 0.45 && crack < 0.47 {
-				r *= 0.3; g *= 0.3; b *= 0.3
+				r *= 0.3
+				g *= 0.3
+				b *= 0.3
 			}
 
 			// Adding some variation to stone color
@@ -1826,12 +2128,24 @@ func genFantasyStone(s int) (image.Image, image.Rectangle, string) {
 			g += nval * 30
 			b += nval * 30
 
-			if r > 255 { r = 255 }
-			if g > 255 { g = 255 }
-			if b > 255 { b = 255 }
-			if r < 0 { r = 0 }
-			if g < 0 { g = 0 }
-			if b < 0 { b = 0 }
+			if r > 255 {
+				r = 255
+			}
+			if g > 255 {
+				g = 255
+			}
+			if b > 255 {
+				b = 255
+			}
+			if r < 0 {
+				r = 0
+			}
+			if g < 0 {
+				g = 0
+			}
+			if b < 0 {
+				b = 0
+			}
 
 			img.Set(x, y, color.RGBA{uint8(r), uint8(g), uint8(b), 255})
 		}

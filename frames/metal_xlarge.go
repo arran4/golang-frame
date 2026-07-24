@@ -12,7 +12,7 @@ var MetalXlargePng []byte
 
 var MetalXlarge = &Definition{
 	Name: "metal_xlarge",
-	Middle: image.Rect(24, 24, 120, 120),
+	Middle: image.Rect(48, 48, 240, 240),
 }
 
 func init() {

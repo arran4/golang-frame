@@ -12,7 +12,7 @@ var MetalPng []byte
 
 var Metal = &Definition{
 	Name: "metal",
-	Middle: image.Rect(8, 8, 40, 40),
+	Middle: image.Rect(16, 16, 80, 80),
 }
 
 func init() {
