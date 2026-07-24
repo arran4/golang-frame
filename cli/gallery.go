@@ -20,6 +20,7 @@ type FrameData struct {
 	IsCheckers   bool
 	IsFloral     bool
 	IsMacSystem9 bool
+	IsMacOSX     bool
 }
 
 // Gallery is a subcommand `frames gallery` Generates gallery images and readme
@@ -64,7 +65,7 @@ func Gallery() error {
 		exportedName := toExportedName(def.Name)
 
 		// If checkers or floral, generate additional aspect ratio / size examples
-		if def.Name == "checkers" || def.Name == "floral" || def.Name == "mac_system_9_like" {
+		if def.Name == "checkers" || def.Name == "floral" || def.Name == "mac_system_9_like" || def.Name == "macosx_like" {
 			for idx, wh := range [][2]int{{300, 150}, {150, 300}, {183, 201}, {230, 230}} {
 				// Measure it properly!
 				wLow, _, hLow, _ := frame.MeasureFrame(def.Image, def.Middle, wh[0], wh[1])
@@ -82,6 +83,19 @@ func Gallery() error {
 				rectExtra := image.Rect(30, 30, 30+w, 30+h)
 				frExtra := frame.NewFrame(rectExtra, def.Image, def.Middle)
 				draw.Draw(dstExtra, rectExtra, frExtra, rectExtra.Min, draw.Over)
+
+				if def.Name == "macosx_like" {
+					mr := frExtra.MiddleRect()
+					for y := mr.Min.Y; y < mr.Max.Y; y++ {
+						for x := mr.Min.X; x < mr.Max.X; x++ {
+							if ((x-mr.Min.X)/16+(y-mr.Min.Y)/16)%2 == 0 {
+								dstExtra.Set(x, y, color.RGBA{220, 230, 240, 255})
+							} else {
+								dstExtra.Set(x, y, color.RGBA{200, 210, 220, 255})
+							}
+						}
+					}
+				}
 
 				extraFilename := fmt.Sprintf("gallery_%s_extra_%d.png", def.Name, idx)
 				fe, err := os.Create(filepath.Join(dstDir, extraFilename))
@@ -102,6 +116,7 @@ func Gallery() error {
 			IsCheckers:   def.Name == "checkers",
 			IsFloral:     def.Name == "floral",
 			IsMacSystem9: def.Name == "mac_system_9_like",
+			IsMacOSX:     def.Name == "macosx_like",
 		})
 	}
 
