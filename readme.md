@@ -1145,6 +1145,51 @@ import "github.com/arran4/golang-frame/frames"
 fr := frame.NewFrame(destRect, frames.SignStreetLarge.Image, frames.SignStreetLarge.Middle)
 ```
 
+### SignStreetRounded
+
+![](images/gallery_sign_street_rounded.png)
+
+
+
+
+
+```go
+import "github.com/arran4/golang-frame/frames"
+
+// Use it directly
+fr := frame.NewFrame(destRect, frames.SignStreetRounded.Image, frames.SignStreetRounded.Middle)
+```
+
+### SignStreetRoundedLarge
+
+![](images/gallery_sign_street_rounded_large.png)
+
+
+
+
+
+```go
+import "github.com/arran4/golang-frame/frames"
+
+// Use it directly
+fr := frame.NewFrame(destRect, frames.SignStreetRoundedLarge.Image, frames.SignStreetRoundedLarge.Middle)
+```
+
+### SignStreetRoundedXlarge
+
+![](images/gallery_sign_street_rounded_xlarge.png)
+
+
+
+
+
+```go
+import "github.com/arran4/golang-frame/frames"
+
+// Use it directly
+fr := frame.NewFrame(destRect, frames.SignStreetRoundedXlarge.Image, frames.SignStreetRoundedXlarge.Middle)
+```
+
 ### SignStreetXlarge
 
 ![](images/gallery_sign_street_xlarge.png)

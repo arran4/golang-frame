@@ -55,6 +55,7 @@ var generators = []Generator{
 	// Signs
 	genSignWarning,
 	genSignStreet,
+	genSignStreetRounded,
 	genSignConstruction,
 }
 
@@ -2678,6 +2679,58 @@ func genSignStreet(s int) (image.Image, image.Rectangle, string) {
 	rect(img, image.Rect(margin, margin, margin+thickness, h-margin), white)
 	rect(img, image.Rect(w-margin-thickness, margin, w-margin, h-margin), white)
 	return img, image.Rect(8*s, 8*s, w-8*s, h-8*s), "sign_street"
+}
+
+func genSignStreetRounded(s int) (image.Image, image.Rectangle, string) {
+	w, h := 64*s, 64*s
+	img := solid(w, h, color.Transparent)
+	green := color.RGBA{0, 100, 0, 255}
+	white := color.RGBA{255, 255, 255, 255}
+
+	radOuter := 8.0 * float64(s)
+	margin := float64(s)
+	thickness := float64(s)
+
+	hw, hh := float64(w)/2, float64(h)/2
+	boxW, boxH := hw-radOuter, hh-radOuter
+
+	for y := 0; y < h; y++ {
+		for x := 0; x < w; x++ {
+			px, py := float64(x)+0.5, float64(y)+0.5
+
+			dx := math.Abs(px-hw) - boxW
+			dy := math.Abs(py-hh) - boxH
+
+			distX := dx
+			if distX < 0 {
+				distX = 0
+			}
+			distY := dy
+			if distY < 0 {
+				distY = 0
+			}
+
+			outDist := math.Sqrt(distX*distX + distY*distY)
+
+			inDist := math.Max(dx, dy)
+			if inDist > 0 {
+				inDist = 0
+			}
+
+			dist := outDist + inDist
+
+			if dist <= radOuter {
+				distToEdge := radOuter - dist
+
+				if distToEdge >= margin && distToEdge <= margin+thickness {
+					img.Set(x, y, white)
+				} else {
+					img.Set(x, y, green)
+				}
+			}
+		}
+	}
+	return img, image.Rect(12*s, 12*s, w-12*s, h-12*s), "sign_street_rounded"
 }
 
 // Helpers
