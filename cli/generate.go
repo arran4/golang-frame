@@ -32,6 +32,7 @@ var generators = []Generator{
 	genFutureWindow,
 	genPaperWindow,
 	genGlassWindow,
+		genHouseWindow,
 
 	// Actual / Material
 	genWood,
@@ -177,6 +178,18 @@ func rectHighlight(img *image.RGBA, r image.Rectangle, c color.RGBA) {
 			img.SetRGBA(x, y, color.RGBA{newR, newG, newB, 255})
 		}
 	}
+}
+
+func drawVLine(img *image.RGBA, x, y0, y1 int, c color.Color) {
+	rect(img, image.Rect(x, y0, x+1, y1), c)
+}
+
+func drawHLine(img *image.RGBA, x0, x1, y int, c color.Color) {
+	rect(img, image.Rect(x0, y, x1, y+1), c)
+}
+
+func rectHighlightOver(img *image.RGBA, r image.Rectangle, c color.RGBA) {
+	draw.Draw(img, r, &image.Uniform{c}, image.Point{}, draw.Over)
 }
 
 // --- GENERATORS ---
@@ -1731,10 +1744,283 @@ func genPaperWindow(s int) (image.Image, image.Rectangle, string) {
 	return img, image.Rect(8*s, 16*s, w-12*s, h-12*s), "window_paper"
 }
 
+// House Window Frame
+func genHouseWindow(s int) (image.Image, image.Rectangle, string) {
+	w, h := 96*s, 96*s
+	img := image.NewRGBA(image.Rect(0, 0, w, h))
+
+	// White PVC/wood color
+	frameColor := color.RGBA{245, 245, 245, 255}
+	frameDark := color.RGBA{170, 170, 170, 255}
+	frameShadow := color.RGBA{110, 110, 110, 255}
+	frameHighlight := color.RGBA{255, 255, 255, 255}
+
+	// Glass color
+	glassColor := color.RGBA{160, 210, 230, 120}
+
+	outerBorder := 10 * s
+	sillH := 16 * s
+	innerBorder := 6 * s
+
+	// Fill with transparent
+	draw.Draw(img, img.Bounds(), &image.Uniform{color.Transparent}, image.Point{}, draw.Src)
+
+	// Outer frame base
+	rect(img, image.Rect(0, 0, w, h-sillH), frameColor)
+
+	// Draw sill (bottom)
+	rect(img, image.Rect(0, h-sillH, w, h), frameColor)
+	// Sill shadow and highlight
+	rect(img, image.Rect(0, h-sillH, w, h-sillH+1*s), frameHighlight)
+	rect(img, image.Rect(0, h-1*s, w, h), frameShadow)
+	// Sill overhang shadow
+	rect(img, image.Rect(0, h-sillH+1*s, w, h-sillH+3*s), frameDark)
+
+	// Frame bevels
+	// Left
+	rect(img, image.Rect(0, 0, 1*s, h-sillH), frameHighlight)
+	// Right
+	rect(img, image.Rect(w-1*s, 0, w, h-sillH), frameShadow)
+	// Top
+	rect(img, image.Rect(0, 0, w, 1*s), frameHighlight)
+
+	// Inner window sash (the part holding the glass)
+	sashRect := image.Rect(outerBorder, outerBorder, w-outerBorder, h-sillH-outerBorder/2)
+	rect(img, sashRect, frameColor)
+
+	// Sash bevels (inner edge of the outer frame)
+    rect(img, image.Rect(sashRect.Min.X-1*s, sashRect.Min.Y-1*s, sashRect.Max.X+1*s, sashRect.Min.Y), frameShadow) // Top inner
+    rect(img, image.Rect(sashRect.Min.X-1*s, sashRect.Min.Y-1*s, sashRect.Min.X, sashRect.Max.Y+1*s), frameShadow) // Left inner
+    rect(img, image.Rect(sashRect.Max.X, sashRect.Min.Y-1*s, sashRect.Max.X+1*s, sashRect.Max.Y+1*s), frameHighlight) // Right inner
+    rect(img, image.Rect(sashRect.Min.X-1*s, sashRect.Max.Y, sashRect.Max.X+1*s, sashRect.Max.Y+1*s), frameHighlight) // Bottom inner
+
+    // Mitre joints for outer frame inner bevels
+    for i := 0; i < 1*s; i++ {
+        img.Set(sashRect.Min.X-1-i, sashRect.Min.Y-1-i, frameShadow)
+        img.Set(sashRect.Max.X+i, sashRect.Min.Y-1-i, frameShadow)
+        img.Set(sashRect.Min.X-1-i, sashRect.Max.Y+i, frameShadow)
+        img.Set(sashRect.Max.X+i, sashRect.Max.Y+i, frameHighlight)
+    }
+
+	glassRect := image.Rect(sashRect.Min.X+innerBorder, sashRect.Min.Y+innerBorder, sashRect.Max.X-innerBorder, sashRect.Max.Y-innerBorder)
+
+    // Sash bevels (outer edge of the inner sash)
+    rect(img, image.Rect(sashRect.Min.X, sashRect.Min.Y, sashRect.Max.X, sashRect.Min.Y+1*s), frameHighlight)
+    rect(img, image.Rect(sashRect.Min.X, sashRect.Min.Y, sashRect.Min.X+1*s, sashRect.Max.Y), frameHighlight)
+    rect(img, image.Rect(sashRect.Max.X-1*s, sashRect.Min.Y, sashRect.Max.X, sashRect.Max.Y), frameShadow)
+    rect(img, image.Rect(sashRect.Min.X, sashRect.Max.Y-1*s, sashRect.Max.X, sashRect.Max.Y), frameShadow)
+
+    // Fix Mitre for sash outer bevels
+    for i := 0; i < 1*s; i++ {
+        img.Set(sashRect.Max.X-1-i, sashRect.Min.Y+i, frameHighlight)
+        img.Set(sashRect.Min.X+i, sashRect.Max.Y-1-i, frameHighlight)
+    }
+
+    // Sash bevels (inner edge near glass)
+    rect(img, image.Rect(glassRect.Min.X-1*s, glassRect.Min.Y-1*s, glassRect.Max.X+1*s, glassRect.Min.Y), frameShadow)
+    rect(img, image.Rect(glassRect.Min.X-1*s, glassRect.Min.Y-1*s, glassRect.Min.X, glassRect.Max.Y+1*s), frameShadow)
+    rect(img, image.Rect(glassRect.Max.X, glassRect.Min.Y-1*s, glassRect.Max.X+1*s, glassRect.Max.Y+1*s), frameHighlight)
+    rect(img, image.Rect(glassRect.Min.X-1*s, glassRect.Max.Y, glassRect.Max.X+1*s, glassRect.Max.Y+1*s), frameHighlight)
+
+    // Mitre for glass inner bevels
+    for i := 0; i < 1*s; i++ {
+        img.Set(glassRect.Max.X+i, glassRect.Min.Y-1-i, frameShadow)
+        img.Set(glassRect.Min.X-1-i, glassRect.Max.Y+i, frameShadow)
+    }
+
+
+	// Inner most shadow around glass
+	rect(img, image.Rect(glassRect.Min.X-1*s, glassRect.Min.Y-1*s, glassRect.Max.X+1*s, glassRect.Max.Y+1*s), color.RGBA{40, 40, 40, 200})
+
+	// Fill glass
+	rect(img, glassRect, glassColor)
+
+	// Add glare to glass
+	for y := glassRect.Min.Y; y < glassRect.Max.Y; y++ {
+		for x := glassRect.Min.X; x < glassRect.Max.X; x++ {
+			// Diagonal stripe
+			d := x - y
+			if d > -8*s && d < 8*s {
+				draw.Draw(img, image.Rect(x, y, x+1, y+1), &image.Uniform{color.RGBA{255, 255, 255, 80}}, image.Point{}, draw.Over)
+			}
+			if d > 16*s && d < 20*s {
+				draw.Draw(img, image.Rect(x, y, x+1, y+1), &image.Uniform{color.RGBA{255, 255, 255, 40}}, image.Point{}, draw.Over)
+			}
+		}
+	}
+
+	return img, glassRect, "window_house"
+}
+
+// WindowGlass aero style
 func genGlassWindow(s int) (image.Image, image.Rectangle, string) {
-	w, h := 64*s, 64*s
-	img := solid(w, h, color.RGBA{255, 255, 255, 80})
-	return img, image.Rect(8*s, 18*s, w-8*s, h-8*s), "window_glass"
+	w, h := 96*s, 96*s
+	img := image.NewRGBA(image.Rect(0, 0, w, h))
+
+	// Base aero color (transparent blue/cyan tint)
+	glassBase := color.RGBA{190, 220, 230, 150} // Lighter, more transparent base
+
+	rect(img, img.Bounds(), glassBase)
+
+	titleH := 24 * s
+	border := 6 * s
+	borderL := 6 * s
+	borderR := 6 * s
+
+	// Outer border lines
+	outerDark := color.RGBA{80, 80, 80, 200}
+	outerLight := color.RGBA{255, 255, 255, 220}
+
+	// 1px outer dark border
+	drawHLine(img, 0, w, 0, outerDark)
+	drawHLine(img, 0, w, h-1, outerDark)
+	drawVLine(img, 0, 0, h, outerDark)
+	drawVLine(img, w-1, 0, h, outerDark)
+
+	// 1px inner light border
+	drawHLine(img, 1, w-1, 1, outerLight)
+	drawHLine(img, 1, w-1, h-2, outerLight)
+	drawVLine(img, 1, 1, h-1, outerLight)
+	drawVLine(img, w-2, 1, h-1, outerLight)
+
+	// Top titlebar reflection
+	for y := 2; y < titleH; y++ {
+		alpha := 180 - uint8(y*180/titleH) // Stronger white reflection fading out
+		rectHighlightOver(img, image.Rect(2, y, w-2, y+1), color.RGBA{255, 255, 255, alpha})
+	}
+
+	// Bottom reflection
+	for y := h - border; y < h-2; y++ {
+		alpha := uint8((y - (h - border)) * 120 / border)
+		rectHighlightOver(img, image.Rect(2, y, w-2, y+1), color.RGBA{255, 255, 255, alpha})
+	}
+
+	// Side reflections
+	for x := 2; x < borderL; x++ {
+		alpha := 80 - uint8((x-2)*80/(borderL-2))
+		rectHighlightOver(img, image.Rect(x, 2, x+1, h-2), color.RGBA{255, 255, 255, alpha})
+	}
+	for x := w - borderR; x < w-2; x++ {
+		alpha := uint8((x - (w - borderR)) * 80 / (borderR-2))
+		rectHighlightOver(img, image.Rect(x, 2, x+1, h-2), color.RGBA{255, 255, 255, alpha})
+	}
+
+	// Inner content area
+	contentRect := image.Rect(borderL, titleH, w-borderR, h-border)
+	innerDark := color.RGBA{100, 100, 100, 180}
+
+	// Inner dark border around content
+	drawHLine(img, contentRect.Min.X-1, contentRect.Max.X, contentRect.Min.Y-1, innerDark)
+	drawHLine(img, contentRect.Min.X-1, contentRect.Max.X, contentRect.Max.Y, innerDark)
+	drawVLine(img, contentRect.Min.X-1, contentRect.Min.Y-1, contentRect.Max.Y, innerDark)
+	drawVLine(img, contentRect.Max.X, contentRect.Min.Y-1, contentRect.Max.Y+1, innerDark)
+
+	// Light border inside the content border
+	drawHLine(img, contentRect.Min.X, contentRect.Max.X, contentRect.Min.Y, outerLight)
+	drawHLine(img, contentRect.Min.X, contentRect.Max.X, contentRect.Max.Y-1, outerLight)
+	drawVLine(img, contentRect.Min.X, contentRect.Min.Y, contentRect.Max.Y, outerLight)
+	drawVLine(img, contentRect.Max.X-1, contentRect.Min.Y, contentRect.Max.Y, outerLight)
+
+	// Middle
+	contentRect2 := image.Rect(contentRect.Min.X+1, contentRect.Min.Y+1, contentRect.Max.X-1, contentRect.Max.Y-1)
+	rect(img, contentRect2, color.Transparent)
+
+	// Windows 7 style close, max, min buttons
+	btnW, btnH := 20*s, 9*s
+	btnY := 0 // Windows aero buttons are flush with the top
+	padding := 3 * s
+
+	closeX := w - padding - btnW - 1*s
+
+	drawButton := func(x int, baseColor color.RGBA, glowColor color.RGBA, isClose bool) {
+		btnImg := image.NewRGBA(image.Rect(0, 0, btnW, btnH))
+
+		btnBase := image.NewRGBA(btnImg.Bounds())
+		draw.Draw(btnBase, btnBase.Bounds(), &image.Uniform{baseColor}, image.Point{}, draw.Src)
+		draw.Draw(btnBase, image.Rect(0, btnH/2, btnW, btnH), &image.Uniform{glowColor}, image.Point{}, draw.Over)
+
+		drawHLine(btnBase, 0, btnW, btnH-1, color.RGBA{0, 0, 0, 80})   // dark bottom edge
+		drawVLine(btnBase, 0, 0, btnH, color.RGBA{255, 255, 255, 100}) // bright left edge
+		if isClose {
+			drawVLine(btnBase, btnW-1, 0, btnH, color.RGBA{255, 255, 255, 100}) // close button has light right edge too
+		} else {
+			drawVLine(btnBase, btnW-1, 0, btnH, color.RGBA{0, 0, 0, 80}) // dark right edge for others
+		}
+
+		// We use Over to draw the button image over the glass frame.
+		draw.Draw(img, image.Rect(x, btnY, x+btnW, btnY+btnH), btnBase, image.Point{}, draw.Over)
+	}
+
+	drawButton(closeX, color.RGBA{180, 50, 50, 150}, color.RGBA{255, 120, 120, 100}, true)
+
+	maxX := closeX - btnW - 1*s
+	drawButton(maxX, color.RGBA{130, 150, 170, 150}, color.RGBA{255, 255, 255, 100}, false)
+
+	minX := maxX - btnW - 1*s
+	drawButton(minX, color.RGBA{130, 150, 170, 150}, color.RGBA{255, 255, 255, 100}, false)
+
+	// Add icon symbols
+	// Close (X)
+	cx, cy := closeX+btnW/2, btnY+btnH/2
+	for i := -2 * s; i <= 2*s; i++ {
+		if i == 0 {
+			continue
+		}
+		rectHighlightOver(img, image.Rect(cx+i, cy+i, cx+i+1, cy+i+1), color.RGBA{255, 255, 255, 255})
+		rectHighlightOver(img, image.Rect(cx+i, cy-i, cx+i+1, cy-i+1), color.RGBA{255, 255, 255, 255})
+	}
+	rectHighlightOver(img, image.Rect(cx, cy, cx+1, cy+1), color.RGBA{255, 255, 255, 255})
+
+	// Max (Square)
+	mx, my := maxX+btnW/2, btnY+btnH/2
+	rectHighlightOver(img, image.Rect(mx-2*s, my-2*s, mx+2*s, my-2*s+1), color.RGBA{255, 255, 255, 255})
+	rectHighlightOver(img, image.Rect(mx-2*s, my+2*s, mx+2*s, my+2*s+1), color.RGBA{255, 255, 255, 255})
+	rectHighlightOver(img, image.Rect(mx-2*s, my-2*s, mx-2*s+1, my+2*s+1), color.RGBA{255, 255, 255, 255})
+	rectHighlightOver(img, image.Rect(mx+2*s, my-2*s, mx+2*s+1, my+2*s+1), color.RGBA{255, 255, 255, 255})
+
+	// Min (Line)
+	mnx, mny := minX+btnW/2, btnY+btnH/2
+	rectHighlightOver(img, image.Rect(mnx-2*s, mny+1*s, mnx+2*s, mny+2*s), color.RGBA{255, 255, 255, 255})
+
+	// Rounded corners
+	cr := 4 * s
+	for y := 0; y < cr; y++ {
+		for x := 0; x < cr; x++ {
+			dx, dy := x-cr, y-cr
+			if dx*dx+dy*dy > cr*cr {
+				img.Set(x, y, color.Transparent)
+				img.Set(w-1-x, y, color.Transparent)
+				img.Set(x, h-1-y, color.Transparent)
+				img.Set(w-1-x, h-1-y, color.Transparent)
+			}
+		}
+	}
+
+	// Smooth the outer dark line on rounded corners
+	// Top-left
+	img.Set(cr, 1, outerDark)
+	img.Set(1, cr, outerDark)
+	// Top-right
+	img.Set(w-cr-1, 1, outerDark)
+	img.Set(w-2, cr, outerDark)
+	// Bottom-left
+	img.Set(1, h-cr-1, outerDark)
+	img.Set(cr, h-2, outerDark)
+	// Bottom-right
+	img.Set(w-cr-1, h-2, outerDark)
+	img.Set(w-2, h-cr-1, outerDark)
+
+	// Smooth outer dark corner slightly more (just 1 pixel diag)
+	img.Set(cr-1, 2, outerDark)
+	img.Set(2, cr-1, outerDark)
+	img.Set(w-cr, 2, outerDark)
+	img.Set(w-3, cr-1, outerDark)
+	img.Set(2, h-cr, outerDark)
+	img.Set(cr-1, h-3, outerDark)
+	img.Set(w-cr, h-3, outerDark)
+	img.Set(w-3, h-cr, outerDark)
+
+	return img, contentRect, "window_glass"
 }
 
 func genMetal(s int) (image.Image, image.Rectangle, string) {

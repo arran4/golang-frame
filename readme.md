@@ -1520,6 +1520,51 @@ import "github.com/arran4/golang-frame/frames"
 fr := frame.NewFrame(destRect, frames.WindowGlassXlarge.Image, frames.WindowGlassXlarge.Middle)
 ```
 
+### WindowHouse
+
+![](images/gallery_window_house.png)
+
+
+
+
+
+```go
+import "github.com/arran4/golang-frame/frames"
+
+// Use it directly
+fr := frame.NewFrame(destRect, frames.WindowHouse.Image, frames.WindowHouse.Middle)
+```
+
+### WindowHouseLarge
+
+![](images/gallery_window_house_large.png)
+
+
+
+
+
+```go
+import "github.com/arran4/golang-frame/frames"
+
+// Use it directly
+fr := frame.NewFrame(destRect, frames.WindowHouseLarge.Image, frames.WindowHouseLarge.Middle)
+```
+
+### WindowHouseXlarge
+
+![](images/gallery_window_house_xlarge.png)
+
+
+
+
+
+```go
+import "github.com/arran4/golang-frame/frames"
+
+// Use it directly
+fr := frame.NewFrame(destRect, frames.WindowHouseXlarge.Image, frames.WindowHouseXlarge.Middle)
+```
+
 ### WindowPaper
 
 ![](images/gallery_window_paper.png)

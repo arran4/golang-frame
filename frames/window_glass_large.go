@@ -12,7 +12,7 @@ var WindowGlassLargePng []byte
 
 var WindowGlassLarge = &Definition{
 	Name: "window_glass_large",
-	Middle: image.Rect(16, 36, 112, 112),
+	Middle: image.Rect(12, 48, 180, 180),
 }
 
 func init() {
