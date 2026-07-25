@@ -29,6 +29,8 @@ var generators = []Generator{
 
 	// Windows
 	genRetroWindow,
+	genRetroWindowCloseOnly,
+	genRetroWindowMinimizeMaximizeClose,
 	genFutureWindow,
 	genPaperWindow,
 	genGlassWindow,
@@ -1685,57 +1687,132 @@ func genAmiga(s int) (image.Image, image.Rectangle, string) {
 	return img, image.Rect(20*s, 13*s, w-24*s, h-7*s), "amiga_like"
 }
 
-func genRetroWindow(s int) (image.Image, image.Rectangle, string) {
-	w, h := 64*s, 64*s
-	img := solid(w, h, color.RGBA{192, 192, 192, 255})
+func buildRetroWindow(s int, buttons string, name string) (image.Image, image.Rectangle, string) {
+	w, h := 96*s, 96*s
+	img := image.NewRGBA(image.Rect(0, 0, w, h))
 
-	white := color.RGBA{255, 255, 255, 255}
-	grayDark := color.RGBA{128, 128, 128, 255}
-	black := color.RGBA{0, 0, 0, 255}
-	blue := color.RGBA{0, 0, 128, 255}
+	face := color.RGBA{192, 192, 192, 255}
+	white := color.White
+	darkGrey := color.RGBA{128, 128, 128, 255}
+	black := color.Black
+	blue := color.RGBA{0, 0, 128, 255} // Win95 title bar blue
 
-	// Outer Border
-	rect(img, image.Rect(0, 0, w, s), white)
-	rect(img, image.Rect(0, 0, s, h), white)
-	rect(img, image.Rect(w-s, 0, w, h), black)
-	rect(img, image.Rect(w-2*s, s, w-s, h-s), grayDark)
-	rect(img, image.Rect(0, h-s, w, h), black)
-	rect(img, image.Rect(s, h-2*s, w-s, h-s), grayDark)
+	titleH := 18 * s
+	border := 4 * s // Win95 outer window border is typically 4px
 
-	// Title Bar
-	titleBarRect := image.Rect(4*s, 4*s, w-4*s, 16*s)
-	rect(img, titleBarRect, blue)
+	// Fill background
+	rect(img, image.Rect(0, 0, w, h), face)
 
-	// Title Bar Text Placeholder
-	rect(img, image.Rect(6*s, 6*s, 14*s, 14*s), white)
+	// Window border 3D effect
+	// 1. White top/left, black bottom/right (outermost bevel)
+	rect(img, image.Rect(0, 0, w, 1*s), face) // Outermost face color line
+	rect(img, image.Rect(0, 0, 1*s, h), face)
+	rect(img, image.Rect(w-1*s, 0, w, h), black)
+	rect(img, image.Rect(0, h-1*s, w, h), black)
+
+	// 2. White top/left, dark grey bottom/right
+	rect(img, image.Rect(1*s, 1*s, w-1*s, 2*s), white)
+	rect(img, image.Rect(1*s, 1*s, 2*s, h-1*s), white)
+	rect(img, image.Rect(w-2*s, 1*s, w-1*s, h-1*s), darkGrey)
+	rect(img, image.Rect(1*s, h-2*s, w-1*s, h-1*s), darkGrey)
+
+	// 3. Face color line (width of border - 3)
+	rect(img, image.Rect(2*s, 2*s, w-2*s, 3*s), face)
+	rect(img, image.Rect(2*s, 2*s, 3*s, h-2*s), face)
+	rect(img, image.Rect(w-3*s, 2*s, w-2*s, h-2*s), face)
+	rect(img, image.Rect(2*s, h-3*s, w-2*s, h-2*s), face)
+
+	contentX, contentY := border, border+titleH+1*s
+
+	// Title bar
+	rect(img, image.Rect(border, border, w-border, border+titleH), blue)
+
+	// Buttons (Close, Max, Min)
+	btnW, btnH := 16*s, 14*s
+	btnY := border + 2*s
+
+	drawButton := func(x, y int) {
+		rect(img, image.Rect(x, y, x+btnW, y+btnH), face)
+		rect(img, image.Rect(x, y, x+btnW, y+1*s), white)
+		rect(img, image.Rect(x, y, x+1*s, y+btnH), white)
+		rect(img, image.Rect(x+btnW-1*s, y, x+btnW, y+btnH), black)
+		rect(img, image.Rect(x, y+btnH-1*s, x+btnW, y+btnH), black)
+		rect(img, image.Rect(x+btnW-2*s, y+1*s, x+btnW-1*s, y+btnH-1*s), darkGrey)
+		rect(img, image.Rect(x+1*s, y+btnH-2*s, x+btnW-1*s, y+btnH-1*s), darkGrey)
+	}
 
 	// Close button
-	btnRect := image.Rect(w-14*s, 6*s, w-6*s, 14*s)
-	rect(img, btnRect, color.RGBA{192, 192, 192, 255})
-	rect(img, image.Rect(btnRect.Min.X, btnRect.Min.Y, btnRect.Max.X, btnRect.Min.Y+s), white)
-	rect(img, image.Rect(btnRect.Min.X, btnRect.Min.Y, btnRect.Min.X+s, btnRect.Max.Y), white)
-	rect(img, image.Rect(btnRect.Max.X-s, btnRect.Min.Y, btnRect.Max.X, btnRect.Max.Y), black)
-	rect(img, image.Rect(btnRect.Min.X, btnRect.Max.Y-s, btnRect.Max.X, btnRect.Max.Y), black)
+	closeX := w - border - 2*s - btnW
+	if buttons == "MinimizeMaximizeClose" || buttons == "CloseOnly" {
+		drawButton(closeX, btnY)
+		// Draw X
+		for i := 0; i < 6; i++ {
+			rect(img, image.Rect(closeX+4*s+i*s, btnY+4*s+i*s, closeX+5*s+i*s, btnY+5*s+i*s), black)
+			rect(img, image.Rect(closeX+4*s+i*s, btnY+5*s+i*s, closeX+5*s+i*s, btnY+6*s+i*s), black)
+			rect(img, image.Rect(closeX+9*s-i*s, btnY+4*s+i*s, closeX+10*s-i*s, btnY+5*s+i*s), black)
+			rect(img, image.Rect(closeX+9*s-i*s, btnY+5*s+i*s, closeX+10*s-i*s, btnY+6*s+i*s), black)
+		}
+	}
 
-	// Inner Border (around the content)
-	// Left Inner Border
-	rect(img, image.Rect(6*s, 18*s, 7*s, h-6*s), grayDark)
-	rect(img, image.Rect(7*s, 19*s, 8*s, h-7*s), black)
+	maxX := closeX - btnW - 2*s
+	minX := maxX - btnW
+	if buttons == "MinimizeMaximizeClose" {
+		// Max button
+		drawButton(maxX, btnY)
+		// Draw square
+		rect(img, image.Rect(maxX+3*s, btnY+3*s, maxX+13*s, btnY+11*s), black)
+		rect(img, image.Rect(maxX+4*s, btnY+5*s, maxX+12*s, btnY+10*s), face)
+		rect(img, image.Rect(maxX+4*s, btnY+4*s, maxX+12*s, btnY+5*s), black) // thick top line
 
-	// Top Inner Border
-	rect(img, image.Rect(6*s, 18*s, w-6*s, 19*s), grayDark)
-	rect(img, image.Rect(7*s, 19*s, w-7*s, 20*s), black)
+		// Min button
+		drawButton(minX, btnY)
+		// Draw line
+		rect(img, image.Rect(minX+4*s, btnY+9*s, minX+10*s, btnY+11*s), black)
+	}
 
-	// Right Inner Border
-	rect(img, image.Rect(w-8*s, 19*s, w-7*s, h-7*s), white)
-	rect(img, image.Rect(w-7*s, 18*s, w-6*s, h-6*s), white)
+	// Draw Window icon placeholder (top left)
+	iconX, iconY := border+2*s, border+2*s
+	rect(img, image.Rect(iconX, iconY, iconX+14*s, iconY+14*s), face) // Simple grey square for icon
+	rect(img, image.Rect(iconX+1*s, iconY+1*s, iconX+13*s, iconY+13*s), white)
+	rect(img, image.Rect(iconX+2*s, iconY+2*s, iconX+12*s, iconY+12*s), darkGrey)
 
-	// Bottom Inner Border
-	rect(img, image.Rect(7*s, h-8*s, w-7*s, h-7*s), white)
-	rect(img, image.Rect(6*s, h-7*s, w-6*s, h-6*s), white)
+	// Client area (White background)
+	rect(img, image.Rect(contentX, contentY, w-border, h-border), white)
 
-	return img, image.Rect(14*s, 20*s, w-14*s, h-8*s), "window_retro"
+	// Client area 3D sunken border
+	rect(img, image.Rect(contentX-1*s, contentY-1*s, w-border+1*s, contentY), darkGrey)
+	rect(img, image.Rect(contentX-1*s, contentY-1*s, contentX, h-border+1*s), darkGrey)
+	rect(img, image.Rect(contentX-2*s, contentY-2*s, w-border+2*s, contentY-1*s), black)
+	rect(img, image.Rect(contentX-2*s, contentY-2*s, contentX-1*s, h-border+2*s), black)
+
+	rect(img, image.Rect(w-border, contentY-2*s, w-border+1*s, h-border+2*s), white)
+	rect(img, image.Rect(contentX-2*s, h-border, w-border+1*s, h-border+1*s), white)
+	rect(img, image.Rect(w-border+1*s, contentY-2*s, w-border+2*s, h-border+2*s), face)
+	rect(img, image.Rect(contentX-2*s, h-border+1*s, w-border+2*s, h-border+2*s), face)
+
+    // Calculate middle scaling rect correctly
+    midStartX := iconX + 14*s + 2*s
+	midEndX := closeX - 2*s
+	if buttons == "MinimizeMaximizeClose" {
+	midEndX = minX - 2*s
+	}
+    if midEndX <= midStartX { midEndX = midStartX + 1*s }
+
+	return img, image.Rect(midStartX, contentY+2*s, midEndX, h-border-2*s), name
 }
+
+func genRetroWindow(s int) (image.Image, image.Rectangle, string) {
+	return buildRetroWindow(s, "MinimizeMaximizeClose", "window_retro")
+}
+
+func genRetroWindowCloseOnly(s int) (image.Image, image.Rectangle, string) {
+	return buildRetroWindow(s, "CloseOnly", "window_retro_close_only")
+}
+
+func genRetroWindowMinimizeMaximizeClose(s int) (image.Image, image.Rectangle, string) {
+	return buildRetroWindow(s, "MinimizeMaximizeClose", "window_retro_min_max_close")
+}
+
 
 func genPaperWindow(s int) (image.Image, image.Rectangle, string) {
 	w, h := 64*s, 64*s

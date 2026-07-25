@@ -1625,6 +1625,51 @@ import "github.com/arran4/golang-frame/frames"
 fr := frame.NewFrame(destRect, frames.WindowRetro.Image, frames.WindowRetro.Middle)
 ```
 
+### WindowRetroCloseOnly
+
+![](images/gallery_window_retro_close_only.png)
+
+
+
+
+
+```go
+import "github.com/arran4/golang-frame/frames"
+
+// Use it directly
+fr := frame.NewFrame(destRect, frames.WindowRetroCloseOnly.Image, frames.WindowRetroCloseOnly.Middle)
+```
+
+### WindowRetroCloseOnlyLarge
+
+![](images/gallery_window_retro_close_only_large.png)
+
+
+
+
+
+```go
+import "github.com/arran4/golang-frame/frames"
+
+// Use it directly
+fr := frame.NewFrame(destRect, frames.WindowRetroCloseOnlyLarge.Image, frames.WindowRetroCloseOnlyLarge.Middle)
+```
+
+### WindowRetroCloseOnlyXlarge
+
+![](images/gallery_window_retro_close_only_xlarge.png)
+
+
+
+
+
+```go
+import "github.com/arran4/golang-frame/frames"
+
+// Use it directly
+fr := frame.NewFrame(destRect, frames.WindowRetroCloseOnlyXlarge.Image, frames.WindowRetroCloseOnlyXlarge.Middle)
+```
+
 ### WindowRetroLarge
 
 ![](images/gallery_window_retro_large.png)
@@ -1638,6 +1683,51 @@ import "github.com/arran4/golang-frame/frames"
 
 // Use it directly
 fr := frame.NewFrame(destRect, frames.WindowRetroLarge.Image, frames.WindowRetroLarge.Middle)
+```
+
+### WindowRetroMinMaxClose
+
+![](images/gallery_window_retro_min_max_close.png)
+
+
+
+
+
+```go
+import "github.com/arran4/golang-frame/frames"
+
+// Use it directly
+fr := frame.NewFrame(destRect, frames.WindowRetroMinMaxClose.Image, frames.WindowRetroMinMaxClose.Middle)
+```
+
+### WindowRetroMinMaxCloseLarge
+
+![](images/gallery_window_retro_min_max_close_large.png)
+
+
+
+
+
+```go
+import "github.com/arran4/golang-frame/frames"
+
+// Use it directly
+fr := frame.NewFrame(destRect, frames.WindowRetroMinMaxCloseLarge.Image, frames.WindowRetroMinMaxCloseLarge.Middle)
+```
+
+### WindowRetroMinMaxCloseXlarge
+
+![](images/gallery_window_retro_min_max_close_xlarge.png)
+
+
+
+
+
+```go
+import "github.com/arran4/golang-frame/frames"
+
+// Use it directly
+fr := frame.NewFrame(destRect, frames.WindowRetroMinMaxCloseXlarge.Image, frames.WindowRetroMinMaxCloseXlarge.Middle)
 ```
 
 ### WindowRetroXlarge
