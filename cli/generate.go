@@ -2498,9 +2498,173 @@ func genFantasyStone(s int) (image.Image, image.Rectangle, string) {
 
 func genSciFiTech(s int) (image.Image, image.Rectangle, string) {
 	w, h := 96*s, 96*s
-	img := solid(w, h, color.Black)
-	rectHighlight(img, image.Rect(0, 0, w, 4*s), color.RGBA{0, 200, 255, 255})
-	return img, image.Rect(16*s, 16*s, w-16*s, h-16*s), "scifi_tech"
+	img := image.NewRGBA(image.Rect(0, 0, w, h))
+
+	bw := 24 * s // Border width
+
+	// Colors
+	baseColor := color.RGBA{15, 18, 22, 255}
+	panelColor := color.RGBA{35, 45, 55, 255}
+	highlightCyan := color.RGBA{0, 255, 255, 255}
+	dimCyan := color.RGBA{0, 150, 200, 255}
+	warnOrange := color.RGBA{255, 140, 0, 255}
+	lineColor := color.RGBA{10, 12, 16, 255}
+
+	// Base frame
+	rect(img, image.Rect(0, 0, w, bw), baseColor)
+	rect(img, image.Rect(0, h-bw, w, h), baseColor)
+	rect(img, image.Rect(0, bw, bw, h-bw), baseColor)
+	rect(img, image.Rect(w-bw, bw, w, h-bw), baseColor)
+
+	// Textured background to base
+	for y := 0; y < h; y++ {
+		for x := 0; x < w; x++ {
+			if x >= bw && x < w-bw && y >= bw && y < h-bw { continue }
+			if (x/s)%4 == 0 && (y/s)%4 == 0 {
+				img.SetRGBA(x, y, color.RGBA{25, 30, 35, 255})
+			}
+		}
+	}
+
+	// 45-degree angle inner slope for the dark base background
+	for y := 0; y < h; y++ {
+		for x := 0; x < w; x++ {
+			if x >= bw && x < w-bw && y >= bw && y < h-bw { continue }
+
+			dx := x - bw
+			if x < bw { dx = bw - x - 1 } else if x >= w-bw { dx = x - (w-bw) }
+			dy := y - bw
+			if y < bw { dy = bw - y - 1 } else if y >= h-bw { dy = y - (h-bw) }
+
+			if dx < 4*s && y >= bw && y < h-bw {
+				c := dimCyan
+				if dx > 1*s { c = color.RGBA{c.R/2, c.G/2, c.B/2, 255} }
+				img.SetRGBA(x, y, c)
+			}
+			if dy < 4*s && x >= bw && x < w-bw {
+				c := dimCyan
+				if dy > 1*s { c = color.RGBA{c.R/2, c.G/2, c.B/2, 255} }
+				img.SetRGBA(x, y, c)
+			}
+		}
+	}
+
+	minInt := func(a, b int) int {
+		if a < b { return a }
+		return b
+	}
+
+	// Draw raised tech panels with chamfered edges
+	drawChamferedPanel := func(x1, y1, x2, y2, chamfer int, c color.RGBA) {
+		for y := y1; y < y2; y++ {
+			for x := x1; x < x2; x++ {
+				dx := x - x1
+				if x2 - x <= dx { dx = x2 - x - 1 }
+				dy := y - y1
+				if y2 - y <= dy { dy = y2 - y - 1 }
+
+				cornerDist := 0
+				if x - x1 < chamfer && y - y1 < chamfer { cornerDist = chamfer - (x - x1) - (y - y1) }
+				if x2 - 1 - x < chamfer && y - y1 < chamfer { cornerDist = chamfer - (x2 - 1 - x) - (y - y1) }
+				if x - x1 < chamfer && y2 - 1 - y < chamfer { cornerDist = chamfer - (x - x1) - (y2 - 1 - y) }
+				if x2 - 1 - x < chamfer && y2 - 1 - y < chamfer { cornerDist = chamfer - (x2 - 1 - x) - (y2 - 1 - y) }
+
+				if cornerDist <= 1 {
+					cc := c
+					if (x+y)%2 == 0 {
+						cc = color.RGBA{uint8(minInt(255, int(c.R)*11/10)), uint8(minInt(255, int(c.G)*11/10)), uint8(minInt(255, int(c.B)*11/10)), 255}
+					}
+
+					if dx == 0 || dy == 0 || x == x2-1 || y == y2-1 || cornerDist == 1 {
+						cc = color.RGBA{c.R/2, c.G/2, c.B/2, 255}
+						if x == x1 || y == y1 || (x - x1 + y - y1 == chamfer && x < x1+chamfer) {
+							cc = color.RGBA{uint8(minInt(255, int(c.R)*3/2)), uint8(minInt(255, int(c.G)*3/2)), uint8(minInt(255, int(c.B)*3/2)), 255}
+						}
+					}
+					img.SetRGBA(x, y, cc)
+				}
+			}
+		}
+	}
+
+	// Panels along the edges
+	drawChamferedPanel(12*s, 2*s, w-12*s, bw-4*s, 6*s, panelColor)
+	drawChamferedPanel(12*s, h-bw+4*s, w-12*s, h-2*s, 6*s, panelColor)
+	drawChamferedPanel(2*s, 12*s, bw-4*s, h-12*s, 6*s, panelColor)
+	drawChamferedPanel(w-bw+4*s, 12*s, w-2*s, h-12*s, 6*s, panelColor)
+
+	// Inner glowing edge (cyan)
+	rectHighlight(img, image.Rect(bw-2*s, bw-2*s, w-bw+2*s, bw), highlightCyan)
+	rectHighlight(img, image.Rect(bw-2*s, h-bw, w-bw+2*s, h-bw+2*s), highlightCyan)
+	rectHighlight(img, image.Rect(bw-2*s, bw, bw, h-bw), highlightCyan)
+	rectHighlight(img, image.Rect(w-bw, bw, w-bw+2*s, h-bw), highlightCyan)
+
+	// Panel lines (cutouts) - align with middle rectangle
+	for y := 24*s; y < h-bw; y += 16*s {
+		rectHighlight(img, image.Rect(2*s, y, bw-4*s, y+2*s), lineColor)
+		rectHighlight(img, image.Rect(w-bw+4*s, y, w-2*s, y+2*s), lineColor)
+	}
+	for x := 24*s; x < w-bw; x += 16*s {
+		rectHighlight(img, image.Rect(x, 2*s, x+2*s, bw-4*s), lineColor)
+		rectHighlight(img, image.Rect(x, h-bw+4*s, x+2*s, h-2*s), lineColor)
+	}
+
+	for i := 0; i < 3; i++ {
+		// Top Left Corner hazard stripes
+		rectHighlight(img, image.Rect(12*s+i*4*s, 4*s, 12*s+i*4*s+2*s, 8*s), warnOrange)
+		rectHighlight(img, image.Rect(12*s+i*4*s, 12*s, 12*s+i*4*s+2*s, 16*s), warnOrange)
+		rectHighlight(img, image.Rect(4*s, 12*s+i*4*s, 8*s, 12*s+i*4*s+2*s), warnOrange)
+		rectHighlight(img, image.Rect(12*s, 12*s+i*4*s, 16*s, 12*s+i*4*s+2*s), warnOrange)
+
+		// Top Right Corner
+		rectHighlight(img, image.Rect(w-22*s+i*4*s, 4*s, w-22*s+i*4*s+2*s, 8*s), warnOrange)
+		rectHighlight(img, image.Rect(w-22*s+i*4*s, 12*s, w-22*s+i*4*s+2*s, 16*s), warnOrange)
+		rectHighlight(img, image.Rect(w-8*s, 12*s+i*4*s, w-4*s, 12*s+i*4*s+2*s), warnOrange)
+		rectHighlight(img, image.Rect(w-16*s, 12*s+i*4*s, w-12*s, 12*s+i*4*s+2*s), warnOrange)
+
+		// Bottom Left
+		rectHighlight(img, image.Rect(12*s+i*4*s, h-8*s, 12*s+i*4*s+2*s, h-4*s), warnOrange)
+		rectHighlight(img, image.Rect(12*s+i*4*s, h-16*s, 12*s+i*4*s+2*s, h-12*s), warnOrange)
+		rectHighlight(img, image.Rect(4*s, h-22*s+i*4*s, 8*s, h-22*s+i*4*s+2*s), warnOrange)
+		rectHighlight(img, image.Rect(12*s, h-22*s+i*4*s, 16*s, h-22*s+i*4*s+2*s), warnOrange)
+
+		// Bottom Right
+		rectHighlight(img, image.Rect(w-22*s+i*4*s, h-8*s, w-22*s+i*4*s+2*s, h-4*s), warnOrange)
+		rectHighlight(img, image.Rect(w-22*s+i*4*s, h-16*s, w-22*s+i*4*s+2*s, h-12*s), warnOrange)
+		rectHighlight(img, image.Rect(w-8*s, h-22*s+i*4*s, w-4*s, h-22*s+i*4*s+2*s), warnOrange)
+		rectHighlight(img, image.Rect(w-16*s, h-22*s+i*4*s, w-12*s, h-22*s+i*4*s+2*s), warnOrange)
+	}
+
+	// Data tracks / dim cyan lines (stretchable/repeatable, goes across the middle)
+	rectHighlight(img, image.Rect(bw, 8*s, w-bw, 10*s), dimCyan)
+	rectHighlight(img, image.Rect(bw, h-10*s, w-bw, h-8*s), dimCyan)
+	rectHighlight(img, image.Rect(8*s, bw, 10*s, h-bw), dimCyan)
+	rectHighlight(img, image.Rect(w-10*s, bw, w-8*s, h-bw), dimCyan)
+
+	// Corner tech details (squares/nodes)
+	drawChamferedPanel(4*s, 4*s, 10*s, 10*s, 2*s, panelColor)
+	rectHighlight(img, image.Rect(6*s, 6*s, 8*s, 8*s), highlightCyan)
+	rectHighlight(img, image.Rect(7*s, 7*s, 7*s+s, 7*s+s), color.RGBA{255, 255, 255, 255})
+
+	drawChamferedPanel(w-10*s, 4*s, w-4*s, 10*s, 2*s, panelColor)
+	rectHighlight(img, image.Rect(w-8*s, 6*s, w-6*s, 8*s), highlightCyan)
+	rectHighlight(img, image.Rect(w-7*s, 7*s, w-6*s, 8*s), color.RGBA{255, 255, 255, 255})
+
+	drawChamferedPanel(4*s, h-10*s, 10*s, h-4*s, 2*s, panelColor)
+	rectHighlight(img, image.Rect(6*s, h-8*s, 8*s, h-6*s), highlightCyan)
+	rectHighlight(img, image.Rect(7*s, h-7*s, 8*s, h-6*s), color.RGBA{255, 255, 255, 255})
+
+	drawChamferedPanel(w-10*s, h-10*s, w-4*s, h-4*s, 2*s, panelColor)
+	rectHighlight(img, image.Rect(w-8*s, h-8*s, w-6*s, h-6*s), highlightCyan)
+	rectHighlight(img, image.Rect(w-7*s, h-7*s, w-6*s, h-6*s), color.RGBA{255, 255, 255, 255})
+
+	// Add little white glowing dots at the extreme inner corners
+	rectHighlight(img, image.Rect(bw-2*s, bw-2*s, bw, bw), color.RGBA{255, 255, 255, 255})
+	rectHighlight(img, image.Rect(w-bw, bw-2*s, w-bw+2*s, bw), color.RGBA{255, 255, 255, 255})
+	rectHighlight(img, image.Rect(bw-2*s, h-bw, bw, h-bw+2*s), color.RGBA{255, 255, 255, 255})
+	rectHighlight(img, image.Rect(w-bw, h-bw, w-bw+2*s, h-bw+2*s), color.RGBA{255, 255, 255, 255})
+
+	return img, image.Rect(bw, bw, w-bw, h-bw), "scifi_tech"
 }
 
 func genSignStreet(s int) (image.Image, image.Rectangle, string) {
