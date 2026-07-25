@@ -687,7 +687,7 @@ func genFutureWindow(s int) (image.Image, image.Rectangle, string) {
 	rectHighlight(img, image.Rect(0, 0, borderThickness, h), cyan)
 	rectHighlight(img, image.Rect(w-borderThickness, 0, w, h), cyan)
 
-	iconSize := 6 * s
+	iconSize := 12 * s
 	padding := 2 * s
 	marginRight := 4 * s
 	marginTop := 4 * s
@@ -698,7 +698,7 @@ func genFutureWindow(s int) (image.Image, image.Rectangle, string) {
 		r := image.Rect(x, y, x+iconSize, y+iconSize)
 		rectHighlight(img, r, cyan)
 
-		inner := 1 * s
+		inner := 2 * s
 		if i == 0 { // Close
 			rectHighlight(img, r.Inset(inner), color.RGBA{255, 0, 0, 200})
 		} else if i == 1 { // Max
@@ -709,7 +709,7 @@ func genFutureWindow(s int) (image.Image, image.Rectangle, string) {
 		}
 	}
 
-	return img, image.Rect(12*s, 24*s, w-28*s, h-12*s), "window_future"
+	return img, image.Rect(12*s, 24*s, w-46*s, h-12*s), "window_future"
 }
 
 func genCheckers(s int) (image.Image, image.Rectangle, string) {
