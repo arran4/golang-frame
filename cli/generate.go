@@ -245,53 +245,131 @@ func genSignWarning(s int) (image.Image, image.Rectangle, string) {
 func genWood(s int) (image.Image, image.Rectangle, string) {
 	w, h := 96*s, 96*s
 	img := image.NewRGBA(image.Rect(0, 0, w, h))
+	bw := 16 * s
+
 	c1, c2, c3 := color.RGBA{110, 60, 30, 255}, color.RGBA{80, 40, 20, 255}, color.RGBA{50, 25, 10, 255}
+
+	getProfile := func(t float64) float64 {
+		if t < 0.0 || t > 1.0 {
+			return 0.0
+		}
+		// A curved profile for the wood frame
+		return math.Sqrt(0.25-(t-0.5)*(t-0.5)) * 1.5
+	}
+
+	lx, ly, lz := -1.0, -1.0, 1.5
+	ln := math.Sqrt(lx*lx + ly*ly + lz*lz)
+	lx, ly, lz = lx/ln, ly/ln, lz/ln
 
 	for y := 0; y < h; y++ {
 		for x := 0; x < w; x++ {
-			xf, yf := float64(x), float64(y)
+			// Calculate distance to edge and gradient of distance
+			d := x
+			gx, gy := 1.0, 0.0
+			if w-1-x < d {
+				d = w - 1 - x
+				gx, gy = -1.0, 0.0
+			}
+			if y < d {
+				d = y
+				gx, gy = 0.0, 1.0
+			}
+			if h-1-y < d {
+				d = h - 1 - y
+				gx, gy = 0.0, -1.0
+			}
 
-			// Plank gaps every 24 pixels
-			if (y/s)%24 < 2 {
-				img.Set(x, y, color.RGBA{30, 15, 5, 255})
+			if d >= bw {
 				continue
 			}
 
-			// Organic fibrous grain
-			grain := math.Sin(yf/float64(s)+math.Sin(xf/float64(s*12))*5.0) * 0.5
-			fineNoise := math.Sin(xf*10+yf*0.5) * 0.2
+			// Miter grain orientation
+			isVerticalGrain := (gx != 0.0)
 
-			// Knots
-			knot := 0.0
-			for _, k := range []image.Point{{w / 3, h / 4}, {2 * w / 3, 3 * h / 4}} {
-				dx, dy := xf-float64(k.X), yf-float64(k.Y)
-				d := math.Sqrt(dx*dx + dy*dy)
-				knot += math.Exp(-d/float64(8*s)) * math.Sin(d/float64(s)) * 4.0
+			xf, yf := float64(x), float64(y)
+			rx, ry := xf, yf
+			if isVerticalGrain {
+				rx, ry = yf, xf
 			}
 
-			f := (grain + fineNoise + knot + 1.5) / 3.0
+			// Organic fibrous grain
+			grain := math.Sin(ry/float64(s)+math.Sin(rx/float64(s*12))*5.0) * 0.5
+			fineNoise := math.Sin(rx*10+ry*0.5) * 0.2
+
+			f := (grain + fineNoise + 1.5) / 3.0
 			if f < 0 {
 				f = 0
 			} else if f > 1 {
 				f = 1
 			}
 
-			var c color.RGBA
+			var baseColor color.RGBA
 			if f < 0.5 {
 				t := f * 2
-				c = color.RGBA{uint8(float64(c1.R)*(1-t) + float64(c2.R)*t), uint8(float64(c1.G)*(1-t) + float64(c2.G)*t), uint8(float64(c1.B)*(1-t) + float64(c2.B)*t), 255}
+				baseColor = color.RGBA{uint8(float64(c1.R)*(1-t) + float64(c2.R)*t), uint8(float64(c1.G)*(1-t) + float64(c2.G)*t), uint8(float64(c1.B)*(1-t) + float64(c2.B)*t), 255}
 			} else {
 				t := (f - 0.5) * 2
-				c = color.RGBA{uint8(float64(c2.R)*(1-t) + float64(c3.R)*t), uint8(float64(c2.G)*(1-t) + float64(c3.G)*t), uint8(float64(c2.B)*(1-t) + float64(c3.B)*t), 255}
+				baseColor = color.RGBA{uint8(float64(c2.R)*(1-t) + float64(c3.R)*t), uint8(float64(c2.G)*(1-t) + float64(c3.G)*t), uint8(float64(c2.B)*(1-t) + float64(c3.B)*t), 255}
 			}
-			img.Set(x, y, c)
+
+			tProfile := float64(d) / float64(bw)
+			eps := 0.01
+			h0 := getProfile(tProfile)
+			h1 := getProfile(tProfile + eps)
+			dh := (h1 - h0) / eps
+
+			nx := -gx * dh
+			ny := -gy * dh
+			nz := 1.0
+			nn := math.Sqrt(nx*nx + ny*ny + nz*nz)
+			nx, ny, nz = nx/nn, ny/nn, nz/nn
+
+			dot := nx*lx + ny*ly + nz*lz
+			if dot < 0 {
+				dot = 0
+			}
+
+			spec := math.Pow(dot, 15.0)
+
+			r := float64(baseColor.R) * 0.3
+			g := float64(baseColor.G) * 0.3
+			b := float64(baseColor.B) * 0.3
+
+			r += float64(baseColor.R) * 0.7 * dot
+			g += float64(baseColor.G) * 0.7 * dot
+			b += float64(baseColor.B) * 0.7 * dot
+
+			r += 255.0 * spec * 0.15
+			g += 255.0 * spec * 0.15
+			b += 255.0 * spec * 0.15
+
+			if x == y || x == w-1-y {
+				r *= 0.6
+				g *= 0.6
+				b *= 0.6
+			}
+
+			if r > 255 {
+				r = 255
+			}
+			if g > 255 {
+				g = 255
+			}
+			if b > 255 {
+				b = 255
+			}
+			if r < 0 {
+				r = 0
+			}
+			if g < 0 {
+				g = 0
+			}
+			if b < 0 {
+				b = 0
+			}
+
+			img.Set(x, y, color.RGBA{uint8(r), uint8(g), uint8(b), 255})
 		}
-	}
-	bw := 16 * s
-	for i := 0; i < bw; i++ {
-		fade := uint8(40 - i*40/bw)
-		rectHighlight(img, image.Rect(i, i, w-i, i+1), color.RGBA{255, 255, 255, fade})
-		rectHighlight(img, image.Rect(0, i, i+1, h), color.RGBA{255, 255, 255, fade})
 	}
 	return img, image.Rect(bw, bw, w-bw, h-bw), "wood"
 }
