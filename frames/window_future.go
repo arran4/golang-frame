@@ -12,7 +12,7 @@ var WindowFuturePng []byte
 
 var WindowFuture = &Definition{
 	Name: "window_future",
-	Middle: image.Rect(12, 24, 68, 84),
+	Middle: image.Rect(12, 24, 50, 84),
 }
 
 func init() {
