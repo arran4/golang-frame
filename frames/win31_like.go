@@ -12,7 +12,7 @@ var Win31LikePng []byte
 
 var Win31Like = &Definition{
 	Name: "win31_like",
-	Middle: image.Rect(4, 4, 28, 28),
+	Middle: image.Rect(25, 25, 52, 90),
 }
 
 func init() {
