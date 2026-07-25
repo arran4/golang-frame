@@ -1385,6 +1385,51 @@ import "github.com/arran4/golang-frame/frames"
 fr := frame.NewFrame(destRect, frames.Win95LikeXlarge.Image, frames.Win95LikeXlarge.Middle)
 ```
 
+### Win95Window
+
+![](images/gallery_win95_window.png)
+
+
+
+
+
+```go
+import "github.com/arran4/golang-frame/frames"
+
+// Use it directly
+fr := frame.NewFrame(destRect, frames.Win95Window.Image, frames.Win95Window.Middle)
+```
+
+### Win95WindowLarge
+
+![](images/gallery_win95_window_large.png)
+
+
+
+
+
+```go
+import "github.com/arran4/golang-frame/frames"
+
+// Use it directly
+fr := frame.NewFrame(destRect, frames.Win95WindowLarge.Image, frames.Win95WindowLarge.Middle)
+```
+
+### Win95WindowXlarge
+
+![](images/gallery_win95_window_xlarge.png)
+
+
+
+
+
+```go
+import "github.com/arran4/golang-frame/frames"
+
+// Use it directly
+fr := frame.NewFrame(destRect, frames.Win95WindowXlarge.Image, frames.Win95WindowXlarge.Middle)
+```
+
 ### WindowFuture
 
 ![](images/gallery_window_future.png)

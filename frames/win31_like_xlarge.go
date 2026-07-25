@@ -12,7 +12,7 @@ var Win31LikeXlargePng []byte
 
 var Win31LikeXlarge = &Definition{
 	Name: "win31_like_xlarge",
-	Middle: image.Rect(12, 12, 84, 84),
+	Middle: image.Rect(75, 75, 156, 270),
 }
 
 func init() {
