@@ -1740,7 +1740,18 @@ func genRetroWindow(s int) (image.Image, image.Rectangle, string) {
 func genPaperWindow(s int) (image.Image, image.Rectangle, string) {
 	w, h := 64*s, 64*s
 	img := solid(w, h, color.Transparent)
-	rect(img, image.Rect(0, 0, w-4*s, h-4*s), color.RGBA{255, 253, 240, 255})
+
+	paperColor := color.RGBA{255, 253, 240, 255}
+
+	// Top border
+	rect(img, image.Rect(0, 0, w-4*s, 16*s), paperColor)
+	// Left border
+	rect(img, image.Rect(0, 16*s, 8*s, h-4*s), paperColor)
+	// Right border
+	rect(img, image.Rect(w-12*s, 16*s, w-4*s, h-4*s), paperColor)
+	// Bottom border
+	rect(img, image.Rect(8*s, h-12*s, w-12*s, h-4*s), paperColor)
+
 	return img, image.Rect(8*s, 16*s, w-12*s, h-12*s), "window_paper"
 }
 
