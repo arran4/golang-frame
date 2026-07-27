@@ -1,5 +1,6 @@
 package frames
 
+// All contains all generated frame definitions.
 var All = []*Definition{
 	AmigaLike,
 	AmigaLikeLarge,
@@ -106,4 +107,20 @@ var All = []*Definition{
 	Wood,
 	WoodLarge,
 	WoodXlarge,
+}
+
+// ByName maps frame names to their definitions.
+var ByName = map[string]*Definition{}
+
+func init() {
+	for _, d := range All {
+		ByName[d.Name] = d
+	}
+}
+
+// List returns a defensive copy of the All slice.
+func List() []*Definition {
+	ret := make([]*Definition, len(All))
+	copy(ret, All)
+	return ret
 }
