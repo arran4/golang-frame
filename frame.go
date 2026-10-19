@@ -92,7 +92,7 @@ func (f *Frame) At(x, y int) color.Color {
 	s5 := 0
 	if xDistanceFromEnd <= f.geom.baseBoundsMaxSubMiddleMaxX {
 		p.X = f.geom.baseBoundsDx - xDistanceFromEnd
-	} else if p.X > f.geom.midStartX {
+	} else if p.X >= f.geom.midStartX {
 		switch f.BorderMode {
 		case Stretched:
 			p.X = f.geom.midStartX + int((int64(p.X-f.geom.midStartX)*int64(f.geom.ratioX))>>16)
@@ -104,7 +104,7 @@ func (f *Frame) At(x, y int) color.Color {
 	yDistanceFromEnd := f.geom.destDy - p.Y
 	if yDistanceFromEnd <= f.geom.baseBoundsMaxSubMiddleMaxY {
 		p.Y = f.geom.baseBoundsDy - yDistanceFromEnd
-	} else if p.Y > f.geom.midStartY {
+	} else if p.Y >= f.geom.midStartY {
 		switch f.BorderMode {
 		case Stretched:
 			p.Y = f.geom.midStartY + int((int64(p.Y-f.geom.midStartY)*int64(f.geom.ratioY))>>16)
@@ -130,9 +130,9 @@ func (s5 *Section5) Apply(p image.Point, op image.Point, f *Frame, midStartX int
 	case PassThrough:
 		c = s5.At(op.X, op.Y)
 	case Zerod:
-		c = s5.At(np.X, np.Y)
+		c = s5.At(np.X+s5b.Min.X, np.Y+s5b.Min.Y)
 	default:
-		c = s5.At(np.X-midStartX-s5b.Min.X, np.Y-midStartY-s5b.Min.Y)
+		c = s5.At(np.X-midStartX+s5b.Min.X, np.Y-midStartY+s5b.Min.Y)
 	}
 	if s5.Replace {
 		return c
