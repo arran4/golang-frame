@@ -194,4 +194,34 @@ func TestSection5AlphaComposition(t *testing.T) {
 	if rRep != 0 || gRep != 0 || bRep != expectedB || aRep != expectedA {
 		t.Errorf("Expected replace color {0, 0, %d, %d}, got {%d, %d, %d, %d}", expectedB, expectedA, rRep, gRep, bRep, aRep)
 	}
+
+	// Test alpha fallback (transparent pixel with Replace: false)
+	s5iTransparent := image.NewRGBA(image.Rect(0, 0, 30, 30))
+	s5iTransparent.Set(10, 10, color.NRGBA{0, 255, 0, 0}) // Transparent green (120, 120 maps to 10, 10 for np=(20,20) and midStart=(10,10))
+	fTransp := NewFrame(dest, baseImg, middle, &Section5{Image: s5iTransparent, Replace: false}, Section5Zeroed)
+
+	cTransp := fTransp.At(120, 120) // Should map to (20,20) in s5iTransparent which is alpha=0
+	rT, gT, bT, aT := cTransp.RGBA()
+	// Base pixel is gray: RGBA{100,100,100,255} -> 16bit = 25700
+	expGray := uint32(100 * 257)
+	expAlpha := uint32(255 * 257)
+	if rT != expGray || gT != expGray || bT != expGray || aT != expAlpha {
+		t.Errorf("Expected unchanged base gray {%d, %d, %d, %d}, got {%d, %d, %d, %d}", expGray, expGray, expGray, expAlpha, rT, gT, bT, aT)
+	}
+
+	// Test opaque override (Replace: false, but pixel is opaque)
+	s5iOpaque := image.NewRGBA(image.Rect(0, 0, 30, 30))
+	s5iOpaque.Set(10, 10, color.NRGBA{0, 255, 0, 255}) // Opaque green
+	fOpaque := NewFrame(dest, baseImg, middle, &Section5{Image: s5iOpaque, Replace: false}, Section5Zeroed)
+
+	cOpaque := fOpaque.At(120, 120)
+	rO, gO, bO, aO := cOpaque.RGBA()
+	expGreen := uint32(255 * 257)
+	// Due to frame.go optimizing opaque colors:
+	// if a1 == math.MaxUint16 { return c }
+	// The returned color is exactly the original color.NRGBA{0, 255, 0, 255} (or whatever internal conversion happens)
+	// So the expected values from RGBA() are standard pre-multiplied 16-bit values.
+	if rO != 0 || gO != expGreen || bO != 0 || aO != expGreen {
+		t.Errorf("Expected fully replaced opaque green {0, %d, 0, %d}, got {%d, %d, %d, %d}", expGreen, expGreen, rO, gO, bO, aO)
+	}
 }
