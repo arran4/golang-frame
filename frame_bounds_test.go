@@ -6,107 +6,192 @@ import (
 	"testing"
 )
 
-// solidImage is a helper to create images of a solid color
-type solidImage struct {
+// patternedImage is a helper to create an image with unique pixel colors based on coordinates.
+// This allows verifying exact coordinate mapping.
+type patternedImage struct {
 	rect image.Rectangle
-	c    color.Color
 }
 
-func (s solidImage) ColorModel() color.Model { return color.RGBAModel }
-func (s solidImage) Bounds() image.Rectangle { return s.rect }
-func (s solidImage) At(x, y int) color.Color {
-	if !image.Pt(x, y).In(s.rect) {
+func (p patternedImage) ColorModel() color.Model { return color.RGBAModel }
+func (p patternedImage) Bounds() image.Rectangle { return p.rect }
+func (p patternedImage) At(x, y int) color.Color {
+	if !image.Pt(x, y).In(p.rect) {
 		return color.Transparent
 	}
-	return s.c
+	return color.RGBA{uint8(x % 256), uint8(y % 256), 255, 255}
+}
+
+func TestNineSliceGeometryExactBounds(t *testing.T) {
+	// 1. Boundary classification: Test with discriminating Section5 override, test X/Y independently
+	base := patternedImage{image.Rect(10, 10, 50, 50)}
+	middle := image.Rect(20, 20, 40, 40)
+	dest := image.Rect(100, 100, 150, 150)
+
+	// Create a Section5 replacement that has different colors from the base
+	s5i := image.NewRGBA(image.Rect(0, 0, 30, 30))
+	s5Red := color.RGBA{255, 0, 0, 255}
+	for y := 0; y < 30; y++ {
+		for x := 0; x < 30; x++ {
+			s5i.Set(x, y, s5Red)
+		}
+	}
+
+	// Test without fix: if we don't have the fix (i.e. we use original `frame.go`), the test will fail
+	// because exact boundary will not be from Section 5.
+	f := NewFrame(dest, base, middle, &Section5{Image: s5i, Replace: true}, Section5Zeroed)
+
+	// Destination middle starts at (110, 110) because dest starts at 100 and left/top border is 10.
+
+	// Helper to check color
+	isRed := func(c color.Color) bool {
+		r, g, b, a := c.RGBA()
+		return r == 65535 && g == 0 && b == 0 && a == 65535
+	}
+	isPattern := func(c color.Color, x, y int) bool {
+		r, g, b, a := c.RGBA()
+		expectedR := uint32(uint8(x%256)) * 0x101
+		expectedG := uint32(uint8(y%256)) * 0x101
+		return r == expectedR && g == expectedG && b == 65535 && a == 65535
+	}
+
+	// Check exact boundaries (midStartX=110, midStartY=110)
+	// X-only boundary
+	c1 := f.At(110, 120)
+	if !isRed(c1) {
+		t.Errorf("At (110, 120) expected red Section5, got %v", c1)
+	}
+
+	c2 := f.At(109, 120)
+	if !isPattern(c2, 19, 30) {
+		t.Errorf("At (109, 120) expected pattern (border), got %v", c2)
+	}
+
+	// Y-only boundary
+	c3 := f.At(120, 110)
+	if !isRed(c3) {
+		t.Errorf("At (120, 110) expected red Section5, got %v", c3)
+	}
+
+	c4 := f.At(120, 109)
+	if !isPattern(c4, 30, 19) {
+		t.Errorf("At (120, 109) expected pattern (border), got %v", c4)
+	}
+
+	// Intersection
+	c5 := f.At(110, 110)
+	if !isRed(c5) {
+		t.Errorf("At (110, 110) expected red Section5, got %v", c5)
+	}
+
+	c6 := f.At(109, 109)
+	if !isPattern(c6, 19, 19) {
+		t.Errorf("At (109, 109) expected pattern (border), got %v", c6)
+	}
 }
 
 func TestSection5Bounds(t *testing.T) {
-	base := image.NewRGBA(image.Rect(10, 10, 50, 50))
+	// 2. Origin translation independently of boundaries.
+	// Sample strictly inside Section 5, use nonzero/unequal X/Y source origins and a coordinate-distinct pixel pattern
+	base := patternedImage{image.Rect(10, 10, 50, 50)}
 	middle := image.Rect(20, 20, 40, 40)
+	dest := image.Rect(100, 100, 150, 150)
 
-	s5Red := color.RGBA{255, 0, 0, 255}
-	s5i := solidImage{image.Rect(5, 5, 25, 25), s5Red}
+	// Patterned Section 5 with non-zero, unequal bounds
+	s5i := patternedImage{image.Rect(5, 7, 35, 37)}
 
-	dest := image.Rect(100, 100, 140, 140)
+	// Helper to check s5 pattern
+	isS5Pattern := func(c color.Color, x, y int) bool {
+		r, g, b, a := c.RGBA()
+		expectedR := uint32(uint8(x%256)) * 0x101
+		expectedG := uint32(uint8(y%256)) * 0x101
+		return r == expectedR && g == expectedG && b == 65535 && a == 65535
+	}
+
+	// Destination middle starts at (110, 110) and is 30x30 in size.
+	// We sample at (120, 120), strictly inside Section 5.
+	sampleX, sampleY := 120, 120
 
 	t.Run("Section5Zeroed", func(t *testing.T) {
 		f := NewFrame(dest, base, middle, &Section5{Image: s5i, Replace: true}, Section5Zeroed)
-		c := f.At(110, 110)
-		r, g, b, a := c.RGBA()
-		if r != 65535 || g != 0 || b != 0 || a != 65535 {
-			t.Errorf("Expected red color from section5, got %v", c)
+		c := f.At(sampleX, sampleY)
+		// Destination point is (120, 120).
+		// np is (20, 20).
+		// midStartX, midStartY is (10, 10) relative to destination origin (100, 100).
+		// Section5Zeroed uses np - midStart + s5b.Min = (20, 20) - (10, 10) + (5, 7) = (15, 17)
+		if !isS5Pattern(c, 15, 17) {
+			t.Errorf("Section5Zeroed: At (%d, %d) expected s5 pattern at (15, 17), got %v", sampleX, sampleY, c)
 		}
 	})
 
 	t.Run("Zerod", func(t *testing.T) {
-		s5i_zerod := solidImage{image.Rect(5, 5, 45, 45), s5Red}
-		f := NewFrame(dest, base, middle, &Section5{Image: s5i_zerod, Replace: true}, Zerod)
-		c := f.At(110, 110) // offset from 100 is (10, 10), from origin (5, 5) -> (15, 15) which is in bounds of (5,5,45,45)
-		r, g, b, a := c.RGBA()
-		if r != 65535 || g != 0 || b != 0 || a != 65535 {
-			t.Errorf("Expected red color from section5, got %v", c)
+		f := NewFrame(dest, base, middle, &Section5{Image: s5i, Replace: true}, Zerod)
+		c := f.At(sampleX, sampleY)
+		// Dest point (120, 120) -> np = (20, 20).
+		// Zerod uses np + s5b.Min = (20, 20) + (5, 7) = (25, 27)
+		if !isS5Pattern(c, 25, 27) {
+			t.Errorf("Zerod: At (%d, %d) expected s5 pattern at (25, 27), got %v", sampleX, sampleY, c)
 		}
 	})
 
 	t.Run("PassThrough", func(t *testing.T) {
-		s5i_pass := solidImage{image.Rect(105, 105, 125, 125), s5Red}
-		f := NewFrame(dest, base, middle, &Section5{Image: s5i_pass, Replace: true}, PassThrough)
-		c := f.At(110, 110)
-		r, g, b, a := c.RGBA()
-		if r != 65535 || g != 0 || b != 0 || a != 65535 {
-			t.Errorf("Expected red color from section5, got %v", c)
+		s5iPassThrough := patternedImage{image.Rect(90, 90, 160, 160)}
+		f := NewFrame(dest, base, middle, &Section5{Image: s5iPassThrough, Replace: true}, PassThrough)
+		c := f.At(sampleX, sampleY)
+		// PassThrough uses op (120, 120).
+		if !isS5Pattern(c, 120, 120) {
+			t.Errorf("PassThrough: At (%d, %d) expected s5 pattern at (120, 120), got %v", sampleX, sampleY, c)
 		}
 	})
 }
 
-func TestNineSliceGeometryExactBounds(t *testing.T) {
-	// Base image 30x30
-	base := image.NewRGBA(image.Rect(0, 0, 30, 30))
-	// Set corner to Green
-	cGreen := color.RGBA{0, 255, 0, 255}
-	// Set middle start pixel to Red
-	cRed := color.RGBA{255, 0, 0, 255}
-
-	base.Set(9, 9, cGreen) // Just outside middle
-	base.Set(10, 10, cRed) // Exact start of middle
-
-	// Middle 10x10, from (10,10) to (20,20)
-	middle := image.Rect(10, 10, 20, 20)
-	dest := image.Rect(0, 0, 30, 30) // 1:1 scale for easy validation
-
-	f := NewFrame(dest, base, middle, Repeating)
-
-	// Sample exact boundary values
-	if c := f.At(9, 9); c != cGreen {
-		t.Errorf("Expected green color at (9,9) - border, got %v", c)
-	}
-
-	if c := f.At(10, 10); c != cRed {
-		t.Errorf("Expected red color at (10,10) - exact middle start, got %v", c)
-	}
-}
-
 func TestSection5AlphaComposition(t *testing.T) {
-	base := solidImage{image.Rect(0, 0, 30, 30), color.RGBA{100, 100, 100, 255}}
-	middle := image.Rect(10, 10, 20, 20)
+	// 3. Actual alpha regression. Use color.NRGBA{0,0,255,127} over opaque RGBA{100,100,100,255}
+	// Note: NRGBA is non-premultiplied. The `Draw.Over` expects premultiplied alpha (as returned by `RGBA()`).
+	// `color.NRGBA{0, 0, 255, 127}.RGBA()` will return correctly premultiplied values.
 
-	// Semi-transparent blue Section5
-	semiBlue := color.RGBA{0, 0, 255, 127}
-	s5i := solidImage{image.Rect(0, 0, 10, 10), semiBlue}
+	baseImg := image.NewRGBA(image.Rect(10, 10, 50, 50))
+	grayColor := color.RGBA{100, 100, 100, 255}
+	for y := 10; y < 50; y++ {
+		for x := 10; x < 50; x++ {
+			baseImg.Set(x, y, grayColor)
+		}
+	}
+	middle := image.Rect(20, 20, 40, 40)
+	dest := image.Rect(100, 100, 150, 150)
 
-	dest := image.Rect(0, 0, 30, 30)
-	f := NewFrame(dest, base, middle, &Section5{Image: s5i, Replace: false}, Section5Zeroed)
+	s5i := image.NewRGBA(image.Rect(0, 0, 30, 30))
+	semiBlue := color.NRGBA{0, 0, 255, 127}
+	for y := 0; y < 30; y++ {
+		for x := 0; x < 30; x++ {
+			s5i.Set(x, y, semiBlue)
+		}
+	}
 
-	c := f.At(10, 10)
-	r, g, b, a := c.RGBA()
+	f := NewFrame(dest, baseImg, middle, &Section5{Image: s5i, Replace: false}, Section5Zeroed)
 
-	// We expect roughly blended (alpha ~127 on 100 gray base)
-	// Base: r=100, g=100, b=100
-	// S5: r=0, g=0, b=255, alpha=127
-	// Expected roughly: r=50, g=50, b=177 (or similar from blend math)
-	// Note: Our simplified draw.Over uses 8-bit output
-	if a == 0 || (r == 65535 && g == 65535 && b == 65535) || (r == 0 && g == 0 && b == 0 && a == 0) {
-		t.Errorf("Expected alpha composition color, got %v", c)
+	// Sample in middle
+	c := f.At(120, 120)
+	r, g, b, a := c.RGBA() // 16-bit values
+
+	// Convert to 8-bit for comparison
+	r8 := uint8(r >> 8)
+	g8 := uint8(g >> 8)
+	b8 := uint8(b >> 8)
+	a8 := uint8(a >> 8)
+
+	// Expected blended color ~RGBA{50, 50, 177, 255} based on repository's `draw.Over` logic
+	if r8 != 50 || g8 != 50 || b8 != 177 || a8 != 255 {
+		t.Errorf("Expected alpha blended color {50, 50, 177, 255}, got {%d, %d, %d, %d}", r8, g8, b8, a8)
+	}
+
+	// Test Replace: true
+	fReplace := NewFrame(dest, baseImg, middle, &Section5{Image: s5i, Replace: true}, Section5Zeroed)
+	cRep := fReplace.At(120, 120)
+	rRep, gRep, bRep, aRep := cRep.RGBA() // 16-bit
+	// Expected 16-bit for NRGBA{0,0,255,127}: R=0, G=0, B=32639 (127 * 257), A=32639 (127 * 257)
+	expectedB := uint32(127 * 257)
+	expectedA := uint32(127 * 257)
+	if rRep != 0 || gRep != 0 || bRep != expectedB || aRep != expectedA {
+		t.Errorf("Expected replace color {0, 0, %d, %d}, got {%d, %d, %d, %d}", expectedB, expectedA, rRep, gRep, bRep, aRep)
 	}
 }
